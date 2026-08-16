@@ -605,7 +605,7 @@ export async function deleteMessage(
     }
     msg.deletedForEveryone = true;
     msg.text = '';
-    msg.attachments = [];
+    msg.set('attachments', []);
     await msg.save();
     return { deleted: true, forEveryone: true, _id: String(msg._id) };
   }
