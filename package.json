@@ -1,0 +1,16 @@
+{
+  "name": "smart-agro-community",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Smart Agro Community monorepo",
+  "scripts": {
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "seed": "npm --prefix server run seed",
+    "test:server": "npm --prefix server test",
+    "build:server": "npm --prefix server run build",
+    "build:client": "npm --prefix client run build",
+    "share": "node scripts/share-demo.mjs",
+    "qr": "node scripts/make-demo-qr.mjs"
+  }
+}

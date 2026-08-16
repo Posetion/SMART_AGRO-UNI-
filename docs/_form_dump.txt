@@ -1,0 +1,14 @@
+﻿PageWidth=1728 PageHeight=3024
+  1 type=17 L=88.9 T=384.8 W=602.5 H=140.3 fill=12611584 line=0 text=Objectives | 
+  2 type=17 L=65.4 T=93.2 W=1,592.7 H=117.2 fill=12611584 line=16777215 text=University of Computer Studies (Meiktila)
+  3 type=17 L=40.2 T=553.4 W=1,639.1 H=541.8 fill=16777215 line=12611584 text=To facilitate UCSMTLA academic system with easy discovery of student academic information  | To organize and manage student information and  academic records effectively | To enable efficient access and quick retrieval of student   infor
+  4 type=17 L=188.7 T=194.6 W=1,452.4 H=134.8 fill=12611584 line=16777215 text=Student Academic Management System | 
+  5 type=17 L=94.5 T=2,368.4 W=627.6 H=124.8 fill=12611584 line=0 text=Benefits | 
+  6 type=17 L=40.2 T=2,532.8 W=1,643.4 H=455.2 fill=16777215 line=12611584 text=Simplify and automate the basic academic functions  | Maintain student profiles, results and provide 24/7 access  | Ensure to provide students to access academic information privately | 
+  7 type=17 L=76.2 T=1,134.7 W=585.6 H=125.3 fill=12611584 line=0 text=Functions | 
+  8 type=17 L=40.2 T=1,305.5 W=728.0 H=365.9 fill=16777215 line=12611584 text=For Students | View personal academic records and results | Edit and update profile information | 
+  9 type=17 L=843.4 T=1,728.1 W=840.2 H=303.5 fill=16777215 line=15773696 text=For Registrar | Add registered student information and results | Manage student enrollments and sub
+ 10 type=13 L=49.5 T=73.3 W=252.2 H=229.1 fill=16777215 line=0 text=
+ 11 type=13 L=837.2 T=1,134.7 W=854.8 H=570.0 fill=16777215 line=0 text=
+ 12 type=13 L=40.2 T=1,730.1 W=771.8 H=565.8 fill=16777215 line=0 text=
+ 13 type=13 L=837.2 T=2,065.5 W=854.8 H=435.7 fill=16777215 line=0 text=

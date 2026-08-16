@@ -1,0 +1,20 @@
+﻿Blast sym 1 ctrl 10 chem 4
+Brown Spot sym 1 ctrl 0 chem 0
+Bacterial Leaf Blight sym 1 ctrl 8 chem 4
+Bacterial Leaf Streak sym 1 ctrl 8 chem 5
+Bakanae sym 1 ctrl 2 chem 5
+False Smut sym 1 ctrl 0 chem 0
+Brown Spot sym 1 ctrl 0 chem 0
+Sheath Blight sym 1 ctrl 7 chem 5
+Sheath Rot sym 1 ctrl 5 chem 5
+Stem Rot sym 1 ctrl 5 chem 4
+NO MATCH for Blast
+NO MATCH for Brown Spot
+NO MATCH for Bacterial Leaf Blight
+NO MATCH for Bacterial Leaf Streak
+NO MATCH for Bakanae
+NO MATCH for False Smut
+NO MATCH for Sheath Blight
+NO MATCH for Sheath Rot
+NO MATCH for Stem Rot
+updated D:\SMART-AGRO\client\src\data\diseaseGuides.ts

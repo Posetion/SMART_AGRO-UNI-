@@ -1,0 +1,22 @@
+﻿1 type=17 overflow=0 autofit=0 size=56 fontRGB=16777215 fill=3308846
+  TEXT: Objectives || 
+2 type=17 overflow=0 autofit=0 size=42 fontRGB=3308846 fill=16777215
+  TEXT: University of Computer Studies (Meiktila) || 
+3 type=17 overflow=0 autofit=0 size=-9999999 fontRGB=1 fill=16777215
+  TEXT: ◆  To identify crop diseases and pests with AI, then get treatment and prevention methods || ◆  To obtain expert review and analysis of field cases || ◆  To display regional plant and crop outbreaks on a heatmap || ◆  To build a farmer-to-farmer community for sharing problems, experience and solutions || ◆  To ask weather and farming advice in Myanmar through the AI advisor Uncle Sprout || ◆  To increase digital knowledge for farmers with the help of AI || 
+4 type=17 overflow=0 autofit=0 size=-9999999 fontRGB=3308846 fill=16777215
+  TEXT: SMART AGRO Community || Smart Tool for Myanmar Farmers || 
+5 type=17 overflow=0 autofit=0 size=56 fontRGB=16777215 fill=3308846
+  TEXT: Benefits || 
+6 type=17 overflow=0 autofit=0 size=-9999999 fontRGB=1 fill=16777215
+  TEXT: ◆  An AI farming platform built for Myanmar farmers || ◆  Expert Review so a specialist can check the result || ◆  Heatmap of regional crop disease and pest outbreaks || ◆  Knowledge Center and a Myanmar-language AI chatbot || 
+7 type=17 overflow=0 autofit=0 size=56 fontRGB=16777215 fill=3308846
+  TEXT: Functions || 
+8 type=17 overflow=0 autofit=0 size=-9999999 fontRGB=1 fill=16777215
+  TEXT: For Farmers || ◆  Identify crop diseases and pests with AI || ◆  Ask Uncle Sprout for weather and farm advice || ◆  Share problems and solutions with other farmers || ◆  Study diseases and pests in the Knowledge Center || 
+9 type=17 overflow=0 autofit=0 size=-9999999 fontRGB=1 fill=16777215
+  TEXT: For Experts || ◆  Review and analyse farmer field cases || ◆  Check regional outbreaks on the heatmap || ◆  Support the farmer-to-farmer community || 
+10 type=13 overflow= autofit= size= fontRGB= fill=
+11 type=13 overflow= autofit= size= fontRGB= fill=
+12 type=13 overflow= autofit= size= fontRGB= fill=
+13 type=13 overflow= autofit= size= fontRGB= fill=

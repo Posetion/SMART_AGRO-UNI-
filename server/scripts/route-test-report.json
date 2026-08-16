@@ -1,0 +1,295 @@
+{
+  "base": "http://127.0.0.1:5000/api/v1",
+  "passed": 48,
+  "total": 48,
+  "results": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/auth/request-otp",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/auth/verify-otp",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/auth/refresh-token",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/weather/forecast?lat=16.8661&lng=96.1951",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/weather/current?lat=16.8661&lng=96.1951",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/weather/alerts?lat=16.8661&lng=96.1951",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/weather/township/Yangon",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/knowledge/articles",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/knowledge/categories",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/knowledge/search?q=Rice",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/heatmap/data",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/heatmap/township",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/heatmap/filter",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/knowledge/articles",
+      "status": 201,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/knowledge/articles/6a5ca326dfb1180f9b624fe9",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "PUT",
+      "path": "/knowledge/articles/6a5ca326dfb1180f9b624fe9",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/social/posts",
+      "status": 201,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/social/posts",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "PUT",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0/like",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0/comments",
+      "status": 201,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0/comments/6a5ca327dfb1180f9b624ffd/replies",
+      "status": 201,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0/moderate",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0/moderate",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/detections/analyze",
+      "status": 201,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/detections/predict",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/detections/history",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/detections/6a5ca327dfb1180f9b625011",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "PUT",
+      "path": "/detections/6a5ca327dfb1180f9b625011",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/detections/6a5ca327dfb1180f9b625011/verify",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/social/posts",
+      "status": 201,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/chatbot/session",
+      "status": 201,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/chatbot/message",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/chatbot/history",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/chatbot/session/f3777134-44f4-4304-b513-22be1b160548",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/dashboard",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/audit-logs",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/heatmap/statistics",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/backup",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/users/6a5ca17ef7259be9d3844e1a",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "GET",
+      "path": "/files/6a5ca327dfb1180f9b62500f",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "POST",
+      "path": "/auth/logout",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/knowledge/articles/6a5ca326dfb1180f9b624fe9",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/social/posts/6a5ca326dfb1180f9b624ff0",
+      "status": 200,
+      "ok": true
+    }
+  ]
+}
