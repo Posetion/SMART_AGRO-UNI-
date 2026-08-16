@@ -13,7 +13,7 @@ services:
     name: smart-agro
     runtime: node
     plan: free
-    buildCommand: npm --prefix client ci && npm --prefix client run build && npm --prefix server ci && npm --prefix server run build
+    buildCommand: npm --prefix client ci --include=dev && npm --prefix client run build && npm --prefix server ci --include=dev && npm --prefix server run build
     startCommand: npm --prefix server start
     healthCheckPath: /api/v1/health
     envVars:
