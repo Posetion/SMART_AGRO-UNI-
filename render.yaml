@@ -1,0 +1,54 @@
+# Free cloud for Smart Agro — one website, no laptop
+#
+# You must create (free):
+# 1. MongoDB Atlas  https://www.mongodb.com/cloud/atlas/register
+# 2. GitHub repo    https://github.com/new
+# 3. Render         https://render.com/register
+#
+# Then paste MONGODB_URI + GEMINI_API_KEY in the Render dashboard.
+
+services:
+  - type: web
+    name: smart-agro
+    runtime: node
+    plan: free
+    buildCommand: npm --prefix client ci && npm --prefix client run build && npm --prefix server ci && npm --prefix server run build
+    startCommand: npm --prefix server start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_ACCESS_EXPIRE
+        value: 30m
+      - key: JWT_REFRESH_EXPIRE
+        value: 7d
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        value: "*"
+      - key: RATE_LIMIT_MAX_PER_MINUTE
+        value: 400
+      - key: OTP_DEV_LOG
+        value: "true"
+      - key: FILE_STORAGE_TYPE
+        value: gridfs
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY_2
+        sync: false
+      - key: GEMINI_API_KEY_3
+        sync: false
+      - key: GEMINI_API_KEY_4
+        sync: false
+      - key: GEMINI_API_KEY_5
+        sync: false
+      - key: GEMINI_API_KEY_6
+        sync: false
+      - key: GEMINI_API_KEY_7
+        sync: false
+      - key: GEMINI_API_KEY_8
+        sync: false
