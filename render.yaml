@@ -5,7 +5,8 @@
 # 2. GitHub repo    https://github.com/new
 # 3. Render         https://render.com/register
 #
-# Then paste MONGODB_URI + GEMINI_API_KEY in the Render dashboard.
+# Then paste MONGODB_URI + GEMINI_API_KEY (and CURSOR_API_KEY for project day).
+# Flip AI_PROVIDER from gemini to cursor when you want Cursor as primary.
 
 services:
   - type: web
@@ -36,6 +37,8 @@ services:
         value: gridfs
       - key: MONGODB_URI
         sync: false
+      - key: AI_PROVIDER
+        value: gemini
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_API_KEY_2
@@ -52,3 +55,7 @@ services:
         sync: false
       - key: GEMINI_API_KEY_8
         sync: false
+      - key: CURSOR_API_KEY
+        sync: false
+      - key: CURSOR_MODEL
+        value: composer-2.5

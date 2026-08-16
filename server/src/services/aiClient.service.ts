@@ -231,6 +231,19 @@ function geminiApiKeys(): string[] {
   return [...new Set(keys)];
 }
 
+function hasGemini(): boolean {
+  return geminiApiKeys().length > 0;
+}
+
+function hasCursor(): boolean {
+  return Boolean(env.CURSOR_API_KEY?.trim());
+}
+
+/** Primary first, the other as fallback. Flip AI_PROVIDER in .env on project day. */
+function providerOrder(): Array<'gemini' | 'cursor'> {
+  return env.AI_PROVIDER === 'cursor' ? ['cursor', 'gemini'] : ['gemini', 'cursor'];
+}
+
 function isGeminiQuotaError(err: unknown): boolean {
   if (!(err instanceof AppError)) return false;
   return /quota exceeded|RESOURCE_EXHAUSTED|rate limit|429/i.test(err.message);
@@ -872,46 +885,54 @@ function isRetryableDetectError(err: unknown): boolean {
   );
 }
 
-export async function detectDisease(imageBuffer: Buffer, mimeType: string): Promise<DetectResult> {
-  // Primary: Gemini vision (rotates KEY → KEY_2 → … → KEY_8 → GEMINI_API_KEYS)
+async function detectWithGeminiKeys(imageBuffer: Buffer, mimeType: string): Promise<DetectResult> {
   const keys = geminiApiKeys();
-  if (keys.length) {
-    let lastError: unknown;
-    for (let i = 0; i < keys.length; i += 1) {
-      try {
-        return await detectWithGemini(imageBuffer, mimeType, keys[i]);
-      } catch (err) {
-        lastError = err;
-        const hasNext = i < keys.length - 1;
-        if (hasNext && isRetryableDetectError(err)) {
-          console.warn(`[gemini-detect] Key ${i + 1}/${keys.length} failed — trying next key`);
-          continue;
-        }
-        const canFallback = Boolean(env.CURSOR_API_KEY?.trim());
-        if (canFallback && isRetryableDetectError(err)) {
-          console.warn('[detect] Gemini failed, trying Cursor:', err instanceof Error ? err.message : err);
-          break;
-        }
-        throw err;
+  let lastError: unknown;
+  for (let i = 0; i < keys.length; i += 1) {
+    try {
+      return await detectWithGemini(imageBuffer, mimeType, keys[i]);
+    } catch (err) {
+      lastError = err;
+      const hasNext = i < keys.length - 1;
+      if (hasNext && isRetryableDetectError(err)) {
+        console.warn(`[gemini-detect] Key ${i + 1}/${keys.length} failed — trying next key`);
+        continue;
       }
-    }
-    if (!env.CURSOR_API_KEY?.trim()) {
-      if (lastError instanceof AppError) throw lastError;
-      throw new AppError('Disease detection failed. Please try again.', 503);
+      throw err;
     }
   }
+  if (lastError instanceof AppError) throw lastError;
+  throw new AppError('Disease detection failed. Please try again.', 503);
+}
 
-  // Fallback: Cursor Agent SDK
-  if (env.CURSOR_API_KEY?.trim()) {
+export async function detectDisease(imageBuffer: Buffer, mimeType: string): Promise<DetectResult> {
+  const order = providerOrder();
+  console.info(`[detect] provider=${env.AI_PROVIDER} order=${order.join('→')}`);
+  let lastError: unknown;
+
+  for (let i = 0; i < order.length; i += 1) {
+    const provider = order[i];
+    const isLast = i === order.length - 1;
     try {
-      return await detectWithCursor(imageBuffer, mimeType);
+      if (provider === 'gemini' && hasGemini()) {
+        return await detectWithGeminiKeys(imageBuffer, mimeType);
+      }
+      if (provider === 'cursor' && hasCursor()) {
+        return await detectWithCursor(imageBuffer, mimeType);
+      }
     } catch (err) {
+      lastError = err;
+      if (!isLast && isRetryableDetectError(err)) {
+        console.warn(`[detect] ${provider} failed, trying next:`, err instanceof Error ? err.message : err);
+        continue;
+      }
       if (err instanceof AppError) throw err;
       throw new AppError('Disease detection failed. Please try again.', 503);
     }
   }
 
-  throw new AppError('Disease detection requires GEMINI_API_KEY', 503);
+  if (lastError instanceof AppError) throw lastError;
+  throw new AppError('Disease detection requires GEMINI_API_KEY or CURSOR_API_KEY', 503);
 }
 
 export async function predictRisk(input: {
@@ -941,31 +962,30 @@ export async function chatWithAi(
   history: Array<{ sender: string; text: string }> = [],
   context?: ChatContext
 ) {
-  // Primary: Gemini free tier (rotates KEY → KEY_2 → … → KEY_8)
-  if (geminiApiKeys().length) {
+  const order = providerOrder();
+  console.info(`[chat] provider=${env.AI_PROVIDER} order=${order.join('→')}`);
+
+  for (let i = 0; i < order.length; i += 1) {
+    const provider = order[i];
+    const isLast = i === order.length - 1;
     try {
-      return await withGeminiKeys((key) => chatWithGemini(prompt, history, context, key));
+      if (provider === 'gemini' && hasGemini()) {
+        return await withGeminiKeys((key) => chatWithGemini(prompt, history, context, key));
+      }
+      if (provider === 'cursor' && hasCursor()) {
+        return await chatWithCursor(prompt, history, context);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      const canFallback = Boolean(env.CURSOR_API_KEY?.trim()) || env.NODE_ENV !== 'production';
-      if (!canFallback) {
-        if (err instanceof AppError) throw err;
-        throw new AppError('AI chat unavailable', 503);
+      if (!isLast) {
+        console.warn(`[chat] ${provider} failed, trying next:`, msg);
+        continue;
       }
-      console.warn('[chat] Gemini failed, trying fallback:', msg);
-    }
-  }
-
-  // Optional: Cursor fallback
-  if (env.CURSOR_API_KEY?.trim()) {
-    try {
-      return await chatWithCursor(prompt, history, context);
-    } catch (err) {
       if (env.NODE_ENV === 'production') {
         if (err instanceof AppError) throw err;
         throw new AppError('AI chat unavailable', 503);
       }
-      console.warn('[chat] Cursor failed, using local mock:', err instanceof Error ? err.message : err);
+      console.warn(`[chat] ${provider} failed, using local mock:`, msg);
     }
   }
 
