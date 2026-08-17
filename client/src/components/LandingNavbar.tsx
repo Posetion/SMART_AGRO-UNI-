@@ -91,10 +91,19 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
     return user ? '/home' : '/';
   }
 
+  function scrollPageTop() {
+    const pane = document.querySelector('.landing-scroll, .farmer-main');
+    if (pane) {
+      pane.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function goLanding() {
     setMenuOpen(false);
     if (isLanding) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollPageTop();
       return;
     }
     navigate('/');
@@ -104,7 +113,7 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
     setMenuOpen(false);
     const dest = homePath();
     if (location.pathname === dest) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollPageTop();
       return;
     }
     navigate(dest);

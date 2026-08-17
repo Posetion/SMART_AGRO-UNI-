@@ -19,6 +19,7 @@
   --font-my: 'Padauk', 'Noto Sans Myanmar', 'Myanmar Text', 'Sora', sans-serif;
   --radius: 16px;
   --sidebar: 286px;
+  --site-nav-h: 4.25rem;
   /* Soft / neumorphic UI */
   --soft-face: #ffffff;
   --soft-drop: 0 8px 18px rgba(20, 40, 32, 0.12), 0 2px 5px rgba(20, 40, 32, 0.06);
@@ -58,6 +59,10 @@ html,
 body,
 #root {
   min-height: 100%;
+}
+
+html {
+  scroll-padding-top: var(--site-nav-h);
 }
 
 body {
@@ -447,6 +452,8 @@ select {
 
 .farmer-shell.no-bottom-nav .farmer-main {
   padding-bottom: 2.5rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .farmer-top-left {
@@ -3033,9 +3040,13 @@ button:disabled,
   justify-content: space-between;
   gap: 1rem;
   margin: -0.25rem 0 1.25rem;
-  padding-bottom: 0.85rem;
+  padding: 0.75rem 0 0.85rem;
   border-bottom: 1px solid var(--line);
   min-width: 0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #f5f5f5;
 }
 .ad-topbar-left {
   display: flex;
@@ -4055,8 +4066,11 @@ button:disabled,
 }
 
 .lp-nav {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 50;
   display: flex;
   align-items: center;
@@ -4090,6 +4104,9 @@ button:disabled,
 
 .site-app.farmer-shell {
   background: #f3f6f4;
+  padding-top: var(--site-nav-h);
+  display: flex;
+  flex-direction: column;
 }
 
 .lp-nav-links button {
@@ -4450,7 +4467,7 @@ button:disabled,
 
 .lp-search-bar {
   position: sticky;
-  top: 3.6rem;
+  top: var(--site-nav-h);
   z-index: 49;
   display: flex;
   gap: 0.5rem;
@@ -4471,8 +4488,7 @@ button:disabled,
   place-items: center;
   overflow: hidden;
   color: #f4faf6;
-  margin-top: -4.2rem;
-  padding-top: 4.2rem;
+  padding-top: var(--site-nav-h);
 }
 
 .lp-hero-bg {
@@ -15629,8 +15645,73 @@ html[lang='my'] .va-bubble-body {
 /* ===== Global mobile polish ===== */
 @media (max-width: 980px) {
   html,
-  body {
+  body,
+  #root {
+    height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  :root {
+    --site-nav-h: 3.85rem;
+  }
+
+  .landing,
+  .farmer-shell.site-app {
+    height: 100%;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: 0;
+  }
+
+  .farmer-shell:has(.farmer-main-chat) {
+    height: 100%;
+    max-height: 100dvh;
+    padding-top: 0;
+  }
+
+  .lp-nav {
+    position: relative;
+    top: auto;
+    flex: 0 0 auto;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom-color: var(--line);
+    box-shadow: 0 8px 24px rgba(33, 33, 33, 0.06);
+  }
+
+  .lp-nav:not(.is-solid) {
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--ink);
+    border-bottom-color: var(--line);
+  }
+
+  .lp-nav:not(.is-solid) .lp-brand strong,
+  .lp-nav:not(.is-solid) .lp-brand small,
+  .lp-nav:not(.is-solid) .lp-nav-links button {
+    color: var(--ink);
+  }
+
+  .landing-scroll,
+  .farmer-main,
+  .farmer-main.farmer-main-wide {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .farmer-main.farmer-main-chat,
+  .farmer-shell.no-bottom-nav .farmer-main.farmer-main-chat {
+    overflow: hidden;
+  }
+
+  .lp-hero {
+    min-height: calc(100dvh - var(--site-nav-h));
+    padding-top: 1.25rem;
   }
 
   .farmer-main,
@@ -16369,6 +16450,7 @@ html[lang='my'] .va-bubble-body {
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
+  padding-top: var(--site-nav-h);
 }
 
 /* Telegram-style messenger */

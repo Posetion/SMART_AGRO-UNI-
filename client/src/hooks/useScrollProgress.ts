@@ -1,20 +1,27 @@
 import { useEffect, useState } from 'react';
 
+function pageScrollEl() {
+  const inner = document.querySelector('.landing-scroll, .farmer-main');
+  if (inner && inner.scrollHeight > inner.clientHeight + 4) return inner;
+  return document.documentElement;
+}
+
 export function useScrollProgress() {
   const [progress, setProgress] = useState(0);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     function onScroll() {
-      const el = document.documentElement;
+      const el = pageScrollEl();
       const max = el.scrollHeight - el.clientHeight;
-      const pct = max > 0 ? (el.scrollTop / max) * 100 : 0;
+      const top = el.scrollTop;
+      const pct = max > 0 ? (top / max) * 100 : 0;
       setProgress(Math.min(100, Math.max(0, pct)));
-      setScrolled(el.scrollTop > 40);
+      setScrolled(top > 40);
     }
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    document.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    return () => document.removeEventListener('scroll', onScroll, { capture: true });
   }, []);
 
   return { progress, scrolled };

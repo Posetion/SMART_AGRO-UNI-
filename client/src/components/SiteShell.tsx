@@ -12,7 +12,9 @@ export function SiteShell() {
     <div className={isLanding ? 'landing' : 'farmer-shell no-bottom-nav site-app'}>
       <LandingNavbar lang={lang} onLangChange={setLang} />
       {isLanding ? (
-        <Outlet context={{ lang }} />
+        <div className="landing-scroll">
+          <Outlet context={{ lang }} />
+        </div>
       ) : (
         <main
           className={`farmer-main ${
