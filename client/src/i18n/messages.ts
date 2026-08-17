@@ -1194,6 +1194,7 @@ export const detectCopy = (lang: Lang) =>
       treatmentTitle: 'Treatment Protocol',
       recommendedChemicals: 'Recommended chemicals',
       symptomsTitle: 'Symptoms',
+      howToTreatTitle: 'How to treat now',
       controlsTitle: 'Control measures',
       causalOrganism: 'Causal organism',
       showMore: 'Show more',
@@ -1327,6 +1328,7 @@ export const detectCopy = (lang: Lang) =>
       treatmentTitle: 'ကုသနည်း လမ်းညွှန်',
       recommendedChemicals: 'အကြံပြု ဆေးများ',
       symptomsTitle: 'ရောဂါလက္ခဏာများ',
+      howToTreatTitle: 'ယခု ကုသရန်',
       controlsTitle: 'ကာကွယ်နှိမ်နင်းနည်းများ',
       causalOrganism: 'ဖြစ်စေသော သက်ရှိ',
       showMore: 'ပိုမိုကြည့်ရန်',
@@ -2173,7 +2175,7 @@ export const faqCopy = (lang: Lang): FaqCopy => {
         },
         {
           q: 'How do I download a lab / treatment report?',
-          a: 'After a successful detection, open Treatment Protocol and tap Download Lab Report. The file includes disease details, severity, location, and control steps you can share with an expert or keep offline.',
+          a: 'After a successful detection, open Treatment Protocol and tap Download Lab Report. The file includes symptoms, how to treat now, control measures, recommended chemicals, severity, and location.',
         },
         {
           q: 'Where can I find farming knowledge articles?',
@@ -2202,6 +2204,10 @@ export const faqCopy = (lang: Lang): FaqCopy => {
         {
           q: 'Can I use Smart Agro without internet?',
           a: 'You need an internet connection for AI detection, live weather, community, and chat. Downloaded lab reports and notes you already saved on your device can still be opened offline.',
+        },
+        {
+          q: 'Why does detection fail with a network / connection error?',
+          a: 'Online detection uses Google Gemini over HTTPS. Some Myanmar ISPs, firewalls, or DNS settings block that connection (the same class of issue as GitHub port 443). Turn on a VPN, try another network, or set DNS to 1.1.1.1 / 8.8.8.8, then retry. If the local AI service is running on this computer (port 8000), Smart Agro will fall back to it automatically.',
         },
         {
           q: 'How do I share a diagnosis with the community?',
@@ -2292,7 +2298,7 @@ export const faqCopy = (lang: Lang): FaqCopy => {
         },
         {
           q: 'ဓာတ်ခွဲခန်း / ကုသနည်း အစီရင်ခံစာကို ဘယ်လို ဒေါင်းလုဒ်လုပ်မလဲ?',
-          a: 'ရောဂါရှာ အောင်မြင်ပြီးနောက် ကုသနည်း လမ်းညွှန်တွင် ဓာတ်ခွဲခန်း အစီရင်ခံစာ ဒေါင်းလုဒ်ကို နှိပ်ပါ။ ရောဂါ၊ ပြင်းထန်မှု၊ တည်နေရာနှင့် ကာကွယ်နှိမ်နင်းနည်းများ ပါဝင်ပြီး ကျွမ်းကျင်သူနှင့် မျှဝေနိုင်သည်။',
+          a: 'ရောဂါရှာ အောင်မြင်ပြီးနောက် ကုသနည်း လမ်းညွှန်တွင် ဓာတ်ခွဲခန်း အစီရင်ခံစာ ဒေါင်းလုဒ်ကို နှိပ်ပါ။ ရောဂါလက္ခဏာ၊ ကုသနည်း၊ ကာကွယ်နှိမ်နင်းနည်း၊ အကြံပြုဆေးများ၊ ပြင်းထန်မှုနှင့် တည်နေရာ ပါဝင်သည်။',
         },
         {
           q: 'စိုက်ပျိုးရေး ဗဟုသုတ ဆောင်းပါးများကို ဘယ်မှာ ရှာမလဲ?',
@@ -2321,6 +2327,10 @@ export const faqCopy = (lang: Lang): FaqCopy => {
         {
           q: 'အင်တာနက် မရှိဘဲ Smart Agro သုံးနိုင်သလား?',
           a: 'AI ရောဂါရှာ၊ တိုက်ရိုက် ရာသီဥတု၊ အသိုင်းအဝိုင်းနှင့် ချတ်အတွက် အင်တာနက် လိုသည်။ ဒေါင်းလုဒ်လုပ်ပြီးသား အစီရင်ခံစာနှင့် စက်ထဲ သိမ်းထားသော မှတ်စုများကို အော့ဖ်လိုင်း ဖွင့်နိုင်သည်။',
+        },
+        {
+          q: 'ရောဂါရှာတွင် ကွန်ရက် / ချိတ်ဆက်မှု အမှား ဘာကြောင့် ဖြစ်သလဲ?',
+          a: 'အွန်လိုင်း ရောဂါရှာသည် Google Gemini ကို HTTPS ဖြင့် သုံးသည်။ မြန်မာ ISP၊ ဖိုင်းယားဝေါလ် သို့မဟုတ် DNS က ထိုချိတ်ဆက်မှုကို ပိတ်တတ်သည် (GitHub port 443 နှင့် အတူတူ အမျိုးအစား)။ VPN ဖွင့်ပါ၊ အခြားကွန်ရက် စမ်းပါ၊ သို့မဟုတ် DNS ကို 1.1.1.1 / 8.8.8.8 ထားပြီး ထပ်မံ စမ်းပါ။ ဤကွန်ပျူတာတွင် local AI (port 8000) ဖွင့်ထားလျှင် Smart Agro က အလိုအလျောက် ပြန်သုံးမည်။',
         },
         {
           q: 'ရောဂါစစ်ချက်ကို အသိုင်းအဝိုင်းသို့ ဘယ်လို မျှဝေမလဲ?',

@@ -13,6 +13,7 @@ import {
   WidthType,
 } from 'docx';
 import type { DiseaseGuide } from '../data/diseaseGuides';
+import { labTreatmentFor } from '../data/diseaseGuides';
 import {
   CROP_NAME_MY,
   diseaseNameMy,
@@ -458,8 +459,7 @@ export async function buildLabReportDocx(input: LabReportInput): Promise<Blob> {
       (input.diseaseCorrected ||
         input.expertBooks ||
         input.expertDrugs ||
-        input.expertSuggestion ||
-        input.treatmentProtocol)
+        input.expertSuggestion)
   );
   if (hasExpertBlock) {
     children.push(heading('ကျွမ်းကျင်သူ စိစစ်ချက်', 'Expert review'));
@@ -536,21 +536,6 @@ export async function buildLabReportDocx(input: LabReportInput): Promise<Blob> {
         })
       );
     }
-    if (input.treatmentProtocol) {
-      expertRows.push(
-        new TableRow({
-          children: [
-            cell(biLabel('ကုသနည်း', 'Treatment protocol'), {
-              bold: true,
-              fill: MUTED_BG,
-              width: 3120,
-              fontSize: 16,
-            }),
-            cell(input.treatmentProtocol, { width: 6240 }),
-          ],
-        })
-      );
-    }
     if (expertRows.length) {
       children.push(
         new Table({
@@ -569,6 +554,15 @@ export async function buildLabReportDocx(input: LabReportInput): Promise<Blob> {
     pushPairedBullets(children, guide?.symptomsEn ?? [], guide?.symptomsMy ?? []);
   }
 
+  const treatment = labTreatmentFor({
+    disease: input.disease,
+    crop: crop.en !== '—' ? crop.en : input.cropType,
+    guide,
+    expertProtocol: input.treatmentProtocol,
+  });
+  children.push(heading('ကုသနည်း', 'Treatment'));
+  pushPairedNumbered(children, treatment.stepsEn, treatment.stepsMy);
+
   const controlsEn = guide?.controlsEn?.length ? guide.controlsEn : input.treatmentSteps;
   const controlsMy = guide?.controlsMy?.length
     ? guide.controlsMy
@@ -580,8 +574,11 @@ export async function buildLabReportDocx(input: LabReportInput): Promise<Blob> {
     pushPairedNumbered(children, controlsEn, controlsMy);
   }
 
-  const chemLines =
-    guide?.chemicalsMy?.length ? guide.chemicalsMy : guide?.chemicals ?? [];
+  const chemLines = treatment.chemicalsMy.length
+    ? treatment.chemicalsMy
+    : guide?.chemicalsMy?.length
+      ? guide.chemicalsMy
+      : guide?.chemicals ?? [];
   if (chemLines.length) {
     children.push(heading('အကြံပြု ဆေးများ', 'Recommended chemicals'));
     children.push(

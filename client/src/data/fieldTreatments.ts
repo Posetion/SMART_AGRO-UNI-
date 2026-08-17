@@ -277,8 +277,43 @@ export const FIELD_TREATMENTS_MY: Record<string, string> = {
     'နွေထယ်ရေးခံပါ။ အတန်း (၅-၆) တိုင်း ပဲစင်းငုံ သီးညှပ်စိုက်ပါ။ တစ်ဧက အလင်းထောင်ချောက် (၁) ခုနှင့် ဖီရိုမုန်းထောင်ချောက် (၂) ခု ထောင်ပါ။ Trichogramma လွှတ်ပေးပြီး သဘာဝရန်သူများ ထိန်းသိမ်းပါ။ လိုအပ်မှ Cypermethrin, Lambda-Cyhalothrin, Flubendiamide, Indoxacarb ကို တံဆိပ်အတိုင်း ဖျန်းပါ။',
 };
 
+/** Used when a crop/disease pair has no DOA row — still give a usable spray protocol. */
+export const CROP_TREATMENT_FALLBACK_MY: Record<string, string> = {
+  Rice:
+    'ရောဂါခံနိုင်သော မျိုးစိုက်ပါ။ ပင်ကြွင်း မီးရှို့ပါ။ ရေသွင်းရေထုတ် မှန်မှန်လုပ်ပါ။ မှိုရောဂါတွင် Tricyclazole, Propiconazole, Azoxystrobin ကို တံဆိပ်အတိုင်း ဖျန်းပါ။ ဘက်တီးရီးယားရောဂါတွင် Kasugamycin, Copper Oxychloride သုံးပါ။ ပိုးကျပါက Cartap / Chlorantraniliprole ကို သတ်မှတ်ချက်ကျော်မှ ဖျန်းပါ။',
+  Maize:
+    'ခံနိုင်ရည်ရှိမျိုး စိုက်ပါ။ ပင်ကြွင်း မီးရှို့ပါ။ ရေမဝပ်၊ မြေမကျပ်စေရန် ထိန်းပါ။ ရွက်မှိုရောဂါတွင် Mancozeb, Propiconazole, Azoxystrobin ကို တံဆိပ်အတိုင်း ဖျန်းပါ။ ပင်စည်/အမြစ်ပုပ်တွင် Metalaxyl, Hymexazol ကို ပင်ခြေ ဆွဲဖျန်းပါ။ ပိုးကျပါက Chlorantraniliprole, Lambda-cyhalothrin ကို သတ်မှတ်ချက်ကျော်မှ သုံးပါ။',
+  Rubber:
+    'ရောဂါကျရွက်/အကိုင်း ဖြတ်မီးရှို့ပါ။ စိုက်ခင်း သန့်ရှင်းရေးနှင့် ရေထုတ်ကောင်းအောင် ထားပါ။ ရွက်မှိုတွင် Sulfur, Hexaconazole, Chlorothalonil ဖျန်းပါ။ Phytophthora ရွက်ကြွေတွင် Metalaxyl, Fosetyl-Al သုံးပါ။ အမြစ်ရောဂါတွင် ရောဂါကျပင် ဖယ်ပြီး Trichoderma / Validamycin ပင်ခြေ ကုသပါ။',
+  Sugarcane:
+    'ရောဂါကင်း မျိုးတုံး သုံးပါ။ ရောဂါကျပင် ဖယ်မီးရှို့ပါ။ သီးလှည့်စိုက်ပါ။ မှိုရောဂါတွင် Carbendazim, Mancozeb, Propiconazole ကို တံဆိပ်အတိုင်း ဖျန်းပါ။ ပိုးကျပါက Chlorantraniliprole, Fipronil ကို လိုအပ်မှ သုံးပါ။',
+  Cabbage:
+    'ပေါင်းရှင်းပါ။ လေဝင်လေထွက်ကောင်းအောင် စိုက်ပါ။ ရွက်မှို/ပုပ်တွင် Chlorothalonil, Mancozeb, Copper Hydroxide ဖျန်းပါ။ ပိုးကျပါက Bacillus thuringiensis ဦးစားပေးပြီး လိုအပ်မှ Spinosad, Emamectin benzoate သုံးပါ။',
+  Onion:
+    'ရေမဝပ်စေရန် ထိန်းပါ။ ပင်ကြွင်း ရှင်းပါ။ မှိုရောဂါတွင် Mancozeb, Chlorothalonil, Difenoconazole ဖျန်းပါ။ သီးလှည့်စိုက်ပါ။ ပိုးကျပါက Spinosad, Lambda-cyhalothrin ကို တံဆိပ်အတိုင်း သုံးပါ။',
+  Garlic:
+    'ရေမဝပ်စေရန် ထိန်းပါ။ ပင်ကြွင်း ရှင်းပါ။ မှိုရောဂါတွင် Mancozeb, Chlorothalonil, Difenoconazole ဖျန်းပါ။ သီးလှည့်စိုက်ပါ။ ပိုးကျပါက Spinosad, Lambda-cyhalothrin ကို တံဆိပ်အတိုင်း သုံးပါ။',
+  Potato:
+    'ရောဂါကင်း မျိုးဥ သုံးပါ။ ရေမဝပ်စေရန် ထိန်းပါ။ နှောင်းမှိုတွင် Mancozeb, Metalaxyl, Cymoxanil, Chlorothalonil ကို ကာကွယ်ဖျန်းပါ။ ပင်ညှိုးတွင် သီးလှည့်စိုက်ပါ။ ပိုးကျပါက Imidacloprid, Spinosad ကို တံဆိပ်အတိုင်း သုံးပါ။',
+  Tea:
+    'ရောဂါကျရွက် ခူးဖယ်ပါ။ လေဝင်လေထွက်ကောင်းအောင် ကိုင်းဖြတ်ပါ။ မှိုရောဂါတွင် Copper Oxychloride, Hexaconazole ဖျန်းပါ။ ပိုးကျပါက သဘာဝရန်သူ ထိန်းသိမ်းပြီး လိုအပ်မှ တမာဆေး / Imidacloprid သုံးပါ။ စားသုံးရွက်တွင် ရိတ်သိမ်းမီ ကာလ (PHI) လိုက်နာပါ။',
+  Coffee:
+    'အရိပ်နှင့် ရေထုတ် မျှတအောင် ထားပါ။ ရောဂါကျအသီး/ရွက် ဖယ်ပါ။ မှိုရောဂါတွင် Copper Oxychloride, Hexaconazole ဖျန်းပါ။ ပိုးကျပါက ထောင်ချောက်နှင့် လိုအပ်မှ Lambda-cyhalothrin ကို တံဆိပ်အတိုင်း သုံးပါ။',
+  'Oil Palm':
+    'ရောဂါကျရွက်/ပင် ဖယ်ပါ။ ရေမဝပ်စေရန် ထိန်းပါ။ မှိုရောဂါတွင် Copper Oxychloride, Mancozeb, Hexaconazole ဖျန်းပါ။ ပိုးကျပါက ပင်စည်ထောင်ချောက်နှင့် လိုအပ်မှ Cypermethrin သုံးပါ။',
+  Cotton:
+    'ပေါင်းရှင်းပါ။ ပင်ကြွင်း မီးရှို့ပါ။ ခံနိုင်ရည်ရှိမျိုး စိုက်ပါ။ မှိုရောဂါတွင် Mancozeb, Azoxystrobin, Copper Hydroxide ဖျန်းပါ။ ပိုးကျပါက Dimethoate, Lambda-cyhalothrin, Flubendiamide ကို တံဆိပ်အတိုင်း သုံးပါ။',
+  Chili:
+    'ပင်ကြွင်း မီးရှို့ပါ။ လေဝင်လေထွက်ကောင်းအောင် စိုက်ပါ။ မှိုရောဂါတွင် Chlorothalonil, Mancozeb, Azoxystrobin ဖျန်းပါ။ ပိုးကျပါက Imidacloprid, Spinosad, Lambda-cyhalothrin ကို တံဆိပ်အတိုင်း သုံးပါ။',
+  Default:
+    'ရောဂါ/ပိုးကျပင်များကို ဖယ်ရှားပါ။ ကွင်းသန့်ရှင်းရေး လုပ်ပါ။ လေဝင်လေထွက်ကောင်းအောင် ထားပါ။ အမည်မှန်အောင် ခွဲခြားပြီးမှ မှိုသတ်/ပိုးသတ်ဆေးကို တံဆိပ်အတိုင်း ဖျန်းပါ။ ဆေးသုံးမီ ဒေသကျွမ်းကျင်သူနှင့် တိုင်ပင်ပါ။',
+};
+
 export function fieldTreatmentMy(label?: string, crop?: string): string {
   if (!label) return '';
+  if (label.toLowerCase() === 'healthy') {
+    return 'ကျန်းမာသော အပင်ဖြစ်၍ ဓာတုဆေးဖျန်းရန် မလိုပါ။ ပုံမှန် စိုက်ခင်း စစ်ဆေးမှု ဆက်လုပ်ပါ။';
+  }
   if (crop) {
     const specific = FIELD_TREATMENTS_MY[`${crop}:${label}`];
     if (specific) return specific;

@@ -1,4 +1,4 @@
-import { fieldTreatmentMy } from '../config/fieldTreatments.js';
+import { CROP_TREATMENT_FALLBACK_MY, fieldTreatmentMy } from '../config/fieldTreatments.js';
 import {
   ALL_DETECT_LABELS,
   CROP_TYPES,
@@ -598,6 +598,7 @@ function parseDetectJson(text: string, modelTag: string): DetectResult {
       ? fieldTreatmentMy(disease, cropType) ||
         String(parsed.treatmentProtocol || '').trim() ||
         TREATMENT_MY[disease] ||
+        CROP_TREATMENT_FALLBACK_MY[cropType] ||
         DEFAULT_TREATMENT_MY
       : '',
     quality: { ok: qualityOk, issues: qualityOk ? issues : [...new Set([...issues, 'not_leaf_like'])] },
@@ -1111,5 +1112,10 @@ export async function chatWithAi(
 }
 
 export function treatmentFor(disease: string, crop?: string): string {
-  return TREATMENT_MY[disease] || fieldTreatmentMy(disease, crop) || DEFAULT_TREATMENT_MY;
+  return (
+    TREATMENT_MY[disease] ||
+    fieldTreatmentMy(disease, crop) ||
+    (crop ? CROP_TREATMENT_FALLBACK_MY[crop] : '') ||
+    DEFAULT_TREATMENT_MY
+  );
 }

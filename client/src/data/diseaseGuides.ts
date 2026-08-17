@@ -1,6 +1,6 @@
 /** Official rice disease guides from Disease.docx (Smart Agro lab report source). */
 import { diseaseNameMy } from './diseaseNames';
-import { fieldTreatmentMy } from './fieldTreatments';
+import { CROP_TREATMENT_FALLBACK_MY, fieldTreatmentMy } from './fieldTreatments';
 
 export type DiseaseGuide = {
   key: string;
@@ -530,17 +530,137 @@ export const DISEASE_GUIDES: Record<string, DiseaseGuide> = {
   },
 };
 
+const CHEM_STOP = new Set([
+  'Field',
+  'Follow',
+  'Myanmar',
+  'Default',
+  'Healthy',
+  'Always',
+  'Apply',
+  'Remove',
+  'Confirm',
+  'Treat',
+  'Repeat',
+  'Scout',
+  'Keep',
+  'Use',
+  'Plant',
+  'Burn',
+  'Clear',
+  'Avoid',
+  'Select',
+  'Maintain',
+  'Improve',
+  'Spray',
+]);
+
+export function extractChemicalsFromText(text: string): string[] {
+  if (!text) return [];
+  const matches =
+    text.match(
+      /[A-Z][A-Za-z]+(?:-[A-Za-z]+)+|[A-Z][a-z]{4,}(?:\s(?:Al|methyl|Hydroxide|Oxychloride|hydrochloride|benzoate|thuringiensis))?/g
+    ) || [];
+  const out: string[] = [];
+  for (const raw of matches) {
+    const name = raw.replace(/\s+/g, ' ').trim();
+    if (name.length < 5 || CHEM_STOP.has(name)) continue;
+    if (!out.some((x) => x.toLowerCase() === name.toLowerCase())) out.push(name);
+  }
+  return out.slice(0, 12);
+}
+
+function splitMySentences(text: string): string[] {
+  return text
+    .split(/(?<=။)\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export type LabTreatment = {
+  stepsMy: string[];
+  stepsEn: string[];
+  chemicals: string[];
+  chemicalsMy: string[];
+};
+
+/** Dedicated "how to treat now" copy for lab reports and the Detect page — all crops. */
+export function labTreatmentFor(opts: {
+  disease?: string;
+  crop?: string;
+  guide?: DiseaseGuide | null;
+  expertProtocol?: string;
+}): LabTreatment {
+  const disease = opts.disease || '';
+  const isHealthy = !disease || disease.toLowerCase() === 'healthy';
+  if (isHealthy) {
+    return {
+      stepsMy: [
+        'ကျန်းမာသော အပင်ဖြစ်၍ ဓာတုဆေးဖျန်းရန် မလိုပါ။ ပုံမှန် စိုက်ခင်း စစ်ဆေးမှု ဆက်လုပ်ပါ။',
+      ],
+      stepsEn: [
+        'No chemical spray is needed. Continue regular field scouting and keep the crop healthy.',
+      ],
+      chemicals: [],
+      chemicalsMy: [],
+    };
+  }
+
+  const specificField = fieldTreatmentMy(disease, opts.crop);
+  const cropFallback =
+    (opts.crop && CROP_TREATMENT_FALLBACK_MY[opts.crop]) || CROP_TREATMENT_FALLBACK_MY.Default;
+  const expert = opts.expertProtocol?.trim() || '';
+  const guide = opts.guide;
+  const chemicals = (
+    guide?.chemicals?.length
+      ? guide.chemicals
+      : extractChemicalsFromText(expert || specificField || cropFallback)
+  ).filter(Boolean);
+  const chemicalsMy = guide?.chemicalsMy?.length ? guide.chemicalsMy : chemicals;
+
+  let stepsMy: string[];
+  if (expert) {
+    const parts = splitMySentences(expert);
+    stepsMy = parts.length > 1 ? parts : [expert];
+  } else if (specificField) {
+    stepsMy = splitMySentences(specificField);
+  } else if (chemicals.length) {
+    stepsMy = [
+      'ရောဂါ/ပိုးကျပင်များကို ဖယ်ရှားပြီး ကွင်းသန့်ရှင်းရေး လုပ်ပါ။',
+      `အကြံပြု ဆေးများ — ${chemicalsMy.join('၊ ')} ကို တံဆိပ်အတိုင်း ဖျန်းပါ။ ရွက်ဖျန်းအဖြစ် သုံးပါ (မျိုးစေ့/မြေသုံးဟု သတ်မှတ်မှသာ ထိုနည်းသုံးပါ)။`,
+      'တံဆိပ်နှုန်းနှင့် ရိတ်သိမ်းမီ ကာလကို လိုက်နာပါ။ ဆေးသုံးမီ ဒေသကျွမ်းကျင်သူနှင့် တိုင်ပင်ပါ။',
+    ];
+  } else {
+    stepsMy = splitMySentences(cropFallback);
+  }
+
+  const stepsEn: string[] = [
+    'Treat the current outbreak first: remove heavily infected leaves, stems, or plants and keep the field clean.',
+  ];
+  if (chemicals.length) {
+    stepsEn.push(
+      `Apply at the product label rate (foliar spray unless seed or soil treatment is specified): ${chemicals.join(', ')}.`
+    );
+    stepsEn.push(
+      'Repeat only as the label allows. Observe the pre-harvest interval before picking or harvesting.'
+    );
+  } else {
+    stepsEn.push(
+      'If a pesticide is needed, choose a labeled product for this crop and pest/disease after confirming the diagnosis.'
+    );
+  }
+  stepsEn.push('Confirm chemical choice and rate with a local agronomist before spraying.');
+
+  return { stepsMy, stepsEn, chemicals, chemicalsMy };
+}
+
 function genericGuide(disease: string, crop?: string): DiseaseGuide {
   const nameMy = diseaseNameMy(disease);
-  const fieldMy = fieldTreatmentMy(disease, crop);
-  const controlsMy = fieldMy
-    ? fieldMy.split(/(?<=။)\s*/).map((s) => s.trim()).filter(Boolean)
-    : [
-        'ရောဂါ/ပိုးကျပင်များကို ဖယ်ရှားပြီး ကွင်းသန့်ရှင်းရေး လုပ်ပါ။',
-        'လေဝင်လေထွက် ကောင်းအောင် ထားပါ။ နိုက်ထရိုဂျင် မလွန်အောင် ထိန်းပါ။',
-        'ခံနိုင်ရည်ရှိမျိုးနှင့် သီးလှည့်စိုက်ပျိုးမှုကို အသုံးပြုပါ။',
-        'အမည်မှန်အောင် ခွဲခြားပြီးမှ သင့်တော်သော ဆေးကို တံဆိပ်အတိုင်း သုံးပါ။',
-      ];
+  const fieldMy =
+    fieldTreatmentMy(disease, crop) ||
+    (crop && CROP_TREATMENT_FALLBACK_MY[crop]) ||
+    CROP_TREATMENT_FALLBACK_MY.Default;
+  const chemicals = extractChemicalsFromText(fieldMy);
   return {
     key: disease,
     nameEn: disease,
@@ -554,20 +674,20 @@ function genericGuide(disease: string, crop?: string): DiseaseGuide {
       'ရောဂါ/ပိုး လက္ခဏာများသည် သီးနှံအလိုက် ကွဲပြားနိုင်သည်။',
       'ဒေသခံ စိုက်ပျိုးရေး ကျွမ်းကျင်သူနှင့် တိုင်ပင်အတည်ပြုပါ။',
     ],
-    controlsEn: fieldMy
-      ? [
-          'Follow the Myanmar DOA field treatment steps shown below.',
-          'Always read and follow pesticide label rates and pre-harvest intervals.',
-        ]
-      : [
-          'Remove heavily infected plant parts and keep the field clean.',
-          'Improve air flow; avoid excess nitrogen where fungal disease pressure is high.',
-          'Use resistant varieties when available and rotate crops where practical.',
-          'Apply recommended fungicide/insecticide only after correct identification, following the label.',
-        ],
-    controlsMy,
-    chemicals: [],
-    chemicalsMy: [],
+    controlsEn: [
+      'Remove heavily infected plant parts and keep the field clean.',
+      'Improve air flow; avoid excess nitrogen where fungal disease pressure is high.',
+      'Use resistant varieties when available and rotate crops where practical.',
+      'Scout regularly and treat early using the treatment protocol.',
+    ],
+    controlsMy: [
+      'ရောဂါ/ပိုးကျပင်ကြွင်းများကို ဖယ်ရှားပြီး ကွင်းသန့်ရှင်းရေး လုပ်ပါ။',
+      'လေဝင်လေထွက် ကောင်းအောင် ထားပါ။ ရေမဝပ်စေရန်၊ နိုက်ထရိုဂျင် မလွန်အောင် ထိန်းပါ။',
+      'ခံနိုင်ရည်ရှိမျိုးနှင့် သီးလှည့်စိုက်ပျိုးမှုကို အသုံးပြုပါ။',
+      'ပုံမှန်ကင်းထောက်ပြီး ကုသနည်းအတိုင်း စောစီးစွာ ဆောင်ရွက်ပါ။',
+    ],
+    chemicals,
+    chemicalsMy: chemicals,
   };
 }
 
@@ -599,30 +719,11 @@ export function getDiseaseGuide(disease?: string, crop?: string): DiseaseGuide |
 }
 
 export function treatmentProtocolFromGuide(disease?: string, lang: "en" | "my" = "my", crop?: string): string {
-  const field = fieldTreatmentMy(disease, crop);
-  if (field && lang === "my") return field;
-  if (field && lang === "en") {
-    return `Follow Myanmar DOA field protocol:\n${field}`;
-  }
-  const g = getDiseaseGuide(disease);
-  if (!g) return "";
-  const steps =
-    lang === "en" && g.controlsEn.length
-      ? [...g.controlsEn]
-      : g.controlsMy.length
-        ? [...g.controlsMy]
-        : [...g.controlsEn];
-  const chems =
-    lang === "en" && g.chemicals.length
-      ? g.chemicals
-      : g.chemicalsMy.length
-        ? g.chemicalsMy
-        : g.chemicals;
-  if (chems.length) {
-    steps.push(
-      lang === "en" ? `Recommended chemicals: ${chems.join(", ")}` : `အကြံပြု ဆေးများ — ${chems.join("၊ ")}`
-    );
-  }
-  return steps.join("\n");
+  const treatment = labTreatmentFor({
+    disease,
+    crop,
+    guide: getDiseaseGuide(disease, crop),
+  });
+  return (lang === 'en' ? treatment.stepsEn : treatment.stepsMy).join('\n');
 }
 

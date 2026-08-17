@@ -6,7 +6,7 @@ import { TownshipLocationPicker, type TownshipOption } from '../components/Towns
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatDiseaseLabel } from '../data/diseaseNames';
-import { getDiseaseGuide, treatmentProtocolFromGuide } from '../data/diseaseGuides';
+import { getDiseaseGuide, labTreatmentFor, treatmentProtocolFromGuide } from '../data/diseaseGuides';
 import { detectCopy } from '../i18n/messages';
 import { api } from '../services/api';
 import { downloadLabReportDocx } from '../utils/labReport';
@@ -714,7 +714,9 @@ export function DetectPage() {
           expertBooks: report.expertBooks?.trim() || undefined,
           expertDrugs: report.expertDrugs?.trim() || undefined,
           expertSuggestion: report.expertSuggestion?.trim() || undefined,
-          treatmentProtocol: report.treatmentProtocol?.trim() || undefined,
+          treatmentProtocol: report.isVerified
+            ? report.treatmentProtocol?.trim() || undefined
+            : undefined,
           guide,
           treatmentSteps: steps,
         },
@@ -1141,12 +1143,19 @@ export function DetectPage() {
               <h3>{t.treatmentTitle}</h3>
               {(() => {
                 const guide = getDiseaseGuide(result.disease, result.cropType);
-                const fieldTip = treatmentProtocolFromGuide(result.disease, lang, result.cropType);
+                const treatment = labTreatmentFor({
+                  disease: result.disease,
+                  crop: result.cropType,
+                  guide,
+                  expertProtocol: result.isVerified ? result.treatmentProtocol : undefined,
+                });
                 const isHealthy =
                   !result.disease ||
                   result.disease === 'Healthy' ||
                   result.disease.toLowerCase() === 'healthy';
-                // Prefer guide/DOA text; ignore stale API protocol on Healthy results
+                const treatSteps =
+                  lang === 'my' ? treatment.stepsMy : treatment.stepsEn;
+                const fieldTip = treatSteps.join(lang === 'my' ? ' ' : ' ');
                 const aiTip = isHealthy
                   ? fieldTip
                   : fieldTip || result.treatmentProtocol?.trim() || '';
@@ -1168,16 +1177,23 @@ export function DetectPage() {
                       : guide?.controlsMy || [];
                 const chemicals =
                   lang === 'my'
-                    ? guide?.chemicalsMy?.length
-                      ? guide.chemicalsMy
-                      : guide?.chemicals || []
-                    : guide?.chemicals?.length
-                      ? guide.chemicals
-                      : guide?.chemicalsMy || [];
+                    ? treatment.chemicalsMy.length
+                      ? treatment.chemicalsMy
+                      : guide?.chemicalsMy?.length
+                        ? guide.chemicalsMy
+                        : guide?.chemicals || []
+                    : treatment.chemicals.length
+                      ? treatment.chemicals
+                      : guide?.chemicals?.length
+                        ? guide.chemicals
+                        : guide?.chemicalsMy || [];
                 const canExpand =
                   Boolean(guide) &&
-                  (symptoms.length > 0 || controls.length > 2 || chemicals.length > 0);
-                const previewControls = controls.slice(0, 2);
+                  (symptoms.length > 0 ||
+                    treatSteps.length > 1 ||
+                    controls.length > 2 ||
+                    chemicals.length > 0);
+                const previewTreat = treatSteps.slice(0, 2);
                 const previewChemicals = chemicals.slice(0, 2);
                 const hasExpertAdvice = Boolean(
                   result.isVerified &&
@@ -1233,19 +1249,18 @@ export function DetectPage() {
 
                     {!guideOpen && (
                       <>
-                        {!guide && (aiTip ? (
+                        {previewTreat.length > 0 ? (
+                          <ol className="dt-treatment-steps">
+                            {previewTreat.map((step, i) => (
+                              <li key={`treat-pre-${i}`}>{step}</li>
+                            ))}
+                          </ol>
+                        ) : aiTip ? (
                           <p className="dt-treatment-ai">{aiTip}</p>
                         ) : (
                           <p className="dt-treatment-ai muted">{t.noTreatment}</p>
-                        ))}
-                        {guide && previewControls.length > 0 && (
-                          <ol className="dt-treatment-steps">
-                            {previewControls.map((step, i) => (
-                              <li key={i}>{step}</li>
-                            ))}
-                          </ol>
                         )}
-                        {guide && previewChemicals.length > 0 && (
+                        {previewChemicals.length > 0 && (
                           <div className="dt-chem-block">
                             <h4>{t.recommendedChemicals}</h4>
                             <ul className="dt-chem-list">
@@ -1260,7 +1275,18 @@ export function DetectPage() {
 
                     {guideOpen && guide && (
                       <div className="dt-guide-full">
-                        {aiTip ? <p className="dt-treatment-ai">{aiTip}</p> : null}
+                        <div className="dt-guide-section">
+                          <h4>{t.howToTreatTitle}</h4>
+                          {treatSteps.length > 0 ? (
+                            <ol className="dt-treatment-steps">
+                              {treatSteps.map((step, i) => (
+                                <li key={`treat-${i}`}>{step}</li>
+                              ))}
+                            </ol>
+                          ) : (
+                            <p className="dt-treatment-ai muted">{t.noTreatment}</p>
+                          )}
+                        </div>
                         {symptoms.length > 0 && (
                           <div className="dt-guide-section">
                             <h4>{t.symptomsTitle}</h4>
