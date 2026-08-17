@@ -775,8 +775,8 @@ async function detectWithGemini(
   const model = env.GEMINI_MODEL;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
   const controller = new AbortController();
-  // Vision + thinking models need more headroom than chat
-  const timeoutMs = Math.max(env.AI_SERVICE_TIMEOUT_MS, 90000);
+  // Fail over sooner when Google is unreachable (common on restricted networks)
+  const timeoutMs = Math.max(env.AI_SERVICE_TIMEOUT_MS, 25000);
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   const generationConfig: Record<string, unknown> = {
@@ -864,6 +864,9 @@ async function detectWithGemini(
     if (err instanceof Error && err.name === 'AbortError') {
       throw new AppError('Gemini detect timed out', 503);
     }
+    if (isNetworkError(err)) {
+      throw new AppError(detectNetworkMessage(), 503);
+    }
     throw new AppError(err instanceof Error ? err.message : 'Gemini detect failed', 503);
   } finally {
     clearTimeout(timer);
@@ -918,11 +921,34 @@ function parseGeminiDetectResponse(
   }
 }
 
+function isNetworkError(err: unknown): boolean {
+  const parts: string[] = [];
+  if (err instanceof Error) {
+    parts.push(err.name, err.message);
+    const cause = (err as Error & { cause?: unknown }).cause;
+    if (cause instanceof Error) parts.push(cause.name, cause.message);
+    else if (cause) parts.push(String(cause));
+  } else {
+    parts.push(String(err));
+  }
+  return /fetch failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|UND_ERR|Connect Timeout|aborted|AbortError|ECONNRESET|failed to connect|socket/i.test(
+    parts.join(' ')
+  );
+}
+
+function detectNetworkMessage() {
+  return 'Could not reach the online detection service. Check your internet connection, then try again.';
+}
+
 function isRetryableDetectError(err: unknown): boolean {
+  if (isNetworkError(err)) return true;
   if (!(err instanceof AppError)) return false;
   return (
     isGeminiQuotaError(err) ||
-    /no JSON|invalid JSON|empty reply|ran out of tokens|timed out/i.test(err.message)
+    isNetworkError(err) ||
+    /fetch failed|no JSON|invalid JSON|empty reply|ran out of tokens|timed out|unavailable|Could not reach/i.test(
+      err.message
+    )
   );
 }
 
@@ -946,8 +972,32 @@ async function detectWithGeminiKeys(imageBuffer: Buffer, mimeType: string): Prom
   throw new AppError('Disease detection failed. Please try again.', 503);
 }
 
+async function detectWithLocalAi(imageBuffer: Buffer, mimeType: string): Promise<DetectResult> {
+  const form = new FormData();
+  const bytes = new Uint8Array(imageBuffer);
+  const file = new File([bytes], 'leaf.jpg', { type: mimeType || 'image/jpeg' });
+  form.append('file', file);
+
+  const data = await callAi<DetectResult>('/ai/detect', {
+    method: 'POST',
+    body: form,
+  });
+  const disease = data.disease || 'Healthy';
+  return {
+    cropType: (data.cropType as CropType) || 'Rice',
+    disease,
+    diseaseMy: data.diseaseMy || diseaseNameMy(disease),
+    severityIndex: Number(data.severityIndex) || 0,
+    probabilities: Array.isArray(data.probabilities) ? data.probabilities : [],
+    treatmentProtocol: data.treatmentProtocol || TREATMENT_MY[disease] || TREATMENT_MY.Healthy || '',
+    quality: data.quality,
+    confidence: data.confidence,
+    model: data.model || 'local-ai',
+  };
+}
+
 export async function detectDisease(imageBuffer: Buffer, mimeType: string): Promise<DetectResult> {
-  const order = providerOrder();
+  const order: Array<'gemini' | 'cursor' | 'local'> = [...providerOrder(), 'local'];
   console.info(`[detect] provider=${env.AI_PROVIDER} order=${order.join('→')}`);
   let lastError: unknown;
 
@@ -960,6 +1010,9 @@ export async function detectDisease(imageBuffer: Buffer, mimeType: string): Prom
       }
       if (provider === 'cursor' && hasCursor()) {
         return await detectWithCursor(imageBuffer, mimeType);
+      }
+      if (provider === 'local') {
+        return await detectWithLocalAi(imageBuffer, mimeType);
       }
     } catch (err) {
       lastError = err;
