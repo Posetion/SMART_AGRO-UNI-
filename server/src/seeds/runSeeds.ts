@@ -4,6 +4,7 @@ import { seedAdmin, seedExpert } from './seedAdmin.js';
 import { seedPosts } from './seedPosts.js';
 import { seedMyanmarCommunity } from './seedMyanmarCommunity.js';
 import { seedKnowledge } from './seedKnowledge.js';
+import { seedBuutheeChats } from './seedChatHistory.js';
 
 async function main() {
   await connectDb();
@@ -13,6 +14,7 @@ async function main() {
   const posts = await seedPosts();
   const myanmar = await seedMyanmarCommunity();
   const knowledge = await seedKnowledge(admin._id);
+  const chats = await seedBuutheeChats();
 
   console.log(`Seeded ${townshipCount} townships`);
   console.log(`Admin: ${admin.email}`);
@@ -28,6 +30,7 @@ async function main() {
       : `Myanmar demo posts: created ${myanmar.created}; liked ${myanmar.likedAccounts} real-account post(s)`
   );
   console.log(`Knowledge: refreshed ${knowledge.created} resources`);
+  console.log(`Chat demo: ${chats.sessions} Myanmar crop chats for ${chats.email}`);
   await disconnectDb();
 }
 
