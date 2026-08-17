@@ -91,6 +91,15 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
     return user ? '/home' : '/';
   }
 
+  function goLanding() {
+    setMenuOpen(false);
+    if (isLanding) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    navigate('/');
+  }
+
   function goHome() {
     setMenuOpen(false);
     const dest = homePath();
@@ -148,7 +157,7 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
       {isLanding && <div className="lp-progress" style={{ width: `${progress}%` }} aria-hidden />}
 
       <header className={`lp-nav ${solid ? 'is-solid' : ''}`}>
-        <button type="button" className="lp-brand" onClick={goHome}>
+        <button type="button" className="lp-brand" onClick={goLanding}>
           <span className="lp-brand-mark" aria-hidden>
             <BrandLogo size={34} decorative />
           </span>
