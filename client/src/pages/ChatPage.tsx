@@ -92,6 +92,24 @@ function formatTime(iso?: string) {
   return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
+function ChatText({ text }: { text: string }) {
+  const blocks = text
+    .replace(/\r\n/g, '\n')
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+  if (blocks.length <= 1) {
+    return <>{text}</>;
+  }
+  return (
+    <>
+      {blocks.map((block, i) => (
+        <p key={i}>{block}</p>
+      ))}
+    </>
+  );
+}
+
 function mapSessionMessages(list?: SessionSummary['messages']): Msg[] {
   return (list || []).map((m) => ({
     sender: m.sender === 'bot' ? 'bot' : 'user',
@@ -630,7 +648,7 @@ export function ChatPage() {
                           ))}
                       </div>
                     )}
-                    {m.text}
+                    {m.text ? <ChatText text={m.text} /> : null}
                   </div>
                 </article>
               ))}

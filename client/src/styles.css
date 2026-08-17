@@ -12146,7 +12146,7 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
   max-width: 760px;
   margin: 0 auto;
   display: grid;
-  gap: 0.85rem;
+  gap: 1.15rem;
 }
 .va-bubble {
   border: 1px solid var(--va-line);
@@ -12165,9 +12165,25 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
 .va-bubble header span { margin-left: auto; font-size: 0.72rem; color: var(--va-muted); }
 .va-bubble-body {
   white-space: pre-wrap;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #314056;
   font-size: 0.94rem;
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-break: auto;
+}
+.va-bubble-body p {
+  margin: 0 0 0.7em;
+  white-space: pre-wrap;
+}
+.va-bubble-body p:last-child {
+  margin-bottom: 0;
+}
+html.lang-my .va-bubble-body,
+html[lang='my'] .va-bubble-body {
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-height: 1.7;
 }
 .va-composer-wrap {
   margin: 0 1.25rem;

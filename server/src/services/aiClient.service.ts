@@ -116,13 +116,13 @@ Also advise on:
 
 How to answer:
 1. Reply in the same language the farmer uses (English or Myanmar/Burmese).
-2. Be concrete and actionable: short steps, what to check in the field today, and what to do next.
-3. When LIVE WEATHER CONTEXT is provided, USE those numbers (temp, humidity, rain, alerts). Cite them briefly. Do not invent local weather.
-4. Tie weather to crop risk (e.g. high humidity + rain → fungal disease pressure; stagnant water + high N → planthopper risk).
-5. If location/weather is missing or uncertain, say so and suggest the Weather page or Detect page for leaf/pest photos.
-6. Prefer integrated pest management. Do not invent pesticide brand names or dosages you are unsure about.
-7. Structure longer answers with short bullets. Ask one clarifying question only when it materially changes the advice.
-8. Stay concise (usually under ~180 words) unless the farmer asks for detail.`;
+2. Answer ONLY the farmer's latest message. Do not repeat earlier replies.
+3. Be concrete and actionable: short steps, what to check in the field today, and what to do next.
+4. When LIVE WEATHER CONTEXT is provided, USE those numbers (temp, humidity, rain, alerts). Cite them briefly. Do not invent local weather.
+5. Tie weather to crop risk (e.g. high humidity + rain → fungal disease pressure; stagnant water + high N → planthopper risk).
+6. If location/weather is missing or uncertain, say so and suggest the Weather page or Detect page for leaf/pest photos.
+7. Prefer integrated pest management. Do not invent pesticide brand names or dosages you are unsure about.
+8. Put a blank line between paragraphs. Put each numbered or bullet step on its own line. Finish the full answer — never stop mid-sentence.`;
 
 export type ChatContext = {
   farmerProfile?: string;
@@ -193,7 +193,7 @@ async function chatWithCursor(
         503
       );
     }
-    const reply = String(result.result || '').trim();
+    const reply = formatFarmReply(String(result.result || '').trim());
     if (!reply) {
       throw new AppError('Cursor chat returned an empty reply', 503);
     }
@@ -271,6 +271,45 @@ async function withGeminiKeys<T>(run: (apiKey: string) => Promise<T>): Promise<T
   throw new AppError('Gemini free quota exceeded for now. Please wait a minute and try again.', 503);
 }
 
+type GeminiChatPart = { text?: string; inlineData?: { mimeType: string; data: string }; thought?: boolean };
+type GeminiChatContent = { role: string; parts: GeminiChatPart[] };
+
+function formatFarmReply(text: string): string {
+  let s = text.replace(/\r\n/g, '\n').replace(/\u00a0/g, ' ').trim();
+  s = s.replace(/```[\s\S]*?```/g, (block) => block.replace(/```[a-z]*\n?/gi, '').trim());
+  s = s.replace(/\*\*(.+?)\*\*/g, '$1').replace(/__(.+?)__/g, '$1');
+  s = s.replace(/^[ \t]*#{1,6}\s+/gm, '');
+  s = s.replace(/([^\n])[ \t]+(?=(?:\d+[.)]|[•\-–]|[၀-၉]+[.)])\s)/g, '$1\n');
+  s = s.replace(/\n{3,}/g, '\n\n');
+  return s.trim();
+}
+
+function toGeminiChatContents(
+  history: Array<{ sender: string; text: string }>,
+  prompt: string,
+  imageParts: GeminiChatPart[]
+): GeminiChatContent[] {
+  const contents: GeminiChatContent[] = [];
+  for (const m of history) {
+    const text = m.text?.trim();
+    if (!text) continue;
+    const role = m.sender === 'bot' ? 'model' : 'user';
+    const last = contents[contents.length - 1];
+    if (last && last.role === role && last.parts[0]?.text) {
+      last.parts[0].text = `${last.parts[0].text}\n\n${text}`;
+    } else {
+      contents.push({ role, parts: [{ text }] });
+    }
+  }
+  const last = contents[contents.length - 1];
+  if (!last || last.role !== 'user' || last.parts[0]?.text !== prompt) {
+    contents.push({ role: 'user', parts: [{ text: prompt }, ...imageParts] });
+  } else if (imageParts.length) {
+    last.parts.push(...imageParts);
+  }
+  return contents;
+}
+
 async function chatWithGemini(
   prompt: string,
   history: Array<{ sender: string; text: string }> = [],
@@ -280,14 +319,7 @@ async function chatWithGemini(
   const key = apiKey?.trim() || geminiApiKeys()[0];
   if (!key) throw new AppError('Gemini API key not configured', 503);
 
-  const contents = history
-    .filter((m) => m.text?.trim())
-    .map((m) => ({
-      role: m.sender === 'bot' ? 'model' : 'user',
-      parts: [{ text: m.text }] as Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>,
-    }));
-
-  const imageParts = (context?.images || [])
+  const imageParts: GeminiChatPart[] = (context?.images || [])
     .filter((img) => img.base64)
     .slice(0, 8)
     .map((img) => ({
@@ -300,56 +332,65 @@ async function chatWithGemini(
       },
     }));
 
-  // Ensure the latest user turn is present (history may already include it)
-  const last = contents[contents.length - 1];
-  if (!last || last.role !== 'user' || last.parts[0]?.text !== prompt) {
-    contents.push({ role: 'user', parts: [{ text: prompt }, ...imageParts] });
-  } else if (imageParts.length) {
-    last.parts.push(...imageParts);
+  const contents = toGeminiChatContents(history, prompt, imageParts);
+  const model = env.GEMINI_MODEL;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+  const generationConfig: Record<string, unknown> = {
+    temperature: 0.55,
+    maxOutputTokens: 8192,
+    topP: 0.9,
+  };
+  if (isGemini3Model(model)) {
+    generationConfig.thinkingConfig = { thinkingLevel: 'minimal' };
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.GEMINI_MODEL)}:generateContent?key=${encodeURIComponent(key)}`;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Math.max(env.AI_SERVICE_TIMEOUT_MS, 45000));
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      signal: controller.signal,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: buildSystemPrompt(context) }] },
-        contents,
-        generationConfig: {
-          temperature: 0.55,
-          maxOutputTokens: 1400,
-          topP: 0.9,
-        },
-      }),
-    });
-
-    const raw = (await res.json()) as {
-      error?: { message?: string; status?: string };
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-    };
-
-    if (!res.ok) {
-      const msg = raw.error?.message || `Gemini error (${res.status})`;
-      if (res.status === 429 || raw.error?.status === 'RESOURCE_EXHAUSTED') {
-        throw new AppError(
-          'Gemini free quota exceeded for now. Please wait a minute and try again.',
-          503
-        );
-      }
-      throw new AppError(msg, 503);
+  const requestOnce = async (turns: GeminiChatContent[]) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), Math.max(env.AI_SERVICE_TIMEOUT_MS, 90000));
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: buildSystemPrompt(context) }] },
+          contents: turns,
+          generationConfig,
+        }),
+      });
+      const raw = (await res.json()) as {
+        error?: { message?: string; status?: string };
+        candidates?: GeminiCandidate[];
+      };
+      if (!res.ok) geminiHttpError(raw, res.status);
+      return extractGeminiText(raw.candidates);
+    } finally {
+      clearTimeout(timer);
     }
+  };
 
-    const reply = raw.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('').trim();
-    if (!reply) throw new AppError('Gemini returned an empty reply', 503);
-    return { reply };
-  } finally {
-    clearTimeout(timer);
+  let { text, finishReason } = await requestOnce(contents);
+  if (finishReason === 'MAX_TOKENS' && text) {
+    const extra = await requestOnce([
+      ...contents,
+      { role: 'model', parts: [{ text }] },
+      {
+        role: 'user',
+        parts: [
+          {
+            text: 'Continue from exactly where you stopped. Do not repeat. Finish the full answer.',
+          },
+        ],
+      },
+    ]);
+    if (extra.text) {
+      text = extra.text.startsWith(text) ? extra.text : `${text}${extra.text.startsWith('\n') ? '' : '\n'}${extra.text}`;
+    }
   }
+
+  const reply = formatFarmReply(text);
+  if (!reply) throw new AppError('Gemini returned an empty reply', 503);
+  return { reply };
 }
 
 async function callAi<T>(path: string, init?: RequestInit): Promise<T> {
