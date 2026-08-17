@@ -17,7 +17,7 @@ type PublicUser = {
   avatarTone?: Tone;
   role?: string;
   isFriend?: boolean;
-  friendship?: 'none' | 'friends' | 'outgoing' | 'incoming';
+  friendship?: 'none' | 'friends' | 'outgoing' | 'incoming' | 'blocked' | 'blocked_by';
 };
 
 type Notice = {
@@ -96,6 +96,7 @@ type ChatMessage = {
 };
 
 type FriendRow = { friendshipId: string; user: PublicUser; since?: string };
+type BlockedRow = { blockId: string; user: PublicUser; since?: string };
 type FriendRequest = {
   _id: string;
   fromUserId?: PublicUser;
@@ -191,6 +192,7 @@ export function MessagesPage() {
   const [friends, setFriends] = useState<FriendRow[]>([]);
   const [incoming, setIncoming] = useState<FriendRequest[]>([]);
   const [outgoing, setOutgoing] = useState<FriendRequest[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<BlockedRow[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [appealDraft, setAppealDraft] = useState('');
   const [appealing, setAppealing] = useState(false);
@@ -370,15 +372,17 @@ export function MessagesPage() {
 
   const loadFriends = useCallback(async () => {
     if (!accessToken) return;
-    const [flist, reqs] = await Promise.all([
+    const [flist, reqs, blocked] = await Promise.all([
       api<FriendRow[]>('/messages/friends', { token: accessToken }),
       api<{ incoming: FriendRequest[]; outgoing: FriendRequest[] }>('/messages/friends/requests', {
         token: accessToken,
       }),
+      api<BlockedRow[]>('/messages/blocks', { token: accessToken }).catch(() => []),
     ]);
     setFriends(Array.isArray(flist) ? flist : []);
     setIncoming(Array.isArray(reqs?.incoming) ? reqs.incoming : []);
     setOutgoing(Array.isArray(reqs?.outgoing) ? reqs.outgoing : []);
+    setBlockedUsers(Array.isArray(blocked) ? blocked : []);
   }, [accessToken]);
 
   const loadMessages = useCallback(
@@ -636,7 +640,41 @@ export function MessagesPage() {
     }
   }
 
-  async function respondRequest(id: string, action: 'accept' | 'decline') {
+  async function cancelPerson(userId: string) {
+    if (!accessToken) return;
+    try {
+      await api('/messages/friends/cancel', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      await loadFriends();
+      setPeople((prev) =>
+        prev.map((p) => (p._id === userId ? { ...p, isFriend: false, friendship: 'none' } : p))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.friendFailed);
+    }
+  }
+
+  async function denyPerson(userId: string) {
+    if (!accessToken) return;
+    try {
+      await api('/messages/friends/deny', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      await loadFriends();
+      setPeople((prev) =>
+        prev.map((p) => (p._id === userId ? { ...p, isFriend: false, friendship: 'none' } : p))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.friendFailed);
+    }
+  }
+
+  async function respondRequest(id: string, action: 'accept' | 'decline' | 'cancel') {
     if (!accessToken) return;
     try {
       await api(`/messages/friends/requests/${id}`, {
@@ -644,6 +682,33 @@ export function MessagesPage() {
         token: accessToken,
         body: { action },
       });
+      await loadFriends();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.friendFailed);
+    }
+  }
+
+  async function blockPerson(userId: string) {
+    if (!accessToken) return;
+    if (!window.confirm(t.blockConfirm)) return;
+    try {
+      await api('/messages/blocks', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setPeople((prev) => prev.filter((p) => p._id !== userId));
+      await loadFriends();
+      await loadConversations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.friendFailed);
+    }
+  }
+
+  async function unblockPerson(userId: string) {
+    if (!accessToken) return;
+    try {
+      await api(`/messages/blocks/${userId}`, { method: 'DELETE', token: accessToken });
       await loadFriends();
     } catch (err) {
       setError(err instanceof Error ? err.message : t.friendFailed);
@@ -1246,16 +1311,33 @@ export function MessagesPage() {
                   </span>
                   <div className="pk-people-acts">
                     {p.friendship === 'friends' || p.isFriend ? null : p.friendship === 'outgoing' ? (
-                      <button type="button" className="secondary compact" disabled>
-                        {t.requestPending}
-                      </button>
+                      <>
+                        <button type="button" className="secondary compact" disabled>
+                          {t.requestPending}
+                        </button>
+                        <button type="button" className="secondary compact" onClick={() => void cancelPerson(p._id)}>
+                          {t.cancelRequest}
+                        </button>
+                      </>
+                    ) : p.friendship === 'incoming' ? (
+                      <>
+                        <button type="button" className="compact" onClick={() => void addFriend(p._id)}>
+                          {t.accept}
+                        </button>
+                        <button type="button" className="secondary compact" onClick={() => void denyPerson(p._id)}>
+                          {t.denyRequest}
+                        </button>
+                      </>
                     ) : (
                       <button type="button" className="secondary compact" onClick={() => void addFriend(p._id)}>
-                        {p.friendship === 'incoming' ? t.accept : t.addFriend}
+                        {t.addFriend}
                       </button>
                     )}
                     <button type="button" className="compact" onClick={() => void openWith(p._id)}>
                       {t.message}
+                    </button>
+                    <button type="button" className="secondary compact" onClick={() => void blockPerson(p._id)}>
+                      {t.blockUser}
                     </button>
                   </div>
                 </li>
@@ -1389,6 +1471,9 @@ export function MessagesPage() {
                           <strong>{displayName(r.toUserId)}</strong>
                           <small>{t.requestPending}</small>
                         </span>
+                        <button type="button" className="secondary compact" onClick={() => void respondRequest(r._id, 'cancel')}>
+                          {t.cancelRequest}
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -1407,6 +1492,26 @@ export function MessagesPage() {
                     </span>
                     <button type="button" className="compact" onClick={() => void openWith(f.user._id)}>
                       {t.message}
+                    </button>
+                    <button type="button" className="secondary compact" onClick={() => void blockPerson(f.user._id)}>
+                      {t.blockUser}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <h3>{t.blockedUsers}</h3>
+              {!blockedUsers.length && <p className="muted pk-empty">{t.noBlocked}</p>}
+              <ul className="pk-friend-list">
+                {blockedUsers.map((b) => (
+                  <li key={b.blockId}>
+                    <Avatar user={b.user} />
+                    <span>
+                      <strong>{displayName(b.user)}</strong>
+                      <small>{b.user.email}</small>
+                    </span>
+                    <button type="button" className="secondary compact" onClick={() => void unblockPerson(b.user._id)}>
+                      {t.unblockUser}
                     </button>
                   </li>
                 ))}

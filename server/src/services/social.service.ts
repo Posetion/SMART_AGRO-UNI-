@@ -8,7 +8,7 @@ import { AppError } from '../utils/AppError.js';
 import { getPagination } from '../utils/pagination.js';
 import { writeAuditLog } from './audit.service.js';
 import { createNotification, notifyAdmins } from './notification.service.js';
-import { friendshipStatus } from './friend.service.js';
+import { blockedPairIds, friendshipStatus } from './friend.service.js';
 
 const PUBLIC_USER =
   'fullName email role bio crops avatarUrl avatarTone coverUrl location.township location.region createdAt';
@@ -25,16 +25,17 @@ export async function getPublicProfile(userId: string, viewerId: string) {
     .lean();
   if (!profile) throw new AppError('User not found', 404);
 
+  const friendship =
+    viewerId === userId
+      ? { status: 'self' as const }
+      : await friendshipStatus(viewerId, userId);
+  if (friendship.status === 'blocked_by') throw new AppError('User not found', 404);
+
   const posts = await Post.find({ userId, isActive: true })
     .sort({ createdAt: -1 })
     .limit(40)
     .populate('diagnosticId', 'disease cropType severityIndex isVerified')
     .lean();
-
-  const friendship =
-    viewerId === userId
-      ? { status: 'self' as const }
-      : await friendshipStatus(viewerId, userId);
 
   return { profile, posts, friendship };
 }
@@ -60,9 +61,17 @@ export async function createPost(input: {
   });
 }
 
-export async function listPosts(query: { page?: unknown; limit?: unknown }, includeHidden = false) {
+export async function listPosts(
+  query: { page?: unknown; limit?: unknown },
+  includeHidden = false,
+  viewerId?: string
+) {
   const { page, limit, skip } = getPagination(query);
-  const filter = includeHidden ? {} : { isActive: true };
+  const filter: Record<string, unknown> = includeHidden ? {} : { isActive: true };
+  if (viewerId) {
+    const blocked = await blockedPairIds(viewerId);
+    if (blocked.length) filter.userId = { $nin: blocked };
+  }
   const [items, total] = await Promise.all([
     Post.find(filter)
       .sort({ createdAt: -1 })

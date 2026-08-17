@@ -77,7 +77,7 @@ const friendSchema = z.object({
 });
 
 const friendRespondSchema = z.object({
-  action: z.enum(['accept', 'decline']),
+  action: z.enum(['accept', 'decline', 'cancel']),
 });
 
 router.get('/users', ctrl.searchUsers);
@@ -87,6 +87,11 @@ router.get('/friends/requests', ctrl.listFriendRequests);
 router.get('/friends/status', ctrl.friendshipStatus);
 router.post('/friends/request', validate({ body: friendSchema }), ctrl.sendFriendRequest);
 router.post('/friends/requests/:id', validate({ body: friendRespondSchema }), ctrl.respondFriendRequest);
+router.post('/friends/cancel', validate({ body: friendSchema }), ctrl.cancelFriendRequest);
+router.post('/friends/deny', validate({ body: friendSchema }), ctrl.denyFriendRequest);
+router.get('/blocks', ctrl.listBlocked);
+router.post('/blocks', validate({ body: friendSchema }), ctrl.blockUser);
+router.delete('/blocks/:userId', ctrl.unblockUser);
 
 router.get('/invite/:code', ctrl.previewInvite);
 router.post('/invite/:code/join', ctrl.joinInvite);

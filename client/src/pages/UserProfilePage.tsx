@@ -39,7 +39,9 @@ type Friendship =
   | { status: 'none' }
   | { status: 'friends'; id?: string }
   | { status: 'outgoing'; id?: string }
-  | { status: 'incoming'; id?: string };
+  | { status: 'incoming'; id?: string }
+  | { status: 'blocked' }
+  | { status: 'blocked_by' };
 
 function SoftIcon({ tone, children, className = '' }: { tone: Tone; children: ReactNode; className?: string }) {
   return <span className={`pf-ico ${tone} ${className}`}>{children}</span>;
@@ -113,17 +115,85 @@ export function UserProfilePage() {
     if (!accessToken || !userId || working) return;
     setWorking(true);
     try {
-      await api('/messages/friends/request', {
+      const data = await api<{ _id?: string }>('/messages/friends/request', {
         method: 'POST',
         token: accessToken,
         body: { userId },
       });
-      setFriendship({ status: friendship.status === 'incoming' ? 'friends' : 'outgoing' });
+      setFriendship({
+        status: friendship.status === 'incoming' ? 'friends' : 'outgoing',
+        id: data?._id,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : st.addFriend;
       if (/already sent/i.test(message)) setFriendship({ status: 'outgoing' });
       else if (/already friends/i.test(message)) setFriendship({ status: 'friends' });
       else setError(message);
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function cancelRequest() {
+    if (!accessToken || !userId || working) return;
+    setWorking(true);
+    try {
+      await api('/messages/friends/cancel', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setFriendship({ status: 'none' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : st.addFriend);
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function denyRequest() {
+    if (!accessToken || !userId || working) return;
+    setWorking(true);
+    try {
+      await api('/messages/friends/deny', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setFriendship({ status: 'none' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : st.addFriend);
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function blockThisUser() {
+    if (!accessToken || !userId || working) return;
+    if (!window.confirm(st.blockConfirm)) return;
+    setWorking(true);
+    try {
+      await api('/messages/blocks', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setFriendship({ status: 'blocked' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : st.blockUser);
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function unblockThisUser() {
+    if (!accessToken || !userId || working) return;
+    setWorking(true);
+    try {
+      await api(`/messages/blocks/${userId}`, { method: 'DELETE', token: accessToken });
+      setFriendship({ status: 'none' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : st.unblockUser);
     } finally {
       setWorking(false);
     }
@@ -222,19 +292,32 @@ export function UserProfilePage() {
                 </button>
               )}
               {friendship.status === 'outgoing' && (
-                <button type="button" className="button secondary compact" disabled>
-                  {st.requestPending}
-                </button>
+                <>
+                  <button type="button" className="button secondary compact" disabled>
+                    {st.requestPending}
+                  </button>
+                  <button type="button" className="button secondary compact" disabled={working} onClick={() => void cancelRequest()}>
+                    {st.cancelRequest}
+                  </button>
+                </>
               )}
               {friendship.status === 'incoming' && (
-                <button type="button" className="button compact" disabled={working} onClick={() => void addFriend()}>
-                  {st.acceptRequest}
-                </button>
+                <>
+                  <button type="button" className="button compact" disabled={working} onClick={() => void addFriend()}>
+                    {st.acceptRequest}
+                  </button>
+                  <button type="button" className="button secondary compact" disabled={working} onClick={() => void denyRequest()}>
+                    {st.denyRequest}
+                  </button>
+                </>
               )}
               {friendship.status === 'friends' && (
                 <span className="pf-friend-pill">{st.friends}</span>
               )}
-              {!user.isGuest && (
+              {friendship.status === 'blocked' && (
+                <span className="pf-friend-pill">{st.blockUser}</span>
+              )}
+              {friendship.status !== 'blocked' && !user.isGuest && (
                 <button
                   type="button"
                   className="button secondary compact"
@@ -244,6 +327,15 @@ export function UserProfilePage() {
                   <IconChat /> {st.messageUser}
                 </button>
               )}
+              {!user.isGuest && friendship.status === 'blocked' ? (
+                <button type="button" className="button compact" disabled={working} onClick={() => void unblockThisUser()}>
+                  {st.unblockUser}
+                </button>
+              ) : !user.isGuest ? (
+                <button type="button" className="button secondary compact" disabled={working} onClick={() => void blockThisUser()}>
+                  {st.blockUser}
+                </button>
+              ) : null}
             </div>
           </div>
         )}

@@ -154,8 +154,34 @@ export const sendFriendRequest = asyncHandler(async (req: Request, res: Response
 });
 
 export const respondFriendRequest = asyncHandler(async (req: Request, res: Response) => {
-  const action = String(req.body.action) === 'decline' ? 'decline' : 'accept';
+  const raw = String(req.body.action);
+  const action = raw === 'decline' || raw === 'cancel' ? raw : 'accept';
   const data = await friends.respondFriendRequest(req.params.id, req.user!.id, action);
+  res.json({ success: true, data });
+});
+
+export const cancelFriendRequest = asyncHandler(async (req: Request, res: Response) => {
+  const data = await friends.cancelOutgoingRequest(req.user!.id, String(req.body.userId));
+  res.json({ success: true, data });
+});
+
+export const denyFriendRequest = asyncHandler(async (req: Request, res: Response) => {
+  const data = await friends.denyIncomingRequest(req.user!.id, String(req.body.userId));
+  res.json({ success: true, data });
+});
+
+export const blockUser = asyncHandler(async (req: Request, res: Response) => {
+  const data = await friends.blockUser(req.user!.id, String(req.body.userId));
+  res.status(201).json({ success: true, data });
+});
+
+export const unblockUser = asyncHandler(async (req: Request, res: Response) => {
+  const data = await friends.unblockUser(req.user!.id, String(req.params.userId));
+  res.json({ success: true, data });
+});
+
+export const listBlocked = asyncHandler(async (req: Request, res: Response) => {
+  const data = await friends.listBlocked(req.user!.id);
   res.json({ success: true, data });
 });
 

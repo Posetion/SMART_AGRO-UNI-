@@ -5,7 +5,7 @@ import { Message } from '../models/Message.js';
 import { User } from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { createNotification } from './notification.service.js';
-import { friendshipStatus } from './friend.service.js';
+import { assertNotBlocked, blockedPairIds, friendshipStatus } from './friend.service.js';
 import { clearTyping, listTypingUserIds, setTyping } from './typing.service.js';
 
 const USER_PUBLIC = 'fullName email avatarUrl avatarTone role';
@@ -36,8 +36,9 @@ export async function searchUsers(q: string, selfId: string) {
   const term = q.trim();
   if (!term) return [];
   const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  const blocked = await blockedPairIds(selfId);
   const users = await User.find({
-    _id: { $ne: selfId },
+    _id: { $ne: selfId, $nin: blocked },
     isActive: true,
     isGuest: { $ne: true },
     role: { $in: ['farmer', 'expert', 'admin'] },
@@ -78,6 +79,7 @@ export async function listConversations(userId: string, typeFilter?: 'direct' | 
   const filter: Record<string, unknown> = { participants: userId, hiddenFor: { $ne: userId } };
   if (typeFilter === 'direct' || typeFilter === 'group') filter.type = typeFilter;
 
+  const blocked = await blockedPairIds(userId);
   const list = await Conversation.find(filter)
     .sort({ lastMessageAt: -1 })
     .populate('participants', USER_PUBLIC)
@@ -85,8 +87,16 @@ export async function listConversations(userId: string, typeFilter?: 'direct' | 
     .populate('createdBy', USER_PUBLIC)
     .lean();
 
+  const visible = list.filter((c) => {
+    const type = (c.type as string) || 'direct';
+    if (type === 'group') return true;
+    const other = (c.participants || []).find((p) => String((p as { _id?: unknown })._id) !== userId);
+    const otherId = other ? String((other as { _id: unknown })._id) : '';
+    return !otherId || !blocked.includes(otherId);
+  });
+
   return Promise.all(
-    list.map(async (c) => {
+    visible.map(async (c) => {
       const unread = await Message.countDocuments({
         conversationId: c._id,
         senderId: { $ne: userId },
@@ -100,6 +110,7 @@ export async function listConversations(userId: string, typeFilter?: 'direct' | 
 export async function getOrCreateConversation(selfId: string, otherUserId: string) {
   if (selfId === otherUserId) throw new AppError('Cannot message yourself', 400);
   if (!mongoose.Types.ObjectId.isValid(otherUserId)) throw new AppError('User not found', 404);
+  await assertNotBlocked(selfId, otherUserId);
 
   const other = await User.findOne({
     _id: otherUserId,
@@ -529,6 +540,10 @@ export async function sendMessage(
   }
 
   const convo = await assertConversationMember(conversationId, senderId);
+  if ((convo.type || 'direct') !== 'group') {
+    const otherId = convo.participants.map(String).find((id) => id !== senderId);
+    if (otherId) await assertNotBlocked(senderId, otherId);
+  }
 
   let replyTo: string | undefined;
   if (extras.replyTo) {

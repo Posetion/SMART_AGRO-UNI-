@@ -29,7 +29,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 
 export const list = asyncHandler(async (req: Request, res: Response) => {
   const includeHidden = req.user?.role === 'admin' && req.query.hidden === 'true';
-  const data = await socialService.listPosts(req.query, includeHidden);
+  const data = await socialService.listPosts(req.query, includeHidden, req.user?.id);
   res.json({ success: true, data: data.items, meta: data.meta });
 });
 

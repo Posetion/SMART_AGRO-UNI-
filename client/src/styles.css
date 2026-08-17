@@ -1937,6 +1937,24 @@ button.sf-lightbox-nav:hover {
   color: #5b6b5e;
 }
 
+.sf-friend-acts {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.sf-actions .act-friend-alt {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5b6b5e;
+  padding: 0.2rem 0.45rem;
+}
+
+.sf-actions .act-friend-alt:hover {
+  color: var(--danger);
+}
+
 .sf-send-reply {
   display: inline-flex;
   align-items: center;

@@ -66,7 +66,8 @@ type Post = {
 };
 
 type CropFilter = 'all' | 'rice';
-type FriendRel = 'none' | 'outgoing' | 'incoming' | 'friends';
+type FriendRel = 'none' | 'outgoing' | 'incoming' | 'friends' | 'blocked';
+type FriendInfo = { status: FriendRel; id?: string };
 
 function personName(u: string | PostAuthor | null | undefined, t: SocialMessages) {
   if (!u) return t.farmer;
@@ -254,7 +255,7 @@ export function SocialPage() {
   const [editKeepImages, setEditKeepImages] = useState<string[]>([]);
   const [editFiles, setEditFiles] = useState<File[]>([]);
   const [savingEdit, setSavingEdit] = useState(false);
-  const [friendRel, setFriendRel] = useState<Record<string, FriendRel>>({});
+  const [friendRel, setFriendRel] = useState<Record<string, FriendInfo>>({});
   const [friendBusyId, setFriendBusyId] = useState<string | null>(null);
 
   const displayName = user?.fullName?.trim() || user?.email?.split('@')[0] || t.farmer;
@@ -331,25 +332,35 @@ export function SocialPage() {
   async function loadFriendRels() {
     if (!accessToken || user?.isGuest) return;
     try {
-      const [flist, reqs] = await Promise.all([
-        api<Array<{ user?: { _id?: string } }>>('/messages/friends', { token: accessToken }),
+      const [flist, reqs, blocked] = await Promise.all([
+        api<Array<{ friendshipId?: string; user?: { _id?: string } }>>('/messages/friends', {
+          token: accessToken,
+        }),
         api<{
-          incoming?: Array<{ fromUserId?: string | { _id?: string } }>;
-          outgoing?: Array<{ toUserId?: string | { _id?: string } }>;
+          incoming?: Array<{ _id?: string; fromUserId?: string | { _id?: string } }>;
+          outgoing?: Array<{ _id?: string; toUserId?: string | { _id?: string } }>;
         }>('/messages/friends/requests', { token: accessToken }),
+        api<Array<{ user?: { _id?: string } }>>('/messages/blocks', { token: accessToken }).catch(
+          () => []
+        ),
       ]);
-      const next: Record<string, FriendRel> = {};
+      const next: Record<string, FriendInfo> = {};
       for (const row of flist || []) {
         const id = row.user?._id;
-        if (id) next[id] = 'friends';
+        if (id) next[id] = { status: 'friends', id: row.friendshipId };
       }
       for (const row of reqs?.outgoing || []) {
         const id = personId(row.toUserId) || (typeof row.toUserId === 'string' ? row.toUserId : null);
-        if (id) next[id] = 'outgoing';
+        if (id) next[id] = { status: 'outgoing', id: row._id };
       }
       for (const row of reqs?.incoming || []) {
-        const id = personId(row.fromUserId) || (typeof row.fromUserId === 'string' ? row.fromUserId : null);
-        if (id) next[id] = 'incoming';
+        const id =
+          personId(row.fromUserId) || (typeof row.fromUserId === 'string' ? row.fromUserId : null);
+        if (id) next[id] = { status: 'incoming', id: row._id };
+      }
+      for (const row of blocked || []) {
+        const id = row.user?._id;
+        if (id) next[id] = { status: 'blocked' };
       }
       setFriendRel(next);
     } catch {
@@ -357,28 +368,108 @@ export function SocialPage() {
     }
   }
 
+  function relOf(userId: string): FriendInfo {
+    return friendRel[userId] || { status: 'none' };
+  }
+
   async function sendFriendRequest(userId: string) {
     if (!accessToken || friendBusyId) return;
-    const rel = friendRel[userId] || 'none';
-    if (rel === 'outgoing' || rel === 'friends') return;
+    const rel = relOf(userId);
+    if (rel.status === 'outgoing' || rel.status === 'friends' || rel.status === 'blocked') return;
     setFriendBusyId(userId);
     try {
-      await api('/messages/friends/request', {
+      const data = await api<{ _id?: string }>('/messages/friends/request', {
         method: 'POST',
         token: accessToken,
         body: { userId },
       });
       setFriendRel((prev) => ({
         ...prev,
-        [userId]: rel === 'incoming' ? 'friends' : 'outgoing',
+        [userId]: {
+          status: rel.status === 'incoming' ? 'friends' : 'outgoing',
+          id: data?._id,
+        },
       }));
     } catch (err) {
       const message = err instanceof Error ? err.message : '';
       if (/already sent/i.test(message)) {
-        setFriendRel((prev) => ({ ...prev, [userId]: 'outgoing' }));
+        setFriendRel((prev) => ({ ...prev, [userId]: { status: 'outgoing' } }));
       } else if (/already friends/i.test(message)) {
-        setFriendRel((prev) => ({ ...prev, [userId]: 'friends' }));
+        setFriendRel((prev) => ({ ...prev, [userId]: { status: 'friends' } }));
       }
+    } finally {
+      setFriendBusyId(null);
+    }
+  }
+
+  async function cancelFriendRequest(userId: string) {
+    if (!accessToken || friendBusyId) return;
+    setFriendBusyId(userId);
+    try {
+      await api('/messages/friends/cancel', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setFriendRel((prev) => ({ ...prev, [userId]: { status: 'none' } }));
+      setNotice(t.requestCancelled);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.editFailed);
+    } finally {
+      setFriendBusyId(null);
+    }
+  }
+
+  async function denyFriendRequest(userId: string) {
+    if (!accessToken || friendBusyId) return;
+    setFriendBusyId(userId);
+    try {
+      await api('/messages/friends/deny', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setFriendRel((prev) => ({ ...prev, [userId]: { status: 'none' } }));
+      setNotice(t.requestDenied);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.editFailed);
+    } finally {
+      setFriendBusyId(null);
+    }
+  }
+
+  async function blockUser(userId: string) {
+    if (!accessToken || friendBusyId) return;
+    if (!window.confirm(t.blockConfirm)) return;
+    setFriendBusyId(userId);
+    setMenuOpenId(null);
+    try {
+      await api('/messages/blocks', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setFriendRel((prev) => ({ ...prev, [userId]: { status: 'blocked' } }));
+      setPosts((prev) => prev.filter((p) => String(p.userId?._id) !== userId));
+      setNotice(t.userBlocked);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.editFailed);
+    } finally {
+      setFriendBusyId(null);
+    }
+  }
+
+  async function unblockUser(userId: string) {
+    if (!accessToken || friendBusyId) return;
+    setFriendBusyId(userId);
+    setMenuOpenId(null);
+    try {
+      await api(`/messages/blocks/${userId}`, { method: 'DELETE', token: accessToken });
+      setFriendRel((prev) => ({ ...prev, [userId]: { status: 'none' } }));
+      setNotice(t.userUnblocked);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.editFailed);
     } finally {
       setFriendBusyId(null);
     }
@@ -950,14 +1041,34 @@ export function SocialPage() {
                                 {t.deletePost}
                               </button>
                             </>
-                          ) : reportedIds[p._id] ? (
-                            <button type="button" disabled>
-                              {t.alreadyReported}
-                            </button>
                           ) : (
-                            <button type="button" onClick={() => openReport(p)}>
-                              {t.report}
-                            </button>
+                            <>
+                              {relOf(String(p.userId?._id)).status === 'blocked' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => void unblockUser(String(p.userId?._id))}
+                                >
+                                  {t.unblockUser}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="sf-more-danger"
+                                  onClick={() => void blockUser(String(p.userId?._id))}
+                                >
+                                  {t.blockUser}
+                                </button>
+                              )}
+                              {reportedIds[p._id] ? (
+                                <button type="button" disabled>
+                                  {t.alreadyReported}
+                                </button>
+                              ) : (
+                                <button type="button" onClick={() => openReport(p)}>
+                                  {t.report}
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
@@ -1113,9 +1224,10 @@ export function SocialPage() {
                     <>
                       {(() => {
                         const authorId = String(p.userId._id);
-                        const rel = friendRel[authorId] || 'none';
+                        const rel = relOf(authorId);
                         const busy = friendBusyId === authorId;
-                        if (rel === 'friends') {
+                        if (rel.status === 'blocked') return null;
+                        if (rel.status === 'friends') {
                           return (
                             <span className="act-friend is-friends">
                               <SoftIcon tone="coral">
@@ -1125,14 +1237,49 @@ export function SocialPage() {
                             </span>
                           );
                         }
-                        if (rel === 'outgoing') {
+                        if (rel.status === 'outgoing') {
                           return (
-                            <button type="button" className="act-friend is-pending" disabled>
-                              <SoftIcon tone="coral">
-                                <IconUserPlus />
-                              </SoftIcon>
-                              {t.requestPending}
-                            </button>
+                            <span className="sf-friend-acts">
+                              <button type="button" className="act-friend is-pending" disabled>
+                                <SoftIcon tone="coral">
+                                  <IconUserPlus />
+                                </SoftIcon>
+                                {t.requestPending}
+                              </button>
+                              <button
+                                type="button"
+                                className="act-friend-alt"
+                                disabled={busy}
+                                onClick={() => void cancelFriendRequest(authorId)}
+                              >
+                                {t.cancelRequest}
+                              </button>
+                            </span>
+                          );
+                        }
+                        if (rel.status === 'incoming') {
+                          return (
+                            <span className="sf-friend-acts">
+                              <button
+                                type="button"
+                                className="act-friend"
+                                disabled={busy}
+                                onClick={() => void sendFriendRequest(authorId)}
+                              >
+                                <SoftIcon tone="coral">
+                                  <IconUserPlus />
+                                </SoftIcon>
+                                {t.acceptRequest}
+                              </button>
+                              <button
+                                type="button"
+                                className="act-friend-alt"
+                                disabled={busy}
+                                onClick={() => void denyFriendRequest(authorId)}
+                              >
+                                {t.denyRequest}
+                              </button>
+                            </span>
                           );
                         }
                         return (
@@ -1145,10 +1292,11 @@ export function SocialPage() {
                             <SoftIcon tone="coral">
                               <IconUserPlus />
                             </SoftIcon>
-                            {rel === 'incoming' ? t.acceptRequest : t.addFriend}
+                            {t.addFriend}
                           </button>
                         );
                       })()}
+                      {relOf(String(p.userId._id)).status !== 'blocked' && (
                       <button
                         type="button"
                         className="act-message"
@@ -1173,6 +1321,7 @@ export function SocialPage() {
                         </SoftIcon>
                         {t.messageUser}
                       </button>
+                      )}
                     </>
                   )}
                 </div>
