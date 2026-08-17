@@ -40,6 +40,9 @@ export const navCopy = (lang: Lang) =>
       heatmap: 'Heat map',
       home: 'Home',
       appPages: 'App pages',
+      aboutGroup: 'About',
+      faq: 'FAQ',
+      contactUs: 'Contact us',
     },
     {
       feed: 'အသိုင်းအဝိုင်း',
@@ -72,6 +75,9 @@ export const navCopy = (lang: Lang) =>
       heatmap: 'ကူးစက်မြေပုံ',
       home: 'ပင်မ',
       appPages: 'အက်ပ် စာမျက်နှာများ',
+      aboutGroup: 'အကြောင်း',
+      faq: 'အမေးအဖြေ',
+      contactUs: 'ဆက်သွယ်ရန်',
     }
   );
 
@@ -166,6 +172,7 @@ export const landingCopy = (lang: Lang) =>
       partners: 'Partners',
       help: 'Help & FAQ',
       faq: 'FAQ',
+      contactUs: 'Contact us',
       getStartedLink: 'Get started',
       aiDetection: 'Detect',
       weather: 'Weather',
@@ -262,6 +269,7 @@ export const landingCopy = (lang: Lang) =>
       partners: 'မိတ်ဖက်',
       help: 'အကူအညီနှင့် အမေးအဖြေ',
       faq: 'အမေးအဖြေ',
+      contactUs: 'ဆက်သွယ်ရန်',
       getStartedLink: 'စတင်ရန်',
       aiDetection: 'ရောဂါရှာ',
       weather: 'ရာသီဥတု',
@@ -2287,3 +2295,49 @@ export const faqCopy = (lang: Lang): FaqCopy => {
 
   return lang === 'my' ? my : en;
 };
+
+export const contactCopy = (lang: Lang) =>
+  pick(
+    lang,
+    {
+      title: 'Contact us',
+      lead: 'Questions about Smart Agro, disease detection, or your farm account? Reach the team at UCS Meiktila.',
+      backHome: 'Back to features',
+      school: 'University of Computer Studies (Meiktila)',
+      place: 'Meiktila, Mandalay Region, Myanmar',
+      emailLabel: 'Email',
+      emailValue: 'smartagro.ucs@gmail.com',
+      chatLabel: 'BaGyi Pyoe',
+      chatLead: 'Ask a farming question in chat',
+      faqLabel: 'FAQ',
+      faqLead: 'Quick answers to common questions',
+      formTitle: 'Send a message',
+      name: 'Name',
+      email: 'Email',
+      message: 'Message',
+      send: 'Send message',
+      sent: 'Thanks. Open your email app to send the message, or try again if nothing opened.',
+      required: 'Please fill in every field.',
+    },
+    {
+      title: 'ဆက်သွယ်ရန်',
+      lead: 'Smart Agro၊ ရောဂါရှာ သို့မဟုတ် အကောင့်အကြောင်း မေးချင်ပါက UCS Meiktila အဖွဲ့ကို ဆက်သွယ်ပါ။',
+      backHome: 'ပင်မသို့ ပြန်ရန်',
+      school: 'ကွန်ပျူတာတက္ကသိုလ် (မိတ္ထီလာ)',
+      place: 'မိတ္ထီလာ၊ မန္တလေးတိုင်းဒေသကြီး၊ မြန်မာ',
+      emailLabel: 'အီးမေးလ်',
+      emailValue: 'smartagro.ucs@gmail.com',
+      chatLabel: 'ဘကြီးပျိုး',
+      chatLead: 'စိုက်ပျိုးရေး မေးခွန်းကို ချတ်တွင် မေးပါ',
+      faqLabel: 'အမေးအဖြေ',
+      faqLead: 'အမေးများသော မေးခွန်းများအတွက် အမြန်အဖြေ',
+      formTitle: 'စာပို့ရန်',
+      name: 'အမည်',
+      email: 'အီးမေးလ်',
+      message: 'စာ',
+      send: 'ပို့ရန်',
+      sent: 'ကျေးဇူးတင်ပါသည်။ ပို့ရန် သင့်အီးမေးလ်အက်ပ်ကို ဖွင့်ပါ။',
+      required: 'အကွက်အားလုံး ဖြည့်ပါ။',
+    }
+  );
+

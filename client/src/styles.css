@@ -16154,7 +16154,8 @@ html[lang='my'] .va-bubble-body {
 }
 
 /* —— FAQ / Help Center —— */
-.farmer-main-wide:has(.faq-page) {
+.farmer-main-wide:has(.faq-page),
+.farmer-main-wide:has(.contact-page) {
   width: 100%;
   max-width: none;
   padding: 0 0 2.5rem;
@@ -16443,6 +16444,101 @@ html[lang='my'] .va-bubble-body {
 
   .faq-search-kbd {
     display: none;
+  }
+
+  .contact-body {
+    grid-template-columns: 1fr;
+    padding: 1.5rem 1.1rem 2.5rem;
+  }
+}
+
+.contact-body {
+  width: min(1040px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.contact-cards {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.contact-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--faq-line, #e5e7eb);
+  border-radius: 16px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.contact-card strong {
+  font-size: 0.95rem;
+  color: #14532d;
+}
+
+.contact-card span {
+  color: #4b5563;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+a.contact-card:hover {
+  border-color: #81c784;
+  background: #f7fbf6;
+}
+
+.contact-form {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.15rem 1.2rem 1.3rem;
+  border: 1px solid var(--faq-line, #e5e7eb);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.contact-form h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.2rem;
+  color: #14532d;
+}
+
+.contact-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: #1b5e20;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  font-weight: 500;
+  color: #111827;
+}
+
+.contact-note {
+  margin: 0;
+  color: #14532d;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .contact-body {
+    grid-template-columns: 1fr;
+    padding: 1.5rem 1.1rem 2.5rem;
   }
 }
 

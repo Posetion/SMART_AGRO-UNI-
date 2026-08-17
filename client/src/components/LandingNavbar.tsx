@@ -364,19 +364,29 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
               {t.myProfile}
             </button>
           )}
-          {isLanding && (
+          {(isLanding || location.pathname === '/faq' || location.pathname === '/contact') && (
             <>
-              <p className="lp-mobile-group">{lang === 'en' ? 'About' : 'အကြောင်း'}</p>
-              {SECTION_LINKS.map((link) => (
-                <button
-                  key={link.id}
-                  type="button"
-                  className={activeId === link.id ? 'is-active' : undefined}
-                  onClick={() => goSection(link.id)}
-                >
-                  {lang === 'en' ? link.en : link.my}
-                </button>
-              ))}
+              <p className="lp-mobile-group">{t.aboutGroup}</p>
+              <button
+                type="button"
+                className={location.pathname === '/faq' ? 'is-active' : undefined}
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/faq');
+                }}
+              >
+                {t.faq}
+              </button>
+              <button
+                type="button"
+                className={location.pathname === '/contact' ? 'is-active' : undefined}
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/contact');
+                }}
+              >
+                {t.contactUs}
+              </button>
             </>
           )}
         </nav>

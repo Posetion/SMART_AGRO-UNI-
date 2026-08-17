@@ -15,6 +15,7 @@ import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { FaqPage } from './pages/FaqPage';
+import { ContactPage } from './pages/ContactPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminKnowledge } from './pages/admin/AdminKnowledge';
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="profile/:userId" element={<UserProfilePage />} />
         <Route path="faq" element={<FaqPage />} />
+        <Route path="contact" element={<ContactPage />} />
       </Route>
 
       <Route path="login" element={<LoginPage />} />

@@ -430,8 +430,8 @@ export function LandingPage() {
             </div>
             <div>
               <h4>{t.company}</h4>
-              <a href="#why">{t.about}</a>
-              <a href="#hero">{t.getStartedLink}</a>
+              <Link to="/faq">{t.faq}</Link>
+              <Link to="/contact">{t.contactUs}</Link>
             </div>
             <div>
               <h4>{t.support}</h4>

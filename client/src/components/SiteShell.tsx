@@ -28,7 +28,8 @@ export function SiteShell() {
                   pathname === '/chat' ||
                   pathname === '/heatmap' ||
                   pathname === '/detect' ||
-                  pathname === '/faq'
+                  pathname === '/faq' ||
+                  pathname === '/contact'
                 ? 'farmer-main-wide'
                 : ''
           }`}
