@@ -7,6 +7,16 @@ import { createNotification } from './notification.service.js';
 
 const USER_PUBLIC = 'fullName email avatarUrl avatarTone role';
 
+function idOf(value: unknown): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && '_id' in value) {
+    const id = (value as { _id?: unknown })._id;
+    return id ? String(id) : null;
+  }
+  return String(value);
+}
+
 export async function blockedPairIds(userId: string) {
   const rows = await UserBlock.find({
     $or: [{ blockerId: userId }, { blockedId: userId }],
@@ -194,11 +204,11 @@ export async function listBlocked(userId: string) {
     .sort({ createdAt: -1 })
     .populate('blockedId', USER_PUBLIC)
     .lean();
-  return rows.map((row) => ({
-    blockId: row._id,
-    user: row.blockedId,
-    since: row.createdAt,
-  }));
+  return rows.flatMap((row) => {
+    const user = row.blockedId;
+    if (!user || typeof user !== 'object' || !idOf(user)) return [];
+    return [{ blockId: row._id, user, since: row.createdAt }];
+  });
 }
 
 export async function listFriends(userId: string) {
@@ -209,11 +219,13 @@ export async function listFriends(userId: string) {
     .populate('fromUserId toUserId', USER_PUBLIC)
     .lean();
 
-  return rows.map((r) => {
-    const from = r.fromUserId as { _id: { toString(): string } };
-    const to = r.toUserId as { _id: { toString(): string } };
-    const other = String(from._id) === userId ? r.toUserId : r.fromUserId;
-    return { friendshipId: r._id, user: other, since: r.updatedAt };
+  return rows.flatMap((r) => {
+    const fromId = idOf(r.fromUserId);
+    const toId = idOf(r.toUserId);
+    if (!fromId || !toId) return [];
+    const other = fromId === userId ? r.toUserId : r.fromUserId;
+    if (!other || typeof other !== 'object') return [];
+    return [{ friendshipId: r._id, user: other, since: r.updatedAt }];
   });
 }
 

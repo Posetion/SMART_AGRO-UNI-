@@ -372,17 +372,24 @@ export function MessagesPage() {
 
   const loadFriends = useCallback(async () => {
     if (!accessToken) return;
-    const [flist, reqs, blocked] = await Promise.all([
-      api<FriendRow[]>('/messages/friends', { token: accessToken }),
-      api<{ incoming: FriendRequest[]; outgoing: FriendRequest[] }>('/messages/friends/requests', {
-        token: accessToken,
-      }),
-      api<BlockedRow[]>('/messages/blocks', { token: accessToken }).catch(() => []),
-    ]);
-    setFriends(Array.isArray(flist) ? flist : []);
-    setIncoming(Array.isArray(reqs?.incoming) ? reqs.incoming : []);
-    setOutgoing(Array.isArray(reqs?.outgoing) ? reqs.outgoing : []);
-    setBlockedUsers(Array.isArray(blocked) ? blocked : []);
+    try {
+      const [flist, reqs, blocked] = await Promise.all([
+        api<FriendRow[]>('/messages/friends', { token: accessToken }),
+        api<{ incoming: FriendRequest[]; outgoing: FriendRequest[] }>('/messages/friends/requests', {
+          token: accessToken,
+        }),
+        api<BlockedRow[]>('/messages/blocks', { token: accessToken }).catch(() => []),
+      ]);
+      setFriends(Array.isArray(flist) ? flist : []);
+      setIncoming(Array.isArray(reqs?.incoming) ? reqs.incoming : []);
+      setOutgoing(Array.isArray(reqs?.outgoing) ? reqs.outgoing : []);
+      setBlockedUsers(Array.isArray(blocked) ? blocked : []);
+    } catch {
+      setFriends([]);
+      setIncoming([]);
+      setOutgoing([]);
+      setBlockedUsers([]);
+    }
   }, [accessToken]);
 
   const loadMessages = useCallback(
