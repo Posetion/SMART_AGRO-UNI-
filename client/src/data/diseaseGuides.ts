@@ -441,7 +441,7 @@ export const DISEASE_GUIDES: Record<string, DiseaseGuide> = {
   "Rice Armyworm": {
     key: "Rice Armyworm",
     nameEn: "Rice Armyworm",
-    nameMy: "စပါးတပ်ပိုး",
+    nameMy: "နှံဖြတ်ပိုး",
     organism: "Spodoptera / Mythimna spp.",
     symptomsEn: [
       "Sudden patches of skeletonized or cut leaves, often overnight.",

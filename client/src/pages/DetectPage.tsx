@@ -769,12 +769,6 @@ export function DetectPage() {
             <span>
               <strong>95%</strong> {t.statsAccuracy}
             </span>
-            <span>
-              <SoftIcon tone="amber" className="sm">
-                <IconRice />
-              </SoftIcon>
-              {t.statsCrops}
-            </span>
           </div>
         </div>
       </header>

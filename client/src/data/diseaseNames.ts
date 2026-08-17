@@ -958,7 +958,7 @@ export const DISEASE_NAME_MY: Record<string, string> = {
   "Rice Leaf Folder": "စပါးရွက်လိပ်ပိုး",
   "Rice Bug": "စပါးနှံစုပ်ပိုး",
   "Rice Hispa": "စပါးဟစ်စပါပိုး",
-  "Rice Armyworm": "စပါးတပ်ပိုး",
+  "Rice Armyworm": "နှံဖြတ်ပိုး",
   "Swarming Caterpillar": "အုပ်စုလိုက် ပိုးလောက်",
   "Cutworm": "ဖြတ်ပိုး",
   "Rice Thrips": "စပါးသရစ်ပိုး",
