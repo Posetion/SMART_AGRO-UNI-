@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import {
@@ -138,7 +138,7 @@ export function ChatPage() {
   const [sending, setSending] = useState(false);
   const [guestStarting, setGuestStarting] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [showAllChats, setShowAllChats] = useState(false);
   const [loc, setLoc] = useState(DEFAULT_CHAT_LOC);
   const [locLabel, setLocLabel] = useState(t.locatingFarm);
   const [locError, setLocError] = useState('');
@@ -267,7 +267,7 @@ export function ChatPage() {
     if (!accessToken) return;
     setMessages([]);
     setError('');
-    setHistoryOpen(false);
+    setShowAllChats(false);
     clearPending();
     try {
       const session = await api<{ sessionId: string }>('/chatbot/session', {
@@ -315,7 +315,6 @@ export function ChatPage() {
       setSessions([]);
       setSessionId(undefined);
       setMessages([]);
-      setHistoryOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : t.clearAllFailed);
     }
@@ -442,18 +441,17 @@ export function ChatPage() {
     await send(text);
   }
 
-  const recent = useMemo(() => sessions.slice(0, 4), [sessions]);
+  const visibleSessions = showAllChats ? sessions : sessions.slice(0, 4);
   const showWelcome = messages.length === 0 && !sending;
 
-  function SessionRow({ s, dense = false }: { s: SessionSummary; dense?: boolean }) {
+  function SessionRow({ s }: { s: SessionSummary }) {
     return (
-      <li className={dense ? 'va-hist-row' : undefined}>
+      <li>
         <button
           type="button"
           className={`va-session-open ${s.sessionId === sessionId ? 'is-active' : ''}`}
           onClick={() => {
             void openSession(s);
-            setHistoryOpen(false);
           }}
         >
           <IconChat />
@@ -529,28 +527,30 @@ export function ChatPage() {
           + {t.newChat}
         </button>
 
-        <nav className="va-nav" aria-label={t.history}>
-          <button
-            type="button"
-            className={historyOpen ? 'is-active' : undefined}
-            onClick={() => setHistoryOpen(true)}
-          >
-            <IconChat />
-            {t.history}
-          </button>
-        </nav>
-
         <div className="va-recent">
           <p className="va-recent-label">{t.recentChats}</p>
-          {!recent.length && <p className="va-recent-empty muted">{t.noRecent}</p>}
+          {!sessions.length && <p className="va-recent-empty muted">{t.noRecent}</p>}
           <ul className="va-session-list">
-            {recent.map((s) => (
+            {visibleSessions.map((s) => (
               <SessionRow key={s.sessionId} s={s} />
             ))}
           </ul>
           {sessions.length > 4 && (
-            <button type="button" className="va-older-link" onClick={() => setHistoryOpen(true)}>
-              {t.openOlder}
+            <button
+              type="button"
+              className="va-older-link"
+              onClick={() => setShowAllChats((v) => !v)}
+            >
+              {showAllChats ? t.showLessChats : t.showMoreChats}
+            </button>
+          )}
+          {showAllChats && sessions.length > 0 && (
+            <button
+              type="button"
+              className="va-clear-all"
+              onClick={() => void clearAllHistory()}
+            >
+              {t.clearAllHistory}
             </button>
           )}
         </div>
@@ -794,41 +794,6 @@ export function ChatPage() {
         </p>
       </main>
     </div>
-
-    {historyOpen && (
-      <div className="va-hist-backdrop" role="presentation" onClick={() => setHistoryOpen(false)}>
-        <aside
-          className="va-hist-panel"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t.allHistory}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <header className="va-hist-head">
-            <h2>{t.allHistory}</h2>
-            <div className="va-hist-actions">
-              <button
-                type="button"
-                className="va-clear-all"
-                disabled={!sessions.length}
-                onClick={() => void clearAllHistory()}
-              >
-                {t.clearAllHistory}
-              </button>
-              <button type="button" className="secondary compact" onClick={() => setHistoryOpen(false)}>
-                {t.closeHistory}
-              </button>
-            </div>
-          </header>
-          {!sessions.length && <p className="muted va-recent-empty">{t.noHistoryYet}</p>}
-          <ul className="va-session-list va-hist-list">
-            {sessions.map((s) => (
-              <SessionRow key={s.sessionId} s={s} dense />
-            ))}
-          </ul>
-        </aside>
-      </div>
-    )}
     </>
   );
 }

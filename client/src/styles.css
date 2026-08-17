@@ -11732,6 +11732,7 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
 .va-page.sidebar-collapsed .va-recent-label,
 .va-page.sidebar-collapsed .va-recent-empty,
 .va-page.sidebar-collapsed .va-older-link,
+.va-page.sidebar-collapsed .va-clear-all,
 .va-page.sidebar-collapsed .va-session-open span,
 .va-page.sidebar-collapsed .va-session-del {
   display: none;
@@ -12019,8 +12020,10 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
 .va-clear-all:disabled {
   opacity: 0.45;
 }
-.va-clear-all:hover:not(:disabled) {
-  background: #ffebee;
+.va-recent .va-clear-all {
+  width: 100%;
+  margin-top: 0.15rem;
+  justify-self: stretch;
 }
 .va-hist-list {
   gap: 0.25rem;
