@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { IconChat, IconPin, IconRice, IconUserPlus } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { profileCopy, socialCopy } from '../i18n/messages';
 import { api } from '../services/api';
+import { formatCropLabel, formatRegionLabel } from '../utils/localizeFarm';
 import { mediaUrl } from '../utils/mediaUrl';
 
 type Tone = 'mint' | 'sky' | 'coral' | 'amber' | 'peach' | 'teal';
@@ -39,6 +40,16 @@ type Friendship =
   | { status: 'friends'; id?: string }
   | { status: 'outgoing'; id?: string }
   | { status: 'incoming'; id?: string };
+
+function SoftIcon({ tone, children, className = '' }: { tone: Tone; children: ReactNode; className?: string }) {
+  return <span className={`pf-ico ${tone} ${className}`}>{children}</span>;
+}
+
+function roleLabel(role: string | undefined, st: ReturnType<typeof socialCopy>) {
+  if (role === 'expert') return st.expert;
+  if (role === 'admin') return st.admin;
+  return st.farmer;
+}
 
 export function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
@@ -86,9 +97,11 @@ export function UserProfilePage() {
   }, [profile, st.farmer]);
 
   const tone = profile?.avatarTone || 'mint';
-  const township = profile?.location?.township || 'Myanmar';
-  const region = profile?.location?.region || '';
-  const cropLabel = profile?.crops?.length ? profile.crops.join(' · ') : '—';
+  const township = profile?.location?.township || (lang === 'my' ? 'မြန်မာ' : 'Myanmar');
+  const region = profile?.location?.region ? formatRegionLabel(profile.location.region, lang) : '';
+  const cropLabel = profile?.crops?.length
+    ? profile.crops.map((c) => formatCropLabel(c, lang)).join(' · ')
+    : '—';
   const joined = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString(undefined, {
         month: 'short',
@@ -134,12 +147,12 @@ export function UserProfilePage() {
   if (isSelf) return <Navigate to="/profile" replace />;
 
   return (
-    <div className="pf-page">
+    <div className="pf-page pf-public">
       <section className="pf-panel pf-hero">
         <div className="pf-section-head">
-          <h1>{t.title}</h1>
+          <h1>{displayName || t.title}</h1>
           <Link className="button secondary compact" to="/social">
-            {st.communityFeed || 'Community'}
+            {st.backCommunity}
           </Link>
         </div>
 
@@ -172,17 +185,26 @@ export function UserProfilePage() {
               <div className="pf-identity-text">
                 <h2>{displayName}</h2>
                 <p>
-                  <IconPin /> {township}
+                  <SoftIcon tone="coral" className="sm">
+                    <IconPin />
+                  </SoftIcon>
+                  {township}
                   {region ? `, ${region}` : ''}
                 </p>
                 <p className="muted">
-                  {profile.role === 'expert' ? st.expert : profile.role === 'admin' ? st.admin : st.farmer} ·{' '}
-                  {t.joined}: {joined}
+                  {roleLabel(profile.role, st)} · {t.joined}: {joined}
                 </p>
                 <p>
-                  <IconRice /> {cropLabel}
+                  <SoftIcon tone="mint" className="sm">
+                    <IconRice />
+                  </SoftIcon>
+                  {cropLabel}
                 </p>
-                {profile.bio && <p className="pf-bio">{profile.bio}</p>}
+                {profile.bio ? (
+                  <p className="pf-bio">{profile.bio}</p>
+                ) : (
+                  <p className="pf-bio">{st.noBio}</p>
+                )}
                 <div className="pf-quick-stats">
                   <span>
                     {posts.length} {t.posts}
@@ -198,11 +220,16 @@ export function UserProfilePage() {
               )}
               {friendship.status === 'outgoing' && (
                 <button type="button" className="button secondary compact" disabled>
-                  {st.requestSent || 'Request sent'}
+                  {st.requestSent}
+                </button>
+              )}
+              {friendship.status === 'incoming' && (
+                <button type="button" className="button compact" disabled={working} onClick={() => void addFriend()}>
+                  {st.acceptRequest}
                 </button>
               )}
               {friendship.status === 'friends' && (
-                <span className="muted">{st.friends || 'Friends'}</span>
+                <span className="pf-friend-pill">{st.friends}</span>
               )}
               {!user.isGuest && (
                 <button
@@ -226,22 +253,29 @@ export function UserProfilePage() {
           </div>
           {!posts.length && <p className="muted">{t.noCommunityPosts}</p>}
           <ul className="pf-post-list">
-            {posts.map((p) => (
-              <li key={p._id}>
-                <Link to={`/social#post-${p._id}`}>
-                  <strong>{p.content.slice(0, 120) || '—'}</strong>
-                  <small>
-                    {p.createdAt
-                      ? new Date(p.createdAt).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      : ''}
-                    {p.diagnosticId?.disease ? ` · ${p.diagnosticId.disease}` : ''}
-                  </small>
-                </Link>
-              </li>
-            ))}
+            {posts.map((p) => {
+              const img = p.images?.[0];
+              return (
+                <li key={p._id}>
+                  <Link className="pf-post-link" to={`/social#post-${p._id}`}>
+                    {img && <img src={mediaUrl(img) || img} alt="" />}
+                    <div>
+                      <strong>{p.content.trim() || '—'}</strong>
+                      <small>
+                        {p.createdAt
+                          ? new Date(p.createdAt).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                            })
+                          : ''}
+                        {p.diagnosticId?.disease ? ` · ${p.diagnosticId.disease}` : ''}
+                        {typeof p.likes?.length === 'number' ? ` · ${p.likes.length}` : ''}
+                      </small>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

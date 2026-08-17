@@ -80,6 +80,15 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
   }, [menuOpen]);
 
   useEffect(() => {
+    const mq = window.matchMedia('(min-width: 981px)');
+    const onChange = () => {
+      if (mq.matches) setMenuOpen(false);
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
     function onDoc(e: MouseEvent) {
       if (!profileRef.current?.contains(e.target as Node)) setProfileOpen(false);
     }

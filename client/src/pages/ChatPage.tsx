@@ -635,12 +635,6 @@ export function ChatPage() {
   return (
     <>
     <div className={`va-page ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`.trim()}>
-      <button
-        type="button"
-        className="va-sidebar-scrim"
-        aria-label={t.hideSidebar}
-        onClick={() => setSidebarOpen(false)}
-      />
       <aside className="va-sidebar">
         <div className="va-side-top">
           <button type="button" className="va-brand" onClick={() => void newChat()}>

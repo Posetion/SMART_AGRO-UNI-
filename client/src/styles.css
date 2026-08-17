@@ -5430,8 +5430,48 @@ button:disabled,
     display: flex;
   }
 
-  .lp-burger {
+  .lp-burger,
+  .lp-mobile-drawer,
+  .lp-drawer-backdrop {
     display: none !important;
+  }
+
+  .va-page,
+  .va-page.sidebar-collapsed,
+  .va-page.sidebar-open {
+    grid-template-columns: 260px 1fr;
+  }
+
+  .va-collapse,
+  .va-menu-btn,
+  .va-sidebar-scrim {
+    display: none !important;
+  }
+
+  .va-page.sidebar-collapsed .va-brand strong,
+  .va-page.sidebar-collapsed .va-recent-label,
+  .va-page.sidebar-collapsed .va-recent-empty,
+  .va-page.sidebar-collapsed .va-older-link,
+  .va-page.sidebar-collapsed .va-clear-all,
+  .va-page.sidebar-collapsed .va-session-open span,
+  .va-page.sidebar-collapsed .va-session-del {
+    display: revert;
+  }
+
+  .va-page.sidebar-collapsed .va-session-open {
+    justify-content: flex-start;
+    padding-inline: 0.55rem;
+  }
+
+  .va-page.sidebar-collapsed .va-new-chat {
+    display: block;
+    font-size: inherit;
+    text-align: left;
+    min-height: 0;
+  }
+
+  .va-page.sidebar-collapsed .va-new-chat::before {
+    content: none;
   }
 }
 
@@ -10887,12 +10927,132 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
   color: #1b5e20;
 }
 
+.pf-identity-text svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.pf-bio {
+  display: block !important;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .pf-hero-actions,
 .pf-row-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+.pf-hero-actions .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pf-hero-actions .button svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.pf-friend-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  color: #1b5e20;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+}
+
+.pf-public .pf-section-head {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.pf-public .pf-section-head h1 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pf-post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.pf-post-link {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.pf-post-link img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.pf-post-link:not(:has(img)) {
+  grid-template-columns: 1fr;
+}
+
+.pf-post-link div {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.pf-post-link strong {
+  font-size: 0.92rem;
+  color: #1b5e20;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pf-post-link small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .pf-public .pf-hero-actions {
+    width: 100%;
+  }
+
+  .pf-public .pf-hero-actions .button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .pf-identity-text h2 {
+    font-size: 1.15rem;
+  }
+
+  .pf-cover-art {
+    height: 110px;
+  }
 }
 
 .pf-tabs {
@@ -11924,7 +12084,7 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
 .va-sidebar {
   background: #fbfcfe;
   border-right: 1px solid var(--va-line);
-  padding: 1rem 0.85rem;
+  padding: 1rem 1rem;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
   gap: 0.85rem;
@@ -12078,6 +12238,7 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 .va-session-open:hover,
 .va-session-open.is-active {
@@ -15864,8 +16025,10 @@ html[lang='my'] .va-bubble-body {
     cursor: pointer;
   }
 
+  .va-sidebar-scrim,
   .va-page.sidebar-open .va-sidebar-scrim {
-    display: block;
+    display: none !important;
+    background: transparent;
   }
 
   .va-menu-btn {
