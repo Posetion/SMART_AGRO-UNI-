@@ -825,20 +825,13 @@ export function ProfilePage() {
       {tab === 'settings' && (
         <section className="pf-panel pf-settings-panel">
           <div className="pf-section-head">
-            <SoftIcon tone="teal">
-              <IconPin />
-            </SoftIcon>
-            <div>
-              <h2>{t.customizeProfile}</h2>
-              <p className="muted pf-settings-lead">{t.settingsLead}</p>
-            </div>
+            <h2>{t.settings}</h2>
           </div>
 
           <form className="pf-settings" onSubmit={(e) => void onSaveProfile(e)}>
             <div className="pf-settings-block">
               <header>
                 <h3>{t.settingsAccount}</h3>
-                <p>{t.settingsAccountHint}</p>
               </header>
               <div className="pf-settings-grid">
                 <label>
@@ -847,7 +840,6 @@ export function ProfilePage() {
                     value={editForm.fullName}
                     onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
                   />
-                  <small>{t.fullNameHint}</small>
                 </label>
                 <label>
                   <span className="pf-field-label">{t.phone}</span>
@@ -856,22 +848,19 @@ export function ProfilePage() {
                     onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
                     placeholder="+95…"
                   />
-                  <small>{t.phoneHint}</small>
                 </label>
                 <label className="pf-settings-span">
                   <span className="pf-field-label">{t.emailLabel}</span>
                   <input value={user.email} readOnly disabled />
-                  <small>{t.emailHint}</small>
                 </label>
                 <label className="pf-settings-span">
                   <span className="pf-field-label">{t.bio}</span>
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={editForm.bio}
                     onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                     placeholder={t.bioPlaceholder}
                   />
-                  <small>{t.bioHint}</small>
                 </label>
               </div>
             </div>
@@ -879,12 +868,10 @@ export function ProfilePage() {
             <div className="pf-settings-block">
               <header>
                 <h3>{t.settingsFarm}</h3>
-                <p>{t.settingsFarmHint}</p>
               </header>
               <div className="pf-settings-grid">
                 <div className="pf-settings-span">
                   <strong className="pf-field-label">{t.cropsGrow}</strong>
-                  <p className="muted pf-inline-hint">{t.cropsGrowHint}</p>
                   <div className="pf-crop-cards">
                     {CROP_TYPES.map((crop) => (
                       <button
@@ -893,20 +880,13 @@ export function ProfilePage() {
                         className={`pf-crop-card ${editForm.crops.includes(crop) ? 'is-active' : ''}`}
                         onClick={() => toggleCrop(crop)}
                       >
-                        <SoftIcon tone="amber">
-                          <IconRice />
-                        </SoftIcon>
-                        <div>
-                          <strong>{formatCropLabel(crop, lang)}</strong>
-                          <span>{crop}</span>
-                        </div>
+                        {formatCropLabel(crop, lang)}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="pf-settings-span">
                   <strong className="pf-field-label">{t.farmLocation}</strong>
-                  <p className="muted pf-inline-hint">{t.farmLocationHint}</p>
                   <TownshipLocationPicker
                     currentName={editForm.township || township}
                     currentRegion={editForm.region || region}
@@ -938,7 +918,6 @@ export function ProfilePage() {
             <div className="pf-settings-block">
               <header>
                 <h3>{t.settingsLook}</h3>
-                <p>{t.settingsLookHint}</p>
               </header>
               <div className="pf-settings-grid">
                 <div className="pf-settings-span">
@@ -992,11 +971,9 @@ export function ProfilePage() {
                       </button>
                     </div>
                   </div>
-                  <small className="muted">{t.photoHint}</small>
                 </div>
                 <div className="pf-settings-span">
                   <strong className="pf-field-label">{t.avatarColor}</strong>
-                  <p className="muted pf-inline-hint">{t.avatarColorHint}</p>
                   <div className="pf-tone-row">
                     {(
                       [
@@ -1012,10 +989,11 @@ export function ProfilePage() {
                         key={tone}
                         type="button"
                         className={`pf-tone-chip ${tone} ${editForm.avatarTone === tone ? 'is-active' : ''}`}
+                        aria-label={label}
+                        title={label}
                         onClick={() => setEditForm({ ...editForm, avatarTone: tone })}
                       >
                         <i className={`pf-tone ${tone}`} aria-hidden />
-                        {label}
                       </button>
                     ))}
                   </div>
@@ -1026,12 +1004,10 @@ export function ProfilePage() {
             <div className="pf-settings-block">
               <header>
                 <h3>{t.settingsPrefs}</h3>
-                <p>{t.settingsPrefsHint}</p>
               </header>
               <div className="pf-settings-grid">
                 <div className="pf-settings-span">
                   <strong className="pf-field-label">{t.languagePref}</strong>
-                  <p className="muted pf-inline-hint">{t.languagePrefHint}</p>
                   <div className="pf-chip-row">
                     <button
                       type="button"
@@ -1058,10 +1034,7 @@ export function ProfilePage() {
                         checked={prefs.alertDisease}
                         onChange={(e) => persistPrefs({ ...prefs, alertDisease: e.target.checked })}
                       />
-                      <span>
-                        <strong>{t.alertDisease}</strong>
-                        <small>{t.alertDiseaseHint}</small>
-                      </span>
+                      <span>{t.alertDisease}</span>
                     </label>
                     <label className="pf-toggle">
                       <input
@@ -1069,10 +1042,7 @@ export function ProfilePage() {
                         checked={prefs.alertCommunity}
                         onChange={(e) => persistPrefs({ ...prefs, alertCommunity: e.target.checked })}
                       />
-                      <span>
-                        <strong>{t.alertCommunity}</strong>
-                        <small>{t.alertCommunityHint}</small>
-                      </span>
+                      <span>{t.alertCommunity}</span>
                     </label>
                     <label className="pf-toggle">
                       <input
@@ -1082,20 +1052,9 @@ export function ProfilePage() {
                           persistPrefs({ ...prefs, askExpertReview: e.target.checked })
                         }
                       />
-                      <span>
-                        <strong>{t.askExpertReview}</strong>
-                        <small>{t.askExpertReviewHint}</small>
-                      </span>
+                      <span>{t.askExpertReview}</span>
                     </label>
                   </div>
-                </div>
-                <div className="pf-settings-span pf-danger-zone">
-                  <strong className="pf-field-label">{t.clearSaved}</strong>
-                  <p className="muted pf-inline-hint">{t.clearSavedHint}</p>
-                  <button type="button" className="button secondary compact" onClick={clearLocalSaved}>
-                    {t.clearSaved}
-                  </button>
-                  {prefsNote && <p className="pf-prefs-note">{prefsNote}</p>}
                 </div>
               </div>
             </div>
@@ -1103,7 +1062,6 @@ export function ProfilePage() {
             <div className="pf-settings-block">
               <header>
                 <h3>{t.settingsPassword}</h3>
-                <p>{t.settingsPasswordHint}</p>
               </header>
               {user?.isGuest ? (
                 <p className="muted">{t.passwordGuestBlocked}</p>
@@ -1111,7 +1069,6 @@ export function ProfilePage() {
                 <div className="pf-settings-grid">
                   <label className="pf-settings-span">
                     {t.currentPassword}
-                    <small>{t.currentPasswordHint}</small>
                     <input
                       type="password"
                       autoComplete="current-password"
@@ -1160,51 +1117,25 @@ export function ProfilePage() {
               )}
             </div>
 
-            <div className="pf-settings-block">
-              <header>
-                <h3>{t.settingsHelp}</h3>
-                <p>{t.settingsHelpHint}</p>
-              </header>
-              <div className="pf-row-actions">
-                <Link className="button" to="/faq">
-                  {t.openFaq}
-                </Link>
-              </div>
-            </div>
-
-            <div className="pf-settings-block">
-              <header>
-                <h3>{t.settingsSession}</h3>
-                <p>{t.settingsSessionHint}</p>
-              </header>
-              <div className="pf-session-meta">
-                <div>
-                  <span>{t.emailLabel}</span>
-                  <strong>{user.email}</strong>
-                </div>
-                <div>
-                  <span>{t.accountRole}</span>
-                  <strong>{user.role}</strong>
-                </div>
-                <div>
-                  <span>{t.accountJoined}</span>
-                  <strong>{joined}</strong>
-                </div>
-              </div>
-              <p className="muted">{t.unsavedNote}</p>
+            <div className="pf-settings-block pf-settings-footer">
               <div className="pf-row-actions">
                 <button type="submit" className="button" disabled={saving}>
                   {saving ? t.saving : t.saveProfile}
                 </button>
+                <Link className="button secondary" to="/faq">
+                  {t.openFaq}
+                </Link>
                 <button type="button" className="button secondary" onClick={requestLogout}>
                   {t.logout}
                 </button>
               </div>
+              {prefsNote && <p className="pf-prefs-note">{prefsNote}</p>}
             </div>
           </form>
         </section>
       )}
 
+      {tab !== 'settings' && (
       <section className="pf-panel">
         <div className="pf-section-head">
           <h2>{t.statsActivity}</h2>
@@ -1244,6 +1175,7 @@ export function ProfilePage() {
           </div>
         </div>
       </section>
+      )}
 
       {editOpen && (
         <div className="pf-modal-backdrop" role="presentation" onClick={() => setEditOpen(false)}>

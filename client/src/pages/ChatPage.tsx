@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import {
@@ -38,6 +39,30 @@ type SessionSummary = {
 
 const MAX_CHAT_ATTACHMENTS = 8;
 
+function preferNativeCamera() {
+  if (typeof navigator === 'undefined') return false;
+  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return true;
+  return navigator.maxTouchPoints > 1 && window.matchMedia('(max-width: 900px)').matches;
+}
+
+/** Phone cameras often return empty MIME or image/jpg. */
+function normalizeChatImage(file: File): File {
+  const name = file.name || `chat-${Date.now()}.jpg`;
+  const lower = name.toLowerCase();
+  let type = (file.type || '').toLowerCase();
+  if (type === 'image/jpg') type = 'image/jpeg';
+  if (!type || type === 'application/octet-stream') {
+    if (lower.endsWith('.png')) type = 'image/png';
+    else if (lower.endsWith('.webp')) type = 'image/webp';
+    else type = 'image/jpeg';
+  }
+  if (file.type === type) return file;
+  return new File([file], lower.includes('.') ? name : `${name}.jpg`, {
+    type,
+    lastModified: file.lastModified,
+  });
+}
+
 const DEFAULT_CHAT_LOC = {
   lat: undefined as number | undefined,
   lng: undefined as number | undefined,
@@ -54,32 +79,28 @@ type ProfileMe = {
 };
 
 const SUGGESTION_DEFS: Array<{
-  key: keyof ReturnType<typeof chatCopy>;
+  key: 'riceBlast' | 'pestCare' | 'weather';
   prompt: string;
   tone: Tone;
   Icon: typeof IconRice;
-  descKey: 'suggestRiceDesc' | 'suggestPestDesc' | 'suggestWeatherDesc';
 }> = [
   {
     key: 'riceBlast',
     prompt: 'How do I treat Rice Blast on my paddy?',
     tone: 'mint',
     Icon: IconRice,
-    descKey: 'suggestRiceDesc',
   },
   {
     key: 'pestCare',
     prompt: 'How do I control brown planthopper and stem borer in rice?',
     tone: 'peach',
     Icon: IconLeaf,
-    descKey: 'suggestPestDesc',
   },
   {
     key: 'weather',
     prompt: "What's the weather outlook for my farm this week?",
     tone: 'sky',
     Icon: IconWeather,
-    descKey: 'suggestWeatherDesc',
   },
 ];
 
@@ -143,9 +164,13 @@ export function ChatPage() {
   const [locLabel, setLocLabel] = useState(t.locatingFarm);
   const [locError, setLocError] = useState('');
   const [pending, setPending] = useState<PendingFile[]>([]);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraError, setCameraError] = useState('');
   const logRef = useRef<HTMLDivElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const displayName = user?.fullName?.trim() || user?.email?.split('@')[0] || 'Farmer';
 
@@ -334,12 +359,15 @@ export function ChatPage() {
     const picked = Array.from(list);
     setPending((prev) => {
       const next = [...prev];
-      for (const file of picked) {
+      for (const raw of picked) {
         if (next.length >= MAX_CHAT_ATTACHMENTS) {
           setError(t.maxAttachments);
           break;
         }
-        if (imagesOnly && !file.type.startsWith('image/')) continue;
+        const type = (raw.type || '').toLowerCase();
+        const looksImage = !type || type === 'application/octet-stream' || type.startsWith('image/');
+        if (imagesOnly && type && !looksImage) continue;
+        const file = imagesOnly || looksImage ? normalizeChatImage(raw) : raw;
         const dup = next.some(
           (f) => f.file.name === file.name && f.file.size === file.size && f.file.lastModified === file.lastModified
         );
@@ -347,12 +375,100 @@ export function ChatPage() {
         next.push({
           id: `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).slice(2, 6)}`,
           file,
-          preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+          preview:
+            file.type.startsWith('image/') || imagesOnly ? URL.createObjectURL(file) : undefined,
         });
       }
       return next;
     });
   }
+
+  function stopCameraStream() {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }
+
+  function closeCamera() {
+    stopCameraStream();
+    setCameraOpen(false);
+    setCameraError('');
+  }
+
+  function openNativeCamera() {
+    if (photoInputRef.current) {
+      photoInputRef.current.value = '';
+      photoInputRef.current.click();
+    }
+  }
+
+  async function openTakePhoto() {
+    setCameraError('');
+    setError('');
+    if (preferNativeCamera()) {
+      openNativeCamera();
+      return;
+    }
+    if (navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+        streamRef.current = stream;
+        setCameraOpen(true);
+        return;
+      } catch {
+        // Fall through to the phone/file camera picker
+      }
+    }
+    openNativeCamera();
+  }
+
+  function captureFromCamera() {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      setCameraError(t.cameraNotReady);
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      setCameraError(t.cameraNotReady);
+      return;
+    }
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          setCameraError(t.cameraNotReady);
+          return;
+        }
+        const shot = new File([blob], `chat-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        addFiles([shot], true);
+        closeCamera();
+      },
+      'image/jpeg',
+      0.92
+    );
+  }
+
+  useEffect(() => {
+    if (!cameraOpen || !streamRef.current || !videoRef.current) return;
+    const video = videoRef.current;
+    video.srcObject = streamRef.current;
+    void video.play().catch(() => {
+      setCameraError(t.cameraPlayError);
+    });
+  }, [cameraOpen, t.cameraPlayError]);
+
+  useEffect(() => () => stopCameraStream(), []);
 
   function removePending(id: string) {
     setPending((prev) => {
@@ -607,7 +723,6 @@ export function ChatPage() {
                       <s.Icon />
                     </SoftIcon>
                     <strong>{t[s.key]}</strong>
-                    <span>{t[s.descKey]}</span>
                   </button>
                 ))}
               </div>
@@ -711,8 +826,8 @@ export function ChatPage() {
             <input
               ref={photoInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
+              accept="image/*"
+              capture="environment"
               hidden
               onChange={(e) => {
                 addFiles(e.target.files, true);
@@ -753,7 +868,7 @@ export function ChatPage() {
               title={t.attachPhoto}
               aria-label={t.attachPhoto}
               disabled={sending || pending.length >= MAX_CHAT_ATTACHMENTS}
-              onClick={() => photoInputRef.current?.click()}
+              onClick={() => void openTakePhoto()}
             >
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden>
                 <path
@@ -794,6 +909,36 @@ export function ChatPage() {
         </p>
       </main>
     </div>
+    {cameraOpen &&
+      createPortal(
+        <div className="dt-camera-modal" role="dialog" aria-modal="true" aria-label={t.takePhoto}>
+          <div className="dt-camera-sheet">
+            <header className="dt-camera-head">
+              <div>
+                <strong>{t.takePhoto}</strong>
+                <p className="dt-camera-sub">{t.cameraGuide}</p>
+              </div>
+              <button type="button" className="button secondary compact" onClick={closeCamera}>
+                {t.closeCamera}
+              </button>
+            </header>
+            <div className="dt-camera-stage">
+              <video ref={videoRef} playsInline muted autoPlay />
+              <p className="dt-camera-chip">{t.cameraGuide}</p>
+            </div>
+            {cameraError && <p className="dt-camera-error">{cameraError}</p>}
+            <div className="dt-camera-actions">
+              <button type="button" className="button secondary" onClick={openNativeCamera}>
+                {t.usePhoneCamera}
+              </button>
+              <button type="button" className="button dt-capture-btn" onClick={captureFromCamera}>
+                {t.capturePhoto}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }
