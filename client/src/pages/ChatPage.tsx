@@ -130,7 +130,6 @@ export function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const displayName = user?.fullName?.trim() || user?.email?.split('@')[0] || 'Farmer';
-  const helloName = displayName.split(' ')[0];
 
   const loadSessions = async (preferId?: string) => {
     if (!accessToken) return;
@@ -561,7 +560,7 @@ export function ChatPage() {
             <div className="va-welcome">
               <h1>
                 <span className="va-hello">
-                  {t.hello} {helloName}
+                  {t.hello} {displayName}
                 </span>
                 <span className="va-help">{t.howHelp}</span>
               </h1>
