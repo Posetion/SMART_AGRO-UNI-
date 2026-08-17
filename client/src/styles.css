@@ -11927,19 +11927,25 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
   text-decoration: none;
   color: var(--va-ink);
   min-width: 0;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 .va-brand strong {
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 .va-logo-mark {
   width: 2rem;
   height: 2rem;
   border-radius: 10px;
-  background: #fff;
-  color: #fff;
+  background: #e8f5e9;
+  color: #1b5e20;
   display: grid;
   place-items: center;
   flex-shrink: 0;

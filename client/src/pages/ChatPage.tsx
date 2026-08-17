@@ -622,12 +622,12 @@ export function ChatPage() {
     <div className={`va-page ${sidebarOpen ? '' : 'sidebar-collapsed'}`.trim()}>
       <aside className="va-sidebar">
         <div className="va-side-top">
-          <Link to="/chat" className="va-brand" onClick={() => void newChat()}>
+          <button type="button" className="va-brand" onClick={() => void newChat()}>
             <span className="va-logo-mark" aria-hidden>
-              <BrandLogo size={28} decorative />
+              <IconChat />
             </span>
-            <strong>SMART AGRO</strong>
-          </Link>
+            <strong>{t.title}</strong>
+          </button>
           <button
             type="button"
             className="va-collapse"
