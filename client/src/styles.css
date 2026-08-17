@@ -16,7 +16,7 @@
   --ok: #2e7d32;
   --shadow: 0 16px 40px rgba(33, 33, 33, 0.08);
   --font: 'Sora', 'Padauk', 'Noto Sans Myanmar', 'Myanmar Text', sans-serif;
-  --font-my: 'Padauk', 'Noto Sans Myanmar', 'Myanmar Text', 'Sora', sans-serif;
+  --font-my: 'Noto Sans Myanmar', 'Padauk', 'Myanmar Text', 'Sora', sans-serif;
   --radius: 16px;
   --sidebar: 286px;
   --site-nav-h: 4.25rem;
@@ -129,8 +129,15 @@ html.lang-my input,
 html.lang-my textarea {
   font-family: inherit;
   letter-spacing: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  word-spacing: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+html[lang='my'] *,
+html.lang-my * {
+  letter-spacing: 0 !important;
+  word-spacing: normal !important;
 }
 
 html[lang='my'] h1,
@@ -4628,6 +4635,14 @@ button:disabled,
   opacity: 0.85;
 }
 
+html[lang='my'] .lp-eyebrow,
+html.lang-my .lp-eyebrow {
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 1;
+  font-weight: 700;
+}
+
 .lp-eyebrow.dark {
   color: var(--paddy);
 }
@@ -4640,12 +4655,50 @@ button:disabled,
   color: white;
 }
 
+html[lang='my'] .lp-hero-content h1,
+html.lang-my .lp-hero-content h1 {
+  letter-spacing: 0;
+  line-height: 1.42;
+  font-weight: 700;
+  text-shadow: 0 2px 18px rgba(8, 24, 16, 0.4);
+}
+
 .lp-hero-sub {
   margin: 0 auto 1.5rem;
   max-width: 40ch;
   font-size: 1.05rem;
   opacity: 0.9;
   line-height: 1.5;
+}
+
+html[lang='my'] .lp-hero-sub,
+html.lang-my .lp-hero-sub {
+  max-width: 28rem;
+  opacity: 1;
+  font-weight: 600;
+  font-size: 1.12rem;
+  line-height: 1.65;
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(8, 24, 16, 0.35);
+}
+
+html[lang='my'] .lp-hero .button,
+html.lang-my .lp-hero .button {
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+
+html[lang='my'] .lp-nav-links button,
+html.lang-my .lp-nav-links button,
+html[lang='my'] .lp-mobile-links button,
+html.lang-my .lp-mobile-links button {
+  font-weight: 700;
+}
+
+html[lang='my'] .lp-brand small,
+html.lang-my .lp-brand small {
+  opacity: 1;
+  font-weight: 600;
 }
 
 .lp-hero-ctas {
@@ -4679,6 +4732,14 @@ button:disabled,
   gap: 0.35rem;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+html[lang='my'] .lp-scroll-cue,
+html.lang-my .lp-scroll-cue {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-shadow: 0 1px 8px rgba(8, 24, 16, 0.4);
 }
 
 .lp-scroll-cue:hover {

@@ -182,7 +182,7 @@ export const landingCopy = (lang: Lang) =>
       feed: 'Feed',
     },
     {
-      tagline: 'မြန်မာ လယ်သမားအတွက် စမတ်ကိရိယာ',
+      tagline: 'မြန်မာလယ်သမားအတွက် စမတ်ကိရိယာ',
       subtitle: 'ရောဂါရှာ · ရောဂါစစ်ဆေး · ရာသီဥတု',
       getStarted: 'စတင်ရန်',
       member: 'ဝင်ရန်',

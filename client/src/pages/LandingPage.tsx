@@ -111,7 +111,6 @@ export function LandingPage() {
         </div>
 
         <div className="lp-hero-content">
-          <p className="lp-eyebrow">{lang === 'my' ? 'Smart Agro အသိုင်းအဝိုင်း' : 'Smart Agro Community'}</p>
           <h1>{t.tagline}</h1>
           <p className="lp-hero-sub">{t.subtitle}</p>
           <div className="lp-hero-ctas">
