@@ -37,7 +37,7 @@ export const navCopy = (lang: Lang) =>
       weather: 'Weather',
       knowledge: 'Knowledge',
       chat: 'BaGyi Pyoe',
-      heatmap: 'Outbreak map',
+      heatmap: 'Heat map',
       home: 'Home',
       appPages: 'App pages',
     },
