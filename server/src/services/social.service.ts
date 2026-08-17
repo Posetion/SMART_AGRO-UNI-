@@ -3,6 +3,7 @@ import { Post } from '../models/Post.js';
 import { PostReport } from '../models/PostReport.js';
 import { Diagnosis } from '../models/Diagnosis.js';
 import { User } from '../models/User.js';
+import { MAX_POST_IMAGES } from '../config/constants.js';
 import { AppError } from '../utils/AppError.js';
 import { getPagination } from '../utils/pagination.js';
 import { writeAuditLog } from './audit.service.js';
@@ -86,11 +87,30 @@ export async function getPost(id: string) {
   return post;
 }
 
-export async function updatePost(id: string, userId: string, content: string) {
+export async function updatePost(
+  id: string,
+  userId: string,
+  input: { content: string; keepImages?: string[]; newImages?: string[] }
+) {
   const post = await Post.findById(id);
   if (!post || !post.isActive) throw new AppError('Post not found', 404);
   if (String(post.userId) !== userId) throw new AppError('Forbidden', 403);
-  post.content = content;
+  post.content = input.content;
+
+  const replacing = input.keepImages !== undefined || (input.newImages && input.newImages.length > 0);
+  if (replacing) {
+    const current = new Set(post.images ?? []);
+    const kept =
+      input.keepImages !== undefined
+        ? input.keepImages.filter((url) => current.has(url))
+        : [...(post.images ?? [])];
+    const next = [...kept, ...(input.newImages ?? [])];
+    if (next.length > MAX_POST_IMAGES) {
+      throw new AppError(`You can attach up to ${MAX_POST_IMAGES} photos`, 400);
+    }
+    post.images = next;
+  }
+
   await post.save();
   return post;
 }

@@ -1445,6 +1445,45 @@ select {
   gap: 0.4rem;
 }
 
+.sf-edit-photos {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sf-edit-add-photo {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px dashed rgba(46, 125, 50, 0.35);
+  background: #f4faf4;
+  color: #1b5e20;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  transform: none;
+}
+
+.sf-edit-add-photo svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.sf-edit-add-photo span {
+  color: #5b6b5e;
+  font-weight: 600;
+}
+
+.sf-edit-add-photo:hover:not(:disabled) {
+  background: #e8f5e9;
+  transform: none;
+}
+
+.sf-edit-add-photo:disabled {
+  opacity: 0.55;
+}
+
 .sf-hashtag {
   color: #1565c0;
   font-weight: 600;
@@ -1875,6 +1914,27 @@ button.sf-lightbox-nav:hover {
 .sf-actions .act-message .sf-ico {
   width: 2rem;
   height: 2rem;
+}
+
+.sf-actions span.act-friend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.sf-actions .act-friend.is-pending,
+.sf-actions .act-friend.is-friends {
+  color: #5b6b5e;
+  cursor: default;
+  opacity: 0.88;
+}
+
+.sf-actions .act-friend.is-pending .sf-ico,
+.sf-actions .act-friend.is-friends .sf-ico {
+  background: #eef3ef;
+  color: #5b6b5e;
 }
 
 .sf-send-reply {

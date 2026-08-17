@@ -28,7 +28,13 @@ router.post(
 );
 router.get('/posts', socialController.list);
 router.get('/posts/:id', socialController.getOne);
-router.put('/posts/:id', validate({ body: updatePostSchema }), socialController.update);
+router.put(
+  '/posts/:id',
+  uploadImages,
+  verifyMagicNumbers,
+  validate({ body: updatePostSchema }),
+  socialController.update
+);
 router.delete('/posts/:id', socialController.remove);
 router.post(
   '/posts/:id/comments',

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as socialService from '../services/social.service.js';
+import { MAX_POST_IMAGES } from '../config/constants.js';
 import { uploadBuffer } from '../services/storage.service.js';
 import { AppError } from '../utils/AppError.js';
 
@@ -43,7 +44,23 @@ export const getOne = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
-  const data = await socialService.updatePost(req.params.id, req.user!.id, req.body.content);
+  const files = (req.files as Express.Multer.File[] | undefined) ?? [];
+  const newImages: string[] = [];
+  for (const file of files) {
+    newImages.push(await uploadBuffer(file.buffer, file.originalname, file.mimetype));
+  }
+
+  const keepImages = req.body.keepImages as string[] | undefined;
+  const keepCount = keepImages?.length ?? 0;
+  if (keepCount + newImages.length > MAX_POST_IMAGES) {
+    throw new AppError(`You can attach up to ${MAX_POST_IMAGES} photos`, 400);
+  }
+
+  const data = await socialService.updatePost(req.params.id, req.user!.id, {
+    content: req.body.content,
+    keepImages,
+    newImages: newImages.length ? newImages : undefined,
+  });
   res.json({ success: true, data });
 });
 

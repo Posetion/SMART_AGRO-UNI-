@@ -17,6 +17,7 @@ type PublicUser = {
   avatarTone?: Tone;
   role?: string;
   isFriend?: boolean;
+  friendship?: 'none' | 'friends' | 'outgoing' | 'incoming';
 };
 
 type Notice = {
@@ -619,7 +620,17 @@ export function MessagesPage() {
         body: { userId },
       });
       await loadFriends();
-      setPeople((prev) => prev.map((p) => (p._id === userId ? { ...p, isFriend: false } : p)));
+      setPeople((prev) =>
+        prev.map((p) =>
+          p._id === userId
+            ? {
+                ...p,
+                isFriend: p.friendship === 'incoming',
+                friendship: p.friendship === 'incoming' ? 'friends' : 'outgoing',
+              }
+            : p
+        )
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : t.friendFailed);
     }
@@ -1234,9 +1245,13 @@ export function MessagesPage() {
                     <small>{p.email}</small>
                   </span>
                   <div className="pk-people-acts">
-                    {!p.isFriend && (
+                    {p.friendship === 'friends' || p.isFriend ? null : p.friendship === 'outgoing' ? (
+                      <button type="button" className="secondary compact" disabled>
+                        {t.requestPending}
+                      </button>
+                    ) : (
                       <button type="button" className="secondary compact" onClick={() => void addFriend(p._id)}>
-                        {t.addFriend}
+                        {p.friendship === 'incoming' ? t.accept : t.addFriend}
                       </button>
                     )}
                     <button type="button" className="compact" onClick={() => void openWith(p._id)}>
@@ -1372,7 +1387,7 @@ export function MessagesPage() {
                         <Avatar user={r.toUserId} />
                         <span>
                           <strong>{displayName(r.toUserId)}</strong>
-                          <small>{t.requestSent}</small>
+                          <small>{t.requestPending}</small>
                         </span>
                       </li>
                     ))}

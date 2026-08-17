@@ -5,7 +5,7 @@ import { Message } from '../models/Message.js';
 import { User } from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { createNotification } from './notification.service.js';
-import { areFriends } from './friend.service.js';
+import { friendshipStatus } from './friend.service.js';
 import { clearTyping, listTypingUserIds, setTyping } from './typing.service.js';
 
 const USER_PUBLIC = 'fullName email avatarUrl avatarTone role';
@@ -48,10 +48,14 @@ export async function searchUsers(q: string, selfId: string) {
     .lean();
 
   return Promise.all(
-    users.map(async (u) => ({
-      ...u,
-      isFriend: await areFriends(selfId, String(u._id)),
-    }))
+    users.map(async (u) => {
+      const rel = await friendshipStatus(selfId, String(u._id));
+      return {
+        ...u,
+        isFriend: rel.status === 'friends',
+        friendship: rel.status,
+      };
+    })
   );
 }
 

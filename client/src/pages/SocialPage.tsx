@@ -66,6 +66,7 @@ type Post = {
 };
 
 type CropFilter = 'all' | 'rice';
+type FriendRel = 'none' | 'outgoing' | 'incoming' | 'friends';
 
 function personName(u: string | PostAuthor | null | undefined, t: SocialMessages) {
   if (!u) return t.farmer;
@@ -215,6 +216,7 @@ export function SocialPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const fileRef = useRef<HTMLInputElement>(null);
+  const editFileRef = useRef<HTMLInputElement>(null);
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [diagnoses, setDiagnoses] = useState<DiagnosisOpt[]>([]);
@@ -249,7 +251,11 @@ export function SocialPage() {
   const [notice, setNotice] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState('');
+  const [editKeepImages, setEditKeepImages] = useState<string[]>([]);
+  const [editFiles, setEditFiles] = useState<File[]>([]);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [friendRel, setFriendRel] = useState<Record<string, FriendRel>>({});
+  const [friendBusyId, setFriendBusyId] = useState<string | null>(null);
 
   const displayName = user?.fullName?.trim() || user?.email?.split('@')[0] || t.farmer;
   const handle = user?.email?.split('@')[0] || 'farmer';
@@ -261,6 +267,13 @@ export function SocialPage() {
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [previewUrls]);
+
+  const editPreviewUrls = useMemo(() => editFiles.map((f) => URL.createObjectURL(f)), [editFiles]);
+  useEffect(() => {
+    return () => {
+      editPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [editPreviewUrls]);
 
   useEffect(() => {
     if (!menuOpenId) return;
@@ -315,8 +328,65 @@ export function SocialPage() {
     }
   }
 
+  async function loadFriendRels() {
+    if (!accessToken || user?.isGuest) return;
+    try {
+      const [flist, reqs] = await Promise.all([
+        api<Array<{ user?: { _id?: string } }>>('/messages/friends', { token: accessToken }),
+        api<{
+          incoming?: Array<{ fromUserId?: string | { _id?: string } }>;
+          outgoing?: Array<{ toUserId?: string | { _id?: string } }>;
+        }>('/messages/friends/requests', { token: accessToken }),
+      ]);
+      const next: Record<string, FriendRel> = {};
+      for (const row of flist || []) {
+        const id = row.user?._id;
+        if (id) next[id] = 'friends';
+      }
+      for (const row of reqs?.outgoing || []) {
+        const id = personId(row.toUserId) || (typeof row.toUserId === 'string' ? row.toUserId : null);
+        if (id) next[id] = 'outgoing';
+      }
+      for (const row of reqs?.incoming || []) {
+        const id = personId(row.fromUserId) || (typeof row.fromUserId === 'string' ? row.fromUserId : null);
+        if (id) next[id] = 'incoming';
+      }
+      setFriendRel(next);
+    } catch {
+      /* friend status is optional on the feed */
+    }
+  }
+
+  async function sendFriendRequest(userId: string) {
+    if (!accessToken || friendBusyId) return;
+    const rel = friendRel[userId] || 'none';
+    if (rel === 'outgoing' || rel === 'friends') return;
+    setFriendBusyId(userId);
+    try {
+      await api('/messages/friends/request', {
+        method: 'POST',
+        token: accessToken,
+        body: { userId },
+      });
+      setFriendRel((prev) => ({
+        ...prev,
+        [userId]: rel === 'incoming' ? 'friends' : 'outgoing',
+      }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      if (/already sent/i.test(message)) {
+        setFriendRel((prev) => ({ ...prev, [userId]: 'outgoing' }));
+      } else if (/already friends/i.test(message)) {
+        setFriendRel((prev) => ({ ...prev, [userId]: 'friends' }));
+      }
+    } finally {
+      setFriendBusyId(null);
+    }
+  }
+
   useEffect(() => {
     void load();
+    void loadFriendRels();
   }, [accessToken]);
 
   useEffect(() => {
@@ -488,6 +558,8 @@ export function SocialPage() {
       if (editingId === id) {
         setEditingId(null);
         setEditDraft('');
+        setEditKeepImages([]);
+        setEditFiles([]);
       }
       await load();
     } catch (err) {
@@ -499,12 +571,31 @@ export function SocialPage() {
     setMenuOpenId(null);
     setEditingId(post._id);
     setEditDraft(post.content);
+    setEditKeepImages([...(post.images || [])]);
+    setEditFiles([]);
     setError('');
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditDraft('');
+    setEditKeepImages([]);
+    setEditFiles([]);
+  }
+
+  function addEditFiles(list: FileList | File[] | null) {
+    const picked = Array.from(list || []);
+    setEditFiles((prev) => {
+      const next = [...prev];
+      for (const file of picked) {
+        if (editKeepImages.length + next.length >= MAX_POST_PHOTOS) break;
+        const dup = next.some(
+          (f) => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
+        );
+        if (!dup) next.push(file);
+      }
+      return next;
+    });
   }
 
   async function saveEdit(id: string) {
@@ -514,14 +605,27 @@ export function SocialPage() {
     setSavingEdit(true);
     setError('');
     try {
-      await api(`/social/posts/${id}`, {
+      const form = new FormData();
+      form.append('content', text);
+      form.append('keepImages', JSON.stringify(editKeepImages));
+      editFiles
+        .slice(0, Math.max(0, MAX_POST_PHOTOS - editKeepImages.length))
+        .forEach((f) => form.append('images', f));
+
+      const updated = await api<Post>(`/social/posts/${id}`, {
         method: 'PUT',
         token: accessToken,
-        body: { content: text },
+        formData: form,
       });
-      setPosts((prev) => prev.map((p) => (p._id === id ? { ...p, content: text } : p)));
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === id ? { ...p, content: text, images: updated.images ?? editKeepImages } : p
+        )
+      );
       setEditingId(null);
       setEditDraft('');
+      setEditKeepImages([]);
+      setEditFiles([]);
       setNotice(t.edited);
     } catch (err) {
       setError(err instanceof Error ? err.message : t.editFailed);
@@ -869,6 +973,68 @@ export function SocialPage() {
                       rows={4}
                       disabled={savingEdit}
                     />
+                    <div className="sf-edit-photos">
+                      {(editKeepImages.length > 0 || editFiles.length > 0) && (
+                        <ul className="sf-composer-thumbs">
+                          {editKeepImages.map((src, i) => (
+                            <li key={`keep-${src}-${i}`}>
+                              <img src={mediaUrl(src) || src} alt="" />
+                              <button
+                                type="button"
+                                aria-label={t.removePhoto}
+                                disabled={savingEdit}
+                                onClick={() =>
+                                  setEditKeepImages((prev) => prev.filter((_, idx) => idx !== i))
+                                }
+                              >
+                                ×
+                              </button>
+                            </li>
+                          ))}
+                          {editPreviewUrls.map((src, i) => (
+                            <li key={`new-${src}-${i}`}>
+                              <img src={src} alt="" />
+                              <button
+                                type="button"
+                                aria-label={t.removePhoto}
+                                disabled={savingEdit}
+                                onClick={() =>
+                                  setEditFiles((prev) => prev.filter((_, idx) => idx !== i))
+                                }
+                              >
+                                ×
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <input
+                        ref={editFileRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        hidden
+                        onChange={(e) => {
+                          addEditFiles(e.target.files);
+                          e.target.value = '';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="sf-edit-add-photo"
+                        disabled={
+                          savingEdit ||
+                          editKeepImages.length + editFiles.length >= MAX_POST_PHOTOS
+                        }
+                        onClick={() => editFileRef.current?.click()}
+                      >
+                        <SvgPhoto />
+                        {t.addPhotos}
+                        <span>
+                          {editKeepImages.length + editFiles.length}/{MAX_POST_PHOTOS}
+                        </span>
+                      </button>
+                    </div>
                     <div className="sf-edit-actions">
                       <button
                         type="button"
@@ -892,7 +1058,7 @@ export function SocialPage() {
                   <p className="sf-content">{renderContent(p.content)}</p>
                 )}
 
-                {!!p.images?.length && (
+                {editingId !== p._id && !!p.images?.length && (
                   <PhotoGallery
                     images={p.images}
                     onOpen={(index) => setLightbox({ images: p.images || [], index })}
@@ -945,29 +1111,44 @@ export function SocialPage() {
                   </button>
                   {p.userId?._id && user.id && String(p.userId._id) !== user.id && !user.isGuest && (
                     <>
-                      <button
-                        type="button"
-                        className="act-friend"
-                        onClick={() => {
-                          void (async () => {
-                            if (!accessToken || !p.userId?._id) return;
-                            try {
-                              await api('/messages/friends/request', {
-                                method: 'POST',
-                                token: accessToken,
-                                body: { userId: p.userId._id },
-                              });
-                            } catch {
-                              /* ignore duplicate / already friends */
-                            }
-                          })();
-                        }}
-                      >
-                        <SoftIcon tone="coral">
-                          <IconUserPlus />
-                        </SoftIcon>
-                        {t.addFriend}
-                      </button>
+                      {(() => {
+                        const authorId = String(p.userId._id);
+                        const rel = friendRel[authorId] || 'none';
+                        const busy = friendBusyId === authorId;
+                        if (rel === 'friends') {
+                          return (
+                            <span className="act-friend is-friends">
+                              <SoftIcon tone="coral">
+                                <IconUserPlus />
+                              </SoftIcon>
+                              {t.friends}
+                            </span>
+                          );
+                        }
+                        if (rel === 'outgoing') {
+                          return (
+                            <button type="button" className="act-friend is-pending" disabled>
+                              <SoftIcon tone="coral">
+                                <IconUserPlus />
+                              </SoftIcon>
+                              {t.requestPending}
+                            </button>
+                          );
+                        }
+                        return (
+                          <button
+                            type="button"
+                            className="act-friend"
+                            disabled={busy}
+                            onClick={() => void sendFriendRequest(authorId)}
+                          >
+                            <SoftIcon tone="coral">
+                              <IconUserPlus />
+                            </SoftIcon>
+                            {rel === 'incoming' ? t.acceptRequest : t.addFriend}
+                          </button>
+                        );
+                      })()}
                       <button
                         type="button"
                         className="act-message"

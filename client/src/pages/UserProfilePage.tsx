@@ -118,9 +118,12 @@ export function UserProfilePage() {
         token: accessToken,
         body: { userId },
       });
-      setFriendship({ status: 'outgoing' });
+      setFriendship({ status: friendship.status === 'incoming' ? 'friends' : 'outgoing' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : st.addFriend);
+      const message = err instanceof Error ? err.message : st.addFriend;
+      if (/already sent/i.test(message)) setFriendship({ status: 'outgoing' });
+      else if (/already friends/i.test(message)) setFriendship({ status: 'friends' });
+      else setError(message);
     } finally {
       setWorking(false);
     }
@@ -220,7 +223,7 @@ export function UserProfilePage() {
               )}
               {friendship.status === 'outgoing' && (
                 <button type="button" className="button secondary compact" disabled>
-                  {st.requestSent}
+                  {st.requestPending}
                 </button>
               )}
               {friendship.status === 'incoming' && (
