@@ -158,7 +158,9 @@ export function ChatPage() {
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
   const [guestStarting, setGuestStarting] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 981px)').matches : true
+  );
   const [showAllChats, setShowAllChats] = useState(false);
   const [loc, setLoc] = useState(DEFAULT_CHAT_LOC);
   const [locLabel, setLocLabel] = useState(t.locatingFarm);
@@ -194,6 +196,17 @@ export function ChatPage() {
     void loadSessions().catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 981px)');
+    const onChange = () => setSidebarOpen(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  function closeIfMobile() {
+    if (window.matchMedia('(max-width: 980px)').matches) setSidebarOpen(false);
+  }
 
   async function applyProfileLocation() {
     if (!accessToken) return false;
@@ -286,6 +299,7 @@ export function ChatPage() {
     setSessionId(s.sessionId);
     setMessages(mapSessionMessages(s.messages));
     setError('');
+    closeIfMobile();
   }
 
   async function newChat() {
@@ -294,6 +308,7 @@ export function ChatPage() {
     setError('');
     setShowAllChats(false);
     clearPending();
+    closeIfMobile();
     try {
       const session = await api<{ sessionId: string }>('/chatbot/session', {
         method: 'POST',
@@ -619,7 +634,13 @@ export function ChatPage() {
 
   return (
     <>
-    <div className={`va-page ${sidebarOpen ? '' : 'sidebar-collapsed'}`.trim()}>
+    <div className={`va-page ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`.trim()}>
+      <button
+        type="button"
+        className="va-sidebar-scrim"
+        aria-label={t.hideSidebar}
+        onClick={() => setSidebarOpen(false)}
+      />
       <aside className="va-sidebar">
         <div className="va-side-top">
           <button type="button" className="va-brand" onClick={() => void newChat()}>
@@ -674,11 +695,24 @@ export function ChatPage() {
 
       <main className="va-main">
         <header className="va-main-head">
-          <div className="va-model-pill">
-            <SoftIcon tone="teal" className="sm">
-              <IconLeaf />
-            </SoftIcon>
-            <span>{t.modelName}</span>
+          <div className="va-head-left">
+            <button
+              type="button"
+              className="va-menu-btn"
+              aria-label={sidebarOpen ? t.hideSidebar : t.showSidebar}
+              aria-expanded={sidebarOpen}
+              onClick={() => setSidebarOpen((v) => !v)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+            <div className="va-model-pill">
+              <SoftIcon tone="teal" className="sm">
+                <IconLeaf />
+              </SoftIcon>
+              <span>{t.modelName}</span>
+            </div>
           </div>
           <div className="va-user-chip">
             <div>
