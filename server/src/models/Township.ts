@@ -20,4 +20,4 @@ townshipSchema.index({ coordinates: '2dsphere' });
 export type TownshipDocument = InferSchemaType<typeof townshipSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const Township = mongoose.model('Township', townshipSchema);
+export const Township = mongoose.models.Township || mongoose.model('Township', townshipSchema);

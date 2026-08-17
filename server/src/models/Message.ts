@@ -31,4 +31,4 @@ messageSchema.index({ conversationId: 1, createdAt: 1 });
 export type MessageDocument = InferSchemaType<typeof messageSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const Message = mongoose.model('Message', messageSchema);
+export const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);

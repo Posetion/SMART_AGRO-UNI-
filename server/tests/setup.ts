@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, afterEach } from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
+import { mockOpenMeteoPayload } from './helpers.js';
 
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI =
@@ -23,15 +24,37 @@ process.env.EMAIL_HOST = 'smtp.example.com';
 process.env.EMAIL_PORT = '587';
 process.env.PORT = '5000';
 
-let mongo: MongoMemoryServer;
+let mongo: MongoMemoryServer | undefined;
+const originalFetch = globalThis.fetch;
 
 beforeAll(async () => {
-  mongo = await MongoMemoryServer.create();
-  process.env.MONGODB_URI = mongo.getUri();
-  await mongoose.connect(process.env.MONGODB_URI);
-}, 120000);
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (/open-meteo|api\.open-meteo/i.test(url) || url.includes('/forecast?latitude')) {
+      return new Response(JSON.stringify(mockOpenMeteoPayload()), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (typeof originalFetch === 'function') {
+      return originalFetch(input, init);
+    }
+    return new Response(JSON.stringify({ error: 'blocked in tests' }), { status: 503 });
+  }) as typeof fetch;
+
+  const localUri = 'mongodb://127.0.0.1:27017/smart_agro_vitest';
+  try {
+    await mongoose.connect(localUri, { serverSelectionTimeoutMS: 3000 });
+    process.env.MONGODB_URI = localUri;
+  } catch {
+    mongo = await MongoMemoryServer.create();
+    process.env.MONGODB_URI = mongo.getUri();
+    await mongoose.connect(process.env.MONGODB_URI);
+  }
+}, 600000);
 
 afterEach(async () => {
+  if (mongoose.connection.readyState !== 1) return;
   const collections = mongoose.connection.collections;
   for (const key of Object.keys(collections)) {
     await collections[key].deleteMany({});
@@ -39,6 +62,10 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
+  globalThis.fetch = originalFetch;
+  if (mongoose.connection.readyState === 1) {
+    await mongoose.connection.dropDatabase();
+    await mongoose.disconnect();
+  }
   if (mongo) await mongo.stop();
 });

@@ -31,4 +31,4 @@ postReportSchema.index({ status: 1, createdAt: -1 });
 export type PostReportDocument = InferSchemaType<typeof postReportSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const PostReport = mongoose.model('PostReport', postReportSchema);
+export const PostReport = mongoose.models.PostReport || mongoose.model('PostReport', postReportSchema);

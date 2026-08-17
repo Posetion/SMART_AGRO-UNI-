@@ -15,4 +15,4 @@ otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 otpSchema.index({ email: 1, createdAt: -1 });
 
 export type OtpDocument = InferSchemaType<typeof otpSchema> & { _id: mongoose.Types.ObjectId };
-export const Otp = mongoose.model('Otp', otpSchema);
+export const Otp = mongoose.models.Otp || mongoose.model('Otp', otpSchema);

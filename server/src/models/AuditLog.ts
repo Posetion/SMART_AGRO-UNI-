@@ -15,4 +15,4 @@ const auditLogSchema = new Schema(
 export type AuditLogDocument = InferSchemaType<typeof auditLogSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const AuditLog = mongoose.model('AuditLog', auditLogSchema);
+export const AuditLog = mongoose.models.AuditLog || mongoose.model('AuditLog', auditLogSchema);

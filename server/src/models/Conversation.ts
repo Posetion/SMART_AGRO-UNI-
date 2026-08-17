@@ -26,4 +26,4 @@ conversationSchema.index({ inviteCode: 1 }, { unique: true, sparse: true });
 export type ConversationDocument = InferSchemaType<typeof conversationSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const Conversation = mongoose.model('Conversation', conversationSchema);
+export const Conversation = mongoose.models.Conversation || mongoose.model('Conversation', conversationSchema);

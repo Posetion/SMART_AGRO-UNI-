@@ -38,4 +38,4 @@ const postSchema = new Schema(
 postSchema.index({ createdAt: -1 });
 
 export type PostDocument = InferSchemaType<typeof postSchema> & { _id: mongoose.Types.ObjectId };
-export const Post = mongoose.model('Post', postSchema);
+export const Post = mongoose.models.Post || mongoose.model('Post', postSchema);

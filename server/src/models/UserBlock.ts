@@ -13,4 +13,4 @@ userBlockSchema.index({ blockerId: 1, blockedId: 1 }, { unique: true });
 export type UserBlockDocument = InferSchemaType<typeof userBlockSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const UserBlock = mongoose.model('UserBlock', userBlockSchema);
+export const UserBlock = mongoose.models.UserBlock || mongoose.model('UserBlock', userBlockSchema);

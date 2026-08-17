@@ -19,4 +19,4 @@ friendshipSchema.index({ fromUserId: 1, toUserId: 1 }, { unique: true });
 export type FriendshipDocument = InferSchemaType<typeof friendshipSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const Friendship = mongoose.model('Friendship', friendshipSchema);
+export const Friendship = mongoose.models.Friendship || mongoose.model('Friendship', friendshipSchema);

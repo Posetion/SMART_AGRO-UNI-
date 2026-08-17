@@ -21,4 +21,4 @@ townshipBoundarySchema.index({ name: 1, region: 1 }, { unique: true });
 export type TownshipBoundaryDocument = InferSchemaType<typeof townshipBoundarySchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const TownshipBoundary = mongoose.model('TownshipBoundary', townshipBoundarySchema);
+export const TownshipBoundary = mongoose.models.TownshipBoundary || mongoose.model('TownshipBoundary', townshipBoundarySchema);

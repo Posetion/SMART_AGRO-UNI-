@@ -34,4 +34,4 @@ knowledgeSchema.index({ category: 1, isPublished: 1 });
 export type KnowledgeDocument = InferSchemaType<typeof knowledgeSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const Knowledge = mongoose.model('Knowledge', knowledgeSchema);
+export const Knowledge = mongoose.models.Knowledge || mongoose.model('Knowledge', knowledgeSchema);

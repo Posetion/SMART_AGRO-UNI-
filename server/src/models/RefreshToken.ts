@@ -17,4 +17,4 @@ refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 export type RefreshTokenDocument = InferSchemaType<typeof refreshTokenSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const RefreshToken = mongoose.model('RefreshToken', refreshTokenSchema);
+export const RefreshToken = mongoose.models.RefreshToken || mongoose.model('RefreshToken', refreshTokenSchema);

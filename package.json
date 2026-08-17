@@ -7,10 +7,18 @@
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
     "seed": "npm --prefix server run seed",
+    "test": "npm run test:server && npm run test:client",
     "test:server": "npm --prefix server test",
+    "test:client": "npm --prefix client test",
+    "test:coverage": "npm --prefix server run test:coverage",
+    "test:e2e": "playwright test",
+    "test:routes": "npx tsx server/scripts/test-all-routes.ts",
     "build:server": "npm --prefix server run build",
     "build:client": "npm --prefix client run build",
     "share": "node scripts/share-demo.mjs",
     "qr": "node scripts/make-demo-qr.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
   }
 }

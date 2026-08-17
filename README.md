@@ -63,12 +63,27 @@ npm run dev
 
 Open `http://localhost:5173`. Vite proxies `/api` to the gateway.
 
-### 5. Tests (API)
+### 5. Tests
 
 ```bash
-cd server
+# API unit + integration + SRS flows (Vitest)
 npm test
+
+# Coverage HTML: server/coverage/index.html
+npm run test:coverage
+
+# Browser UI smoke (Playwright) — starts Vite on port 5174, uses installed Chrome
+npm run test:e2e
+
+# Optional live-server route smoke (API must be running)
+npm run test:routes
+
+# Optional k6 gateway load (API must be running)
+k6 run server/tests/performance/k6-gateway.js
 ```
+
+See [docs/TEST-REPORT.md](docs/TEST-REPORT.md) for the evaluation evidence pack.
+
 
 ## Default seeded accounts
 

@@ -35,4 +35,4 @@ const userSchema = new Schema(
 userSchema.index({ 'location.coordinates': '2dsphere' });
 
 export type UserDocument = InferSchemaType<typeof userSchema> & { _id: mongoose.Types.ObjectId };
-export const User = mongoose.model('User', userSchema);
+export const User = mongoose.models.User || mongoose.model('User', userSchema);

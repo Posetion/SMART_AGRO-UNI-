@@ -36,4 +36,4 @@ chatbotSessionSchema.index({ userId: 1, updatedAt: -1 });
 export type ChatbotSessionDocument = InferSchemaType<typeof chatbotSessionSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const ChatbotSession = mongoose.model('ChatbotSession', chatbotSessionSchema);
+export const ChatbotSession = mongoose.models.ChatbotSession || mongoose.model('ChatbotSession', chatbotSessionSchema);

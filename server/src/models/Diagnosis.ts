@@ -63,4 +63,4 @@ diagnosisSchema.index({ disease: 1, createdAt: -1 });
 export type DiagnosisDocument = InferSchemaType<typeof diagnosisSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const Diagnosis = mongoose.model('Diagnosis', diagnosisSchema);
+export const Diagnosis = mongoose.models.Diagnosis || mongoose.model('Diagnosis', diagnosisSchema);

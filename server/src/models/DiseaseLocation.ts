@@ -21,4 +21,4 @@ diseaseLocationSchema.index({ disease: 1, timestamp: -1 });
 export type DiseaseLocationDocument = InferSchemaType<typeof diseaseLocationSchema> & {
   _id: mongoose.Types.ObjectId;
 };
-export const DiseaseLocation = mongoose.model('DiseaseLocation', diseaseLocationSchema);
+export const DiseaseLocation = mongoose.models.DiseaseLocation || mongoose.model('DiseaseLocation', diseaseLocationSchema);
