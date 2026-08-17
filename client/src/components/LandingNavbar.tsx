@@ -8,6 +8,15 @@ import { useLogoutConfirm } from '../hooks/useLogoutConfirm';
 import { useScrollProgress } from '../hooks/useScrollProgress';
 import { navCopy } from '../i18n/messages';
 
+/** App routes used when the farmer is logged in (laptop Home must open the dashboard). */
+const APP_SECTION_ROUTES: Record<string, string> = {
+  hero: '/home',
+  detect: '/detect',
+  weather: '/weather',
+  knowledge: '/knowledge',
+  chatbot: '/chat',
+};
+
 /** Section anchors on the landing page */
 const SECTION_LINKS = [
   { id: 'hero', en: 'Home', my: 'ပင်မစာမျက်နှာ' },
@@ -78,19 +87,40 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
     return () => document.removeEventListener('mousedown', onDoc);
   }, []);
 
+  function homePath() {
+    return user ? '/home' : '/';
+  }
+
   function goHome() {
     setMenuOpen(false);
-    if (isLanding) window.scrollTo({ top: 0, behavior: 'smooth' });
-    else navigate('/');
+    const dest = homePath();
+    if (location.pathname === dest) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    navigate(dest);
   }
 
   function goSection(id: string) {
     setMenuOpen(false);
+    const appPath = user ? APP_SECTION_ROUTES[id] : undefined;
+    if (appPath) {
+      navigate(appPath);
+      return;
+    }
     if (isLanding) {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       navigate({ pathname: '/', hash: id });
     }
+  }
+
+  function isSectionActive(id: string) {
+    if (user) {
+      const path = APP_SECTION_ROUTES[id];
+      return Boolean(path && location.pathname === path);
+    }
+    return isLanding && activeId === id;
   }
 
   function goFeed() {
@@ -133,7 +163,7 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
             <button
               key={link.id}
               type="button"
-              className={isLanding && activeId === link.id ? 'is-active' : undefined}
+              className={isSectionActive(link.id) ? 'is-active' : undefined}
               onClick={() => goSection(link.id)}
             >
               {lang === 'en' ? link.en : link.my}
@@ -242,10 +272,7 @@ export function LandingNavbar({ lang, onLangChange }: Props) {
           <button
             type="button"
             className={location.pathname === '/home' || location.pathname === '/' ? 'is-active' : undefined}
-            onClick={() => {
-              setMenuOpen(false);
-              navigate(user ? '/home' : '/');
-            }}
+            onClick={goHome}
           >
             {t.home}
           </button>
