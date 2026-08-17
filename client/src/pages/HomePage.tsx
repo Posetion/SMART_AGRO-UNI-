@@ -219,22 +219,51 @@ export function HomePage() {
 
   return (
     <div className="home page-home">
-      {/* Location + weather strip */}
-      <section className="home-location-bar">
-        <div className="home-location-left">
-          <IconPin />
-          <div>
-            <strong>{locationLabel}</strong>
-            <span>{loading ? t.updating : t.liveFieldConditions}</span>
+      <div className="home-desk-hero">
+        <section className="home-location-bar">
+          <div className="home-location-left">
+            <IconPin />
+            <div>
+              <strong>{locationLabel}</strong>
+              <span>{loading ? t.updating : t.liveFieldConditions}</span>
+            </div>
           </div>
-        </div>
-        <div className="home-location-right">
-          <span className="temp">{currentTemp != null ? `${Math.round(currentTemp)}°C` : '—'}</span>
-          <span className="cond">{currentLabel}</span>
-        </div>
-      </section>
+          <div className="home-location-right">
+            <span className="temp">{currentTemp != null ? `${Math.round(currentTemp)}°C` : '—'}</span>
+            <span className="cond">{currentLabel}</span>
+          </div>
+        </section>
 
-      {/* Feature grid */}
+        <section className="home-section home-stats-section">
+          <div className="section-head">
+            <h2>{t.dashboard}</h2>
+            {!user && <Link to="/login">{t.signInForStats}</Link>}
+          </div>
+          <div className="stats-grid">
+            <article className="stat-card">
+              <span className="stat-label">{t.diagnostics}</span>
+              <strong>{user ? diagnosticsCount : '—'}</strong>
+              <span>{t.thisMonth}</span>
+            </article>
+            <article className="stat-card warn">
+              <span className="stat-label">{t.activeAlerts}</span>
+              <strong>{alertCount}</strong>
+              <span>{t.inArea}</span>
+            </article>
+            <article className="stat-card">
+              <span className="stat-label">{t.diseaseHotspots}</span>
+              <strong>{hotspots.length}</strong>
+              <span>{t.townships}</span>
+            </article>
+            <article className="stat-card">
+              <span className="stat-label">{t.communityLabel}</span>
+              <strong>{user ? communityCount : '—'}</strong>
+              <span>{t.recentPosts}</span>
+            </article>
+          </div>
+        </section>
+      </div>
+
       <section className="home-section">
         <div className="feature-grid">
           {features.map(({ to, title, sub, Icon, tone }) => (
@@ -249,188 +278,160 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Dashboard stats */}
-      <section className="home-section">
-        <div className="section-head">
-          <h2>{t.dashboard}</h2>
-          {!user && <Link to="/login">{t.signInForStats}</Link>}
-        </div>
-        <div className="stats-grid">
-          <article className="stat-card">
-            <span className="stat-label">{t.diagnostics}</span>
-            <strong>{user ? diagnosticsCount : '—'}</strong>
-            <span>{t.thisMonth}</span>
-          </article>
-          <article className="stat-card warn">
-            <span className="stat-label">{t.activeAlerts}</span>
-            <strong>{alertCount}</strong>
-            <span>{t.inArea}</span>
-          </article>
-          <article className="stat-card">
-            <span className="stat-label">{t.diseaseHotspots}</span>
-            <strong>{hotspots.length}</strong>
-            <span>{t.townships}</span>
-          </article>
-          <article className="stat-card">
-            <span className="stat-label">{t.communityLabel}</span>
-            <strong>{user ? communityCount : '—'}</strong>
-            <span>{t.recentPosts}</span>
-          </article>
-        </div>
-      </section>
-
-      {/* Disease alert */}
-      <section className="home-section">
-        <div
-          className={`alert-banner ${
-            alertFeature?.properties?.riskLevel === 'High' || (alertFeature?.properties?.outbreakCount || 0) >= 10
-              ? 'critical'
-              : 'warning'
-          }`}
-        >
-          <div className="alert-banner-top">
-            <span className="pill danger">{t.diseaseAlert}</span>
-            <span>{alertFeature?.properties?.region || 'Yangon Region'}</span>
-          </div>
-          <h3>
-            {alertFeature
-              ? `${alertFeature.properties?.riskLevel || t.elevated} · ${alertFeature.properties?.name}`
-              : t.noOutbreak}
-          </h3>
-          <p>
-            {alertFeature
-              ? `${alertFeature.properties?.outbreakCount || 0} ${t.reportsLinked} ${alertFeature.properties?.name}`
-              : t.noOutbreakHint}
-          </p>
-          <Link className="button secondary" to="/heatmap">
-            {t.viewDetails}
-          </Link>
-        </div>
-      </section>
-
-      {/* Community feed */}
-      <section className="home-section">
-        <div className="section-head">
-          <h2>{t.communityFeed}</h2>
-          <Link to="/social">{t.openFeed}</Link>
-        </div>
-
-        {!user && (
-          <div className="panel soft-empty">
-            <p>{t.guestFeedHint}</p>
-            <Link className="button" to="/login">
-              {t.loginToJoin}
-            </Link>
-          </div>
-        )}
-
-        {user && posts.length === 0 && (
-          <div className="panel soft-empty">
-            <p>{t.noPostsYet}</p>
-            <Link className="button" to="/social">
-              {t.createPost}
-            </Link>
-          </div>
-        )}
-
-        <div className="feed-preview-list">
-          {posts.map((p) => (
-            <article key={p._id} className="feed-card">
-              <header>
-                <div className="avatar">
-                  {(p.userId?.fullName || p.userId?.email || 'F').slice(0, 1).toUpperCase()}
-                </div>
-                <div>
-                  <strong>{p.userId?.fullName || p.userId?.email?.split('@')[0] || (lang === 'my' ? 'လယ်သမား' : 'Farmer')}</strong>
-                  <span className="muted">{timeAgo(p.createdAt, t)}</span>
-                </div>
-              </header>
-              <p>{p.content}</p>
-              {p.images && p.images.length > 0 && (
-                <div className="feed-thumbs">
-                  {p.images.slice(0, 2).map((src) => (
-                    <div key={src} className="thumb" style={{ backgroundImage: `url(${src})` }} />
-                  ))}
-                </div>
-              )}
-              {p.diagnosticId && (
-                <div className="diag-chip">
-                  <span>{t.diseaseLabel} {p.diagnosticId.disease}</span>
-                  <span>{t.severityLabel} {p.diagnosticId.severityIndex ?? '—'}</span>
-                </div>
-              )}
-              <footer>
-                <span>{p.likes?.length || 0} {t.likes}</span>
-                <span>{p.comments?.length || 0} {t.replies}</span>
-                <Link to="/social">{t.view}</Link>
-              </footer>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* Knowledge recommendations */}
-      <section className="home-section">
-        <div className="section-head">
-          <h2>{t.knowledgeCenter}</h2>
-          <Link to="/knowledge">{t.viewAll}</Link>
-        </div>
-        <div className="knowledge-rec-list">
-          {articles.length === 0 && (
-            <div className="panel soft-empty">
-              <p>No published articles yet. Admins can add guides in the knowledge console.</p>
+      <div className="home-desk-body">
+        <div className="home-desk-main">
+          <section className="home-section">
+            <div className="section-head">
+              <h2>{t.communityFeed}</h2>
+              <Link to="/social">{t.openFeed}</Link>
             </div>
-          )}
-          {articles.map((a) => (
-            <Link key={a._id} to="/knowledge" className="knowledge-rec-card">
-              <div className="knowledge-rec-icon">
-                <IconBook />
-              </div>
-              <div>
-                <strong>{a.title}</strong>
-                <span>
-                  {a.category}
-                  {a.updatedAt || a.createdAt
-                    ? ` · ${new Date(a.updatedAt || a.createdAt || '').toLocaleDateString()}`
-                    : ''}
-                </span>
-                {a.description && <p>{a.description.slice(0, 90)}</p>}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
 
-      {/* Weather strip */}
-      <section className="home-section">
-        <div className="section-head">
-          <h2>{t.liveWeather}</h2>
-          <Link to="/weather">{t.full7Day}</Link>
+            {!user && (
+              <div className="panel soft-empty">
+                <p>{t.guestFeedHint}</p>
+                <Link className="button" to="/login">
+                  {t.loginToJoin}
+                </Link>
+              </div>
+            )}
+
+            {user && posts.length === 0 && (
+              <div className="panel soft-empty">
+                <p>{t.noPostsYet}</p>
+                <Link className="button" to="/social">
+                  {t.createPost}
+                </Link>
+              </div>
+            )}
+
+            <div className="feed-preview-list">
+              {posts.map((p) => (
+                <article key={p._id} className="feed-card">
+                  <header>
+                    <div className="avatar">
+                      {(p.userId?.fullName || p.userId?.email || 'F').slice(0, 1).toUpperCase()}
+                    </div>
+                    <div>
+                      <strong>{p.userId?.fullName || p.userId?.email?.split('@')[0] || (lang === 'my' ? 'လယ်သမား' : 'Farmer')}</strong>
+                      <span className="muted">{timeAgo(p.createdAt, t)}</span>
+                    </div>
+                  </header>
+                  <p>{p.content}</p>
+                  {p.images && p.images.length > 0 && (
+                    <div className="feed-thumbs">
+                      {p.images.slice(0, 2).map((src) => (
+                        <div key={src} className="thumb" style={{ backgroundImage: `url(${src})` }} />
+                      ))}
+                    </div>
+                  )}
+                  {p.diagnosticId && (
+                    <div className="diag-chip">
+                      <span>{t.diseaseLabel} {p.diagnosticId.disease}</span>
+                      <span>{t.severityLabel} {p.diagnosticId.severityIndex ?? '—'}</span>
+                    </div>
+                  )}
+                  <footer>
+                    <span>{p.likes?.length || 0} {t.likes}</span>
+                    <span>{p.comments?.length || 0} {t.replies}</span>
+                    <Link to="/social">{t.view}</Link>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          </section>
         </div>
-        <div className="weather-strip">
-          {forecastDays.length === 0 && (
-            <div className="panel soft-empty" style={{ gridColumn: '1 / -1' }}>
+
+        <aside className="home-desk-side">
+          <section className="home-section">
+            <div
+              className={`alert-banner ${
+                alertFeature?.properties?.riskLevel === 'High' || (alertFeature?.properties?.outbreakCount || 0) >= 10
+                  ? 'critical'
+                  : 'warning'
+              }`}
+            >
+              <div className="alert-banner-top">
+                <span className="pill danger">{t.diseaseAlert}</span>
+                <span>{alertFeature?.properties?.region || 'Yangon Region'}</span>
+              </div>
+              <h3>
+                {alertFeature
+                  ? `${alertFeature.properties?.riskLevel || t.elevated} · ${alertFeature.properties?.name}`
+                  : t.noOutbreak}
+              </h3>
               <p>
-                {lang === 'my'
-                  ? 'ခန့်မှန်းချက် API ရရှိသောအခါ ရာသီဥတု ပေါ်ပါမည်။'
-                  : 'Weather will appear when the forecast API is reachable.'}
+                {alertFeature
+                  ? `${alertFeature.properties?.outbreakCount || 0} ${t.reportsLinked} ${alertFeature.properties?.name}`
+                  : t.noOutbreakHint}
               </p>
+              <Link className="button secondary" to="/heatmap">
+                {t.viewDetails}
+              </Link>
             </div>
-          )}
-          {forecastDays.map((date, i) => (
-            <article key={date} className="weather-day">
-              <strong>{dayName(date, i, t, lang)}</strong>
-              <span className="wx-temp">
-                {Math.round(daily?.temperature_2m_max?.[i] ?? 0)}°
-                <small> / {Math.round(daily?.temperature_2m_min?.[i] ?? 0)}°</small>
-              </span>
-              <span className="wx-cond">
-                {weatherLabel(daily?.weathercode?.[i], daily?.precipitation_sum?.[i], lang)}
-              </span>
-            </article>
-          ))}
-        </div>
-      </section>
+          </section>
+
+          <section className="home-section">
+            <div className="section-head">
+              <h2>{t.knowledgeCenter}</h2>
+              <Link to="/knowledge">{t.viewAll}</Link>
+            </div>
+            <div className="knowledge-rec-list">
+              {articles.length === 0 && (
+                <div className="panel soft-empty">
+                  <p>No published articles yet. Admins can add guides in the knowledge console.</p>
+                </div>
+              )}
+              {articles.map((a) => (
+                <Link key={a._id} to="/knowledge" className="knowledge-rec-card">
+                  <div className="knowledge-rec-icon">
+                    <IconBook />
+                  </div>
+                  <div>
+                    <strong>{a.title}</strong>
+                    <span>
+                      {a.category}
+                      {a.updatedAt || a.createdAt
+                        ? ` · ${new Date(a.updatedAt || a.createdAt || '').toLocaleDateString()}`
+                        : ''}
+                    </span>
+                    {a.description && <p>{a.description.slice(0, 90)}</p>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className="home-section">
+            <div className="section-head">
+              <h2>{t.liveWeather}</h2>
+              <Link to="/weather">{t.full7Day}</Link>
+            </div>
+            <div className="weather-strip">
+              {forecastDays.length === 0 && (
+                <div className="panel soft-empty" style={{ gridColumn: '1 / -1' }}>
+                  <p>
+                    {lang === 'my'
+                      ? 'ခန့်မှန်းချက် API ရရှိသောအခါ ရာသီဥတု ပေါ်ပါမည်။'
+                      : 'Weather will appear when the forecast API is reachable.'}
+                  </p>
+                </div>
+              )}
+              {forecastDays.map((date, i) => (
+                <article key={date} className="weather-day">
+                  <strong>{dayName(date, i, t, lang)}</strong>
+                  <span className="wx-temp">
+                    {Math.round(daily?.temperature_2m_max?.[i] ?? 0)}°
+                    <small> / {Math.round(daily?.temperature_2m_min?.[i] ?? 0)}°</small>
+                  </span>
+                  <span className="wx-cond">
+                    {weatherLabel(daily?.weathercode?.[i], daily?.precipitation_sum?.[i], lang)}
+                  </span>
+                </article>
+              ))}
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }
