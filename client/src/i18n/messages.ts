@@ -366,6 +366,12 @@ export const socialCopy = (lang: Lang) =>
       deletePostConfirm: 'Delete this post? This cannot be undone.',
       deletingPost: 'Deleting…',
       moreActions: 'More actions',
+      editPost: 'Edit',
+      saveEdit: 'Save',
+      cancelEdit: 'Cancel',
+      savingEdit: 'Saving…',
+      editFailed: 'Could not update post.',
+      edited: 'Post updated.',
     },
     {
       guestTitle: 'အသိုင်းအဝိုင်း ဖိဒ်',
@@ -450,6 +456,12 @@ export const socialCopy = (lang: Lang) =>
       deletePostConfirm: 'ဤပို့စ်ကို ဖျက်မလား? ပြန်မရနိုင်ပါ။',
       deletingPost: 'ဖျက်နေသည်…',
       moreActions: 'နောက်ထပ် လုပ်ဆောင်ချက်',
+      editPost: 'ပြင်ရန်',
+      saveEdit: 'သိမ်းရန်',
+      cancelEdit: 'ပယ်ဖျက်ရန်',
+      savingEdit: 'သိမ်းနေသည်…',
+      editFailed: 'ပို့စ် ပြင်မရပါ။',
+      edited: 'ပို့စ် အပ်ဒိတ်ပြီးပါပြီ။',
     }
   );
 

@@ -1422,6 +1422,29 @@ select {
   color: #2a2f2c;
 }
 
+.sf-edit-box {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.sf-edit-box textarea {
+  width: 100%;
+  min-height: 6.5rem;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.sf-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .sf-hashtag {
   color: #1565c0;
   font-weight: 600;

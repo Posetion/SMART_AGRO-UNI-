@@ -247,6 +247,9 @@ export function SocialPage() {
   const [reportBusy, setReportBusy] = useState(false);
   const [reportedIds, setReportedIds] = useState<Record<string, boolean>>({});
   const [notice, setNotice] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const displayName = user?.fullName?.trim() || user?.email?.split('@')[0] || t.farmer;
   const handle = user?.email?.split('@')[0] || 'farmer';
@@ -482,9 +485,48 @@ export function SocialPage() {
     try {
       await api(`/social/posts/${id}`, { method: 'DELETE', token: accessToken });
       setMenuOpenId(null);
+      if (editingId === id) {
+        setEditingId(null);
+        setEditDraft('');
+      }
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete post');
+    }
+  }
+
+  function startEdit(post: Post) {
+    setMenuOpenId(null);
+    setEditingId(post._id);
+    setEditDraft(post.content);
+    setError('');
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditDraft('');
+  }
+
+  async function saveEdit(id: string) {
+    if (!accessToken) return;
+    const text = editDraft.trim();
+    if (!text) return;
+    setSavingEdit(true);
+    setError('');
+    try {
+      await api(`/social/posts/${id}`, {
+        method: 'PUT',
+        token: accessToken,
+        body: { content: text },
+      });
+      setPosts((prev) => prev.map((p) => (p._id === id ? { ...p, content: text } : p)));
+      setEditingId(null);
+      setEditDraft('');
+      setNotice(t.edited);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.editFailed);
+    } finally {
+      setSavingEdit(false);
     }
   }
 
@@ -789,13 +831,21 @@ export function SocialPage() {
                       {menuOpenId === p._id && (
                         <div className="sf-more-menu" role="menu">
                           {String(p.userId?._id) === user.id ? (
-                            <button
-                              type="button"
-                              className="sf-more-danger"
-                              onClick={() => void deleteOwnPost(p._id)}
-                            >
-                              {t.deletePost}
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => startEdit(p)}
+                              >
+                                {t.editPost}
+                              </button>
+                              <button
+                                type="button"
+                                className="sf-more-danger"
+                                onClick={() => void deleteOwnPost(p._id)}
+                              >
+                                {t.deletePost}
+                              </button>
+                            </>
                           ) : reportedIds[p._id] ? (
                             <button type="button" disabled>
                               {t.alreadyReported}
@@ -811,7 +861,36 @@ export function SocialPage() {
                   )}
                 </header>
 
-                <p className="sf-content">{renderContent(p.content)}</p>
+                {editingId === p._id ? (
+                  <div className="sf-edit-box">
+                    <textarea
+                      value={editDraft}
+                      onChange={(e) => setEditDraft(e.target.value)}
+                      rows={4}
+                      disabled={savingEdit}
+                    />
+                    <div className="sf-edit-actions">
+                      <button
+                        type="button"
+                        className="button compact"
+                        disabled={savingEdit || !editDraft.trim()}
+                        onClick={() => void saveEdit(p._id)}
+                      >
+                        {savingEdit ? t.savingEdit : t.saveEdit}
+                      </button>
+                      <button
+                        type="button"
+                        className="button secondary compact"
+                        disabled={savingEdit}
+                        onClick={cancelEdit}
+                      >
+                        {t.cancelEdit}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="sf-content">{renderContent(p.content)}</p>
+                )}
 
                 {!!p.images?.length && (
                   <PhotoGallery

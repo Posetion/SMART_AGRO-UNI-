@@ -249,7 +249,7 @@ export function UserProfilePage() {
       {profile && (
         <section className="pf-panel">
           <div className="pf-section-head">
-            <h2>{t.myPosts}</h2>
+            <h2>{st.posts}</h2>
           </div>
           {!posts.length && <p className="muted">{t.noCommunityPosts}</p>}
           <ul className="pf-post-list">
