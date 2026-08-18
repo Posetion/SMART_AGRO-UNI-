@@ -12,6 +12,7 @@ import {
   TownshipLocationPicker,
   placeCoords,
 } from '../components/TownshipLocationPicker';
+import { ImageCropModal } from '../components/ImageCropModal';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { CROP_TYPES, type CropType } from '../data/diseaseNames';
@@ -19,6 +20,7 @@ import { useLogoutConfirm } from '../hooks/useLogoutConfirm';
 import { profileCopy } from '../i18n/messages';
 import { api } from '../services/api';
 import { formatCropLabel } from '../utils/localizeFarm';
+import { mediaUrl } from '../utils/mediaUrl';
 
 type Tone = 'mint' | 'sky' | 'coral' | 'amber' | 'peach' | 'teal';
 type Tab = 'posts' | 'saved' | 'history' | 'settings';
@@ -175,6 +177,7 @@ export function ProfilePage() {
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [photoUploading, setPhotoUploading] = useState<'avatar' | 'cover' | null>(null);
+  const [crop, setCrop] = useState<{ kind: 'avatar' | 'cover'; src: string } | null>(null);
   const [deletingDiagnosisId, setDeletingDiagnosisId] = useState<string | null>(null);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -484,8 +487,42 @@ export function ProfilePage() {
     }
   }
 
+  function pickPhoto(kind: 'avatar' | 'cover', file: File | null) {
+    if (!file) return;
+    const src = URL.createObjectURL(file);
+    setCrop((prev) => {
+      if (prev?.src) URL.revokeObjectURL(prev.src);
+      return { kind, src };
+    });
+  }
+
+  function closeCrop() {
+    if (crop?.src) URL.revokeObjectURL(crop.src);
+    setCrop(null);
+  }
+
+  const avatarSrc = mediaUrl(profile?.avatarUrl) || profile?.avatarUrl || '';
+  const coverSrc = mediaUrl(profile?.coverUrl) || profile?.coverUrl || '';
+
   return (
     <>
+    {crop && (
+      <ImageCropModal
+        src={crop.src}
+        aspect={crop.kind === 'cover' ? 3 : 1}
+        title={crop.kind === 'cover' ? t.cropCover : t.cropAvatar}
+        hint={t.cropHint}
+        applyLabel={t.cropApply}
+        cancelLabel={t.cropCancel}
+        zoomLabel={t.cropZoom}
+        onCancel={closeCrop}
+        onCrop={(file) => {
+          const kind = crop.kind;
+          closeCrop();
+          void uploadPhoto(kind, file);
+        }}
+      />
+    )}
     <div className="pf-page">
       <section className="pf-panel pf-hero">
         <div className="pf-section-head">
@@ -496,22 +533,18 @@ export function ProfilePage() {
         </div>
 
         <div className="pf-cover">
-          <div
-            className={`pf-cover-art tone-${avatarTone}`}
-            style={
-              profile?.coverUrl
-                ? { backgroundImage: `url(${profile.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                : undefined
-            }
-            aria-hidden
-          />
+          <div className={`pf-cover-art tone-${avatarTone} ${coverSrc ? 'has-photo' : ''}`}>
+            {coverSrc ? <img className="pf-cover-img" src={coverSrc} alt="" /> : null}
+          </div>
           <div className="pf-identity">
-            <div className={`pf-avatar tone-${avatarTone}`}>
-              {profile?.avatarUrl ? (
-                <img src={profile.avatarUrl} alt="" />
-              ) : (
-                <span aria-hidden>{displayName.slice(0, 1).toUpperCase()}</span>
-              )}
+            <div className={`pf-avatar tone-${avatarTone} ${avatarSrc ? 'has-photo' : ''}`}>
+              <div className="pf-avatar-media">
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="" />
+                ) : (
+                  <span aria-hidden>{displayName.slice(0, 1).toUpperCase()}</span>
+                )}
+              </div>
             </div>
             <div className="pf-identity-text">
               <h2>{displayName}</h2>
@@ -929,7 +962,7 @@ export function ProfilePage() {
                     hidden
                     onChange={(e) => {
                       const file = e.target.files?.[0] || null;
-                      void uploadPhoto('avatar', file);
+                      pickPhoto('avatar', file);
                       e.target.value = '';
                     }}
                   />
@@ -940,14 +973,14 @@ export function ProfilePage() {
                     hidden
                     onChange={(e) => {
                       const file = e.target.files?.[0] || null;
-                      void uploadPhoto('cover', file);
+                      pickPhoto('cover', file);
                       e.target.value = '';
                     }}
                   />
                   <div className="pf-photo-row">
                     <div className={`pf-photo-preview tone-${avatarTone}`}>
-                      {profile?.avatarUrl ? (
-                        <img src={profile.avatarUrl} alt="" />
+                      {avatarSrc ? (
+                        <img src={avatarSrc} alt="" />
                       ) : (
                         <span>{displayName.slice(0, 1).toUpperCase()}</span>
                       )}

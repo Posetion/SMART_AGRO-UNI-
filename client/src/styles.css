@@ -11100,9 +11100,25 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
   height: 140px;
   border-radius: 16px;
   border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
   background:
     radial-gradient(circle at 20% 30%, rgba(255,255,255,0.45), transparent 42%),
     linear-gradient(120deg, #a5d6a7 0%, #81c784 40%, #66bb6a 70%, #43a047 100%);
+}
+
+.pf-cover-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.pf-cover-art.has-photo {
+  background: #c8e6c9;
 }
 
 .pf-identity {
@@ -11125,6 +11141,31 @@ html.ad-compact .as-stack { gap: 0.65rem; padding: 0.85rem 1rem; }
   box-shadow: 0 8px 20px rgba(27, 94, 32, 0.12);
   margin-top: -48px;
   flex-shrink: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.pf-avatar-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  display: grid;
+  place-items: center;
+}
+
+.pf-avatar.has-photo {
+  background: #c8e6c9;
+}
+
+.pf-avatar-media img,
+.pf-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: inherit;
+  display: block;
 }
 
 .pf-identity-text {
@@ -12958,7 +12999,9 @@ html[lang='my'] .va-bubble-body {
 }
 
 .pf-cover-art.has-image,
+.pf-cover-art.has-photo,
 .pf-cover-art[style*='background-image'] {
+  background-image: none;
   background-color: #c8e6c9;
 }
 
@@ -12985,15 +13028,85 @@ html[lang='my'] .va-bubble-body {
 
 .pf-avatar {
   position: relative;
-  overflow: visible;
 }
 
 .pf-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   border-radius: inherit;
   display: block;
+}
+
+.pf-crop-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(15, 40, 20, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.pf-crop-modal {
+  width: min(480px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  padding: 1.1rem 1.15rem 1.2rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pf-crop-modal h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1b5e20;
+}
+
+.pf-crop-stage {
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #1b4332;
+  touch-action: none;
+  cursor: grab;
+  max-width: 100%;
+}
+
+.pf-crop-stage:active {
+  cursor: grabbing;
+}
+
+.pf-crop-stage img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.pf-crop-zoom {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1b5e20;
+}
+
+.pf-crop-zoom input {
+  width: 100%;
+  accent-color: #2e7d32;
+}
+
+.pf-crop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
 }
 
 /* ===== Heatmap v2 (Leaflet real map) ===== */

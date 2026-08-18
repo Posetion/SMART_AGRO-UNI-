@@ -234,26 +234,24 @@ export function UserProfilePage() {
 
         {profile && (
           <div className="pf-cover">
-            <div
-              className={`pf-cover-art tone-${tone}`}
-              style={
-                profile.coverUrl
-                  ? {
-                      backgroundImage: `url(${mediaUrl(profile.coverUrl) || profile.coverUrl})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }
-                  : undefined
-              }
-              aria-hidden
-            />
+            <div className={`pf-cover-art tone-${tone} ${profile.coverUrl ? 'has-photo' : ''}`}>
+              {profile.coverUrl ? (
+                <img
+                  className="pf-cover-img"
+                  src={mediaUrl(profile.coverUrl) || profile.coverUrl}
+                  alt=""
+                />
+              ) : null}
+            </div>
             <div className="pf-identity">
-              <div className={`pf-avatar tone-${tone}`}>
-                {profile.avatarUrl ? (
-                  <img src={mediaUrl(profile.avatarUrl) || profile.avatarUrl} alt="" />
-                ) : (
-                  <span aria-hidden>{displayName.slice(0, 1).toUpperCase()}</span>
-                )}
+              <div className={`pf-avatar tone-${tone} ${profile.avatarUrl ? 'has-photo' : ''}`}>
+                <div className="pf-avatar-media">
+                  {profile.avatarUrl ? (
+                    <img src={mediaUrl(profile.avatarUrl) || profile.avatarUrl} alt="" />
+                  ) : (
+                    <span aria-hidden>{displayName.slice(0, 1).toUpperCase()}</span>
+                  )}
+                </div>
               </div>
               <div className="pf-identity-text">
                 <h2>{displayName}</h2>
