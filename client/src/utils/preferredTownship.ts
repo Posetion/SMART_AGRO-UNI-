@@ -20,6 +20,11 @@ export function readPreferredTownship(): PreferredTownship | null {
   }
 }
 
+export function coordsLookLikeMyanmar(lat?: number, lng?: number) {
+  if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+  return lat >= 9.5 && lat <= 28.6 && lng >= 92.1 && lng <= 101.3;
+}
+
 export function writePreferredTownship(next: PreferredTownship) {
   const nameEn = next.nameEn.trim();
   if (!nameEn) return;

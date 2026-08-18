@@ -15,7 +15,7 @@ import {
   formatRegionLabel,
   formatTownshipLabel,
 } from '../utils/localizeFarm';
-import { readPreferredTownship, writePreferredTownship } from '../utils/preferredTownship';
+import { coordsLookLikeMyanmar, readPreferredTownship, writePreferredTownship } from '../utils/preferredTownship';
 
 type Tone = 'mint' | 'sky' | 'coral' | 'amber' | 'peach' | 'teal';
 
@@ -419,6 +419,10 @@ export function DetectPage() {
       });
       const nextLat = pos.coords.latitude;
       const nextLng = pos.coords.longitude;
+      if (!coordsLookLikeMyanmar(nextLat, nextLng)) {
+        if (force) setError(t.geoFailed);
+        return;
+      }
       setLat(nextLat);
       setLng(nextLng);
 

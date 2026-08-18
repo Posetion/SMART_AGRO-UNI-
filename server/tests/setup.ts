@@ -17,6 +17,7 @@ process.env.OTP_TTL_SECONDS = '180';
 process.env.OTP_MAX_ATTEMPTS = '3';
 process.env.OTP_RESEND_COOLDOWN_SECONDS = '0';
 process.env.AI_SERVICE_URL = 'http://localhost:8000';
+process.env.AI_PROVIDER = 'local';
 process.env.WEATHER_API_URL = 'https://api.open-meteo.com/v1';
 process.env.WEATHER_CACHE_TTL_SECONDS = '900';
 process.env.FILE_STORAGE_TYPE = 'gridfs';

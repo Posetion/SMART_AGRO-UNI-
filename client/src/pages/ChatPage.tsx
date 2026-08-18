@@ -13,6 +13,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { chatCopy } from '../i18n/messages';
 import { api } from '../services/api';
 import { mediaUrl } from '../utils/mediaUrl';
+import { coordsLookLikeMyanmar, readPreferredTownship } from '../utils/preferredTownship';
 
 type Tone = 'mint' | 'sky' | 'coral' | 'amber' | 'peach' | 'teal';
 type ChatAttachment = { url: string; name?: string; mimeType?: string };
@@ -220,6 +221,7 @@ export function ChatPage() {
       if (hasCoords) {
         const lng = Number(coords![0]);
         const lat = Number(coords![1]);
+        if (!coordsLookLikeMyanmar(lat, lng)) return false;
         const township = me.location?.township?.trim() || 'Saved farm';
         setLoc({ lat, lng, township, source: 'profile' });
         setLocLabel(
@@ -242,6 +244,18 @@ export function ChatPage() {
   async function locateFarm(force = false) {
     setLocError('');
     if (!force) {
+      const preferred = readPreferredTownship();
+      if (preferred?.nameEn) {
+        const useCoords = coordsLookLikeMyanmar(preferred.lat, preferred.lng);
+        setLoc({
+          lat: useCoords ? preferred.lat : undefined,
+          lng: useCoords ? preferred.lng : undefined,
+          township: preferred.nameEn,
+          source: 'profile',
+        });
+        setLocLabel(preferred.region ? `${preferred.nameEn}, ${preferred.region}` : preferred.nameEn);
+        return;
+      }
       const fromProfile = await applyProfileLocation();
       if (fromProfile) return;
     }
@@ -256,6 +270,22 @@ export function ChatPage() {
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        if (!coordsLookLikeMyanmar(lat, lng)) {
+          const preferred = readPreferredTownship();
+          if (preferred?.nameEn) {
+            setLoc({
+              lat: coordsLookLikeMyanmar(preferred.lat, preferred.lng) ? preferred.lat : undefined,
+              lng: coordsLookLikeMyanmar(preferred.lat, preferred.lng) ? preferred.lng : undefined,
+              township: preferred.nameEn,
+              source: 'profile',
+            });
+            setLocLabel(preferred.region ? `${preferred.nameEn}, ${preferred.region}` : preferred.nameEn);
+            return;
+          }
+          setLocLabel(t.usingDefaultLocation);
+          setLoc((prev) => ({ ...prev, source: 'default' }));
+          return;
+        }
         setLoc({ lat, lng, township: 'My location', source: 'gps' });
         setLocLabel(`${lat.toFixed(2)}°, ${lng.toFixed(2)}°`);
         setLocError('');

@@ -231,10 +231,12 @@ function hasCursor(): boolean {
   return Boolean(env.CURSOR_API_KEY?.trim());
 }
 
-/** Local FastAPI first (no VPN). Cloud provider next if the network can reach it. */
+/** Cursor only when requested — do not let local rice-SVM intercept. */
 function providerOrder(): Array<'gemini' | 'cursor' | 'local'> {
+  if (env.AI_PROVIDER === 'cursor') return ['cursor'];
   if (env.AI_PROVIDER === 'local') return ['local'];
-  return ['local', env.AI_PROVIDER];
+  if (env.AI_PROVIDER === 'gemini') return ['gemini', 'local'];
+  return ['cursor'];
 }
 
 function isGeminiQuotaError(err: unknown): boolean {
@@ -353,7 +355,7 @@ async function chatWithGemini(
 
   const requestOnce = async (turns: GeminiChatContent[]) => {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), env.CURSOR_DETECT_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), env.GEMINI_TIMEOUT_MS);
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -397,6 +399,7 @@ async function chatWithGemini(
 
   const reply = formatFarmReply(text);
   if (!reply) throw new AppError('Gemini returned an empty reply', 503);
+  if (looksLikeLeakedPrompt(reply)) throw new AppError('Gemini returned an unusable reply', 503);
   return { reply };
 }
 
@@ -648,6 +651,7 @@ async function detectWithCursor(
   const timeoutMs = env.CURSOR_DETECT_TIMEOUT_MS;
   const modelId = env.CURSOR_MODEL || 'composer-2.5';
   const imagePayload = [{ data: imageBuffer.toString('base64'), mimeType: safeMime }];
+  console.info(`[cursor-detect] model=${modelId} timeout=${timeoutMs}ms`);
 
   const rejectResult = (): DetectResult => ({
     cropType: '',
@@ -783,8 +787,7 @@ async function detectWithGemini(
   const model = env.GEMINI_MODEL;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
   const controller = new AbortController();
-  // Keep short so blocked Google APIs fail fast without VPN
-  const timeoutMs = env.CURSOR_DETECT_TIMEOUT_MS;
+  const timeoutMs = env.GEMINI_TIMEOUT_MS;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   const generationConfig: Record<string, unknown> = {
@@ -1020,7 +1023,13 @@ export async function detectDisease(imageBuffer: Buffer, mimeType: string): Prom
         return await detectWithCursor(imageBuffer, mimeType);
       }
       if (provider === 'local') {
-        return await detectWithLocalAi(imageBuffer, mimeType);
+        const local = await detectWithLocalAi(imageBuffer, mimeType);
+        if (local.quality?.ok === false && !isLast) {
+          console.warn('[detect] local could not classify this photo, trying next');
+          lastError = new AppError('Local AI could not classify this photo', 400);
+          continue;
+        }
+        return local;
       }
     } catch (err) {
       lastError = err;
@@ -1088,9 +1097,12 @@ export async function chatWithAi(
             },
           }),
         });
-        const raw = data.data?.reply ?? data.reply ?? mockChat(prompt).reply;
+        const raw = data.data?.reply ?? data.reply ?? '';
         const reply = formatFarmReply(raw);
-        if (!reply || looksLikeLeakedPrompt(reply)) return mockChat(prompt);
+        if (!reply || looksLikeLeakedPrompt(reply)) {
+          if (!isLast) throw new AppError('Local chat returned an unusable reply', 503);
+          return mockChat(prompt);
+        }
         return { reply };
       }
       if (provider === 'gemini' && hasGemini()) {

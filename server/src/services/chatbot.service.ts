@@ -98,6 +98,10 @@ function formatWeatherContext(input: {
     .join('\n');
 }
 
+function inMyanmar(lat: number, lng: number) {
+  return lat >= 9.5 && lat <= 28.6 && lng >= 92.1 && lng <= 101.3;
+}
+
 function isPlaceholderTownship(name?: string) {
   return !name || PLACEHOLDER_TOWNSHIPS.has(name.trim().toLowerCase());
 }
@@ -110,13 +114,15 @@ async function resolveChatContext(userId: string, loc: ChatLocation = {}) {
     coords.length >= 2 &&
     Number.isFinite(coords[0]) &&
     Number.isFinite(coords[1]) &&
-    !(coords[0] === 0 && coords[1] === 0);
+    !(coords[0] === 0 && coords[1] === 0) &&
+    inMyanmar(Number(coords[1]), Number(coords[0]));
 
   const hasClientCoords =
     typeof loc.lat === 'number' &&
     typeof loc.lng === 'number' &&
     Number.isFinite(loc.lat) &&
-    Number.isFinite(loc.lng);
+    Number.isFinite(loc.lng) &&
+    inMyanmar(loc.lat, loc.lng);
 
   let lat = DEFAULT_LAT;
   let lng = DEFAULT_LNG;
@@ -143,6 +149,10 @@ async function resolveChatContext(userId: string, loc: ChatLocation = {}) {
       township = `Farm near ${lat.toFixed(2)}, ${lng.toFixed(2)}`;
       region = 'Myanmar';
     }
+  } else if (loc.township?.trim() && !isPlaceholderTownship(loc.township)) {
+    township = loc.township.trim();
+    region = user?.location?.region?.trim() || 'Myanmar';
+    source = 'client-name';
   } else if (hasProfileCoords) {
     lng = coords![0];
     lat = coords![1];
@@ -165,7 +175,7 @@ async function resolveChatContext(userId: string, loc: ChatLocation = {}) {
   }
 
   // Persist resolved GPS onto the user so later chats don't fall back to Yangon
-  if (hasClientCoords && user) {
+  if (hasClientCoords && user && lat >= 9.5 && lat <= 28.6 && lng >= 92.1 && lng <= 101.3) {
     try {
       user.location = {
         township,

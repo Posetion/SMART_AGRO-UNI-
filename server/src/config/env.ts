@@ -30,13 +30,15 @@ const envSchema = z.object({
   /** Optional comma-separated extra Gemini keys (after KEY … KEY_8). */
   GEMINI_API_KEYS: z.string().optional().default(''),
   GEMINI_MODEL: z.string().default('gemini-3.6-flash'),
-  /** Primary AI. `local` = FastAPI on this PC (works without VPN). `cursor` / `gemini` are tried after local. */
-  AI_PROVIDER: z.enum(['gemini', 'cursor', 'local']).default('local'),
-  /** Cursor SDK key — used after local AI when the network can reach Cursor. */
+  /** Primary AI for detect + chat. `cursor` = Cursor Agent (detect + BaGyi Pyoe). */
+  AI_PROVIDER: z.enum(['gemini', 'cursor', 'local']).default('cursor'),
+  /** Cursor SDK key — required when AI_PROVIDER=cursor. */
   CURSOR_API_KEY: z.string().optional().default(''),
   CURSOR_MODEL: z.string().default('composer-2.5'),
-  /** Keep short so blocked Cursor/Gemini APIs fail fast without VPN. */
-  CURSOR_DETECT_TIMEOUT_MS: z.coerce.number().default(12000),
+  /** Cursor detect + chat. Vision/chat needs a long window; too short falls through and looks “broken”. */
+  CURSOR_DETECT_TIMEOUT_MS: z.coerce.number().default(90000),
+  /** Gemini vision + chat. Needs enough time for a real answer; then local FastAPI is used. */
+  GEMINI_TIMEOUT_MS: z.coerce.number().default(45000),
   WEATHER_API_URL: z.string().default('https://api.open-meteo.com/v1'),
   WEATHER_CACHE_TTL_SECONDS: z.coerce.number().default(900),
   /** Fail fast when Open-Meteo is blocked (common without VPN in Myanmar). */
