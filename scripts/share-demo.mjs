@@ -90,6 +90,7 @@ function writeRedirect(liveUrl) {
   const dir = join(root, 'scripts', 'demo-go');
   mkdirSync(dir, { recursive: true });
   const safe = liveUrl.replace(/"/g, '');
+  const stamp = Date.now();
   writeFileSync(
     join(dir, 'index.html'),
     `<!doctype html>
@@ -97,6 +98,9 @@ function writeRedirect(liveUrl) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Smart Agro Community</title>
   <style>
     body { margin: 0; min-height: 100vh; display: grid; place-items: center;
@@ -116,21 +120,21 @@ function writeRedirect(liveUrl) {
   <script>
     var url = ${JSON.stringify(safe)};
     document.getElementById('go').href = url;
-    setTimeout(function () { location.href = url; }, 200);
+    setTimeout(function () { location.replace(url); }, 200);
   </script>
+  <!-- ${stamp} -->
 </body>
 </html>
 `
   );
 }
 
-function deployRedirect() {
+function deployRedirectOnce() {
   return new Promise((resolve) => {
     if (!SURGE_DOMAIN) {
       resolve(false);
       return;
     }
-    console.log(`Updating permanent link ${PUBLIC_URL} …`);
     const child = spawn(
       'npx',
       ['--yes', 'surge', join(root, 'scripts', 'demo-go'), SURGE_DOMAIN],
@@ -149,6 +153,68 @@ function deployRedirect() {
       resolve(false);
     });
   });
+}
+
+async function qrPagePointsAt(liveUrl) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    const res = await fetch(`${PUBLIC_URL}/?v=${Date.now()}`, {
+      signal: controller.signal,
+      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+    });
+    clearTimeout(timer);
+    const html = await res.text();
+    return html.includes(liveUrl);
+  } catch {
+    return false;
+  }
+}
+
+async function publishQrLink(liveUrl) {
+  if (!SURGE_DOMAIN) return false;
+  for (let i = 1; i <= 4; i += 1) {
+    console.log(
+      i === 1
+        ? `Updating the one QR link ${PUBLIC_URL} …`
+        : `Retrying the one QR link (${i}/4)…`
+    );
+    writeRedirect(liveUrl);
+    if (await deployRedirectOnce()) {
+      await sleep(2000);
+      if (await qrPagePointsAt(liveUrl)) {
+        console.log(`One QR is live: ${PUBLIC_URL}`);
+        return true;
+      }
+      console.log('Surge published. CDN may take a few seconds.');
+      return true;
+    }
+    await sleep(2500 * i);
+  }
+  return false;
+}
+
+function keepPublishingQr(liveUrl) {
+  let busy = false;
+  const timer = setInterval(async () => {
+    if (busy) return;
+    busy = true;
+    try {
+      if (await qrPagePointsAt(liveUrl)) {
+        console.log(`\nOne QR is live: ${PUBLIC_URL}`);
+        clearInterval(timer);
+        return;
+      }
+      writeRedirect(liveUrl);
+      if (await deployRedirectOnce()) {
+        console.log(`\nOne QR is live: ${PUBLIC_URL}`);
+        clearInterval(timer);
+      }
+    } finally {
+      busy = false;
+    }
+  }, 20000);
+  return timer;
 }
 
 function spawnLogged(cmd, args) {
@@ -278,22 +344,28 @@ try {
 }
 
 writeRedirect(tunnel.url);
-const published = await deployRedirect();
+const published = await publishQrLink(tunnel.url);
+let qrRetryTimer = null;
 console.log('\n========================================');
-console.log('  Smart Agro is public');
-console.log(`  Live now:    ${tunnel.url}`);
-console.log(`  Use this QR: docs/Smart-Agro-Demo-QR.png`);
-console.log(`  QR link:     ${PUBLIC_URL}`);
-if (!published) {
-  console.log('  Surge did not update the QR link.');
-  console.log(`  Phones: open ${tunnel.url}`);
-  console.log('  Or run: npx --yes surge login');
-  console.log('  then log in with the Surge account that owns smart-agro-ucs.surge.sh');
+console.log('  ONE QR only — phones scan this file:');
+console.log('  docs/Smart-Agro-Demo-QR.png');
+console.log(`  ${PUBLIC_URL}`);
+if (published) {
+  console.log('  That link now opens this PC. Do not print another QR.');
+} else {
+  console.log('  Could not refresh the QR page yet. Retrying in the background.');
+  console.log('  Do not make a second QR. Wait until this says “One QR is live”.');
+  qrRetryTimer = keepPublishingQr(tunnel.url);
 }
 console.log('  Leave this window open. Ctrl+C when the demo is over.');
 console.log('========================================\n');
 
 function stopAll() {
+  try {
+    if (qrRetryTimer) clearInterval(qrRetryTimer);
+  } catch {
+    /* ignore */
+  }
   try {
     tunnel?.child?.kill('SIGINT');
   } catch {
@@ -308,11 +380,7 @@ function stopAll() {
 
 tunnel.child.on('exit', (code) => {
   console.log('\nTunnel closed. The printed QR stays the same for next time.');
-  try {
-    previewChild?.kill('SIGINT');
-  } catch {
-    /* ignore */
-  }
+  stopAll();
   process.exit(code ?? 0);
 });
 

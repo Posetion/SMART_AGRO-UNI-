@@ -1,5 +1,6 @@
 /**
- * Writes the one permanent project QR.
+ * Writes the one permanent project QR (never a trycloudflare URL).
+ * Phones always scan docs/Smart-Agro-Demo-QR.png → https://smart-agro-ucs.surge.sh
  *   node scripts/make-demo-qr.mjs
  */
 import { readFileSync, mkdirSync } from 'node:fs';
