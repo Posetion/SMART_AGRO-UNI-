@@ -1,8 +1,17 @@
-SYSTEM_HINT = (
-    "သင်သည် Smart Agro Community ၏ စိုက်ပျိုးရေး အကြံပေး AI ဖြစ်သည်။ "
-    "ဆန်နှင့် ကြက်သွန် ရောဂါ၊ ရာသီဥတုနှင့် လက်တွေ့ စိုက်ပျိုးရေး အကြံဉာဏ် ပေးပါ။ "
-    "ပေးထားသော LIVE WEATHER CONTEXT ကို အသုံးပြုပြီး တိကျသော အကြံပြုချက် ပေးပါ။"
+import re
+
+GREETING_RE = re.compile(
+    r"^(hi|hii+|hello|hey|yo|mingalaba|မင်္ဂလာပါ|ဟိုင်း|ဟယ်လို)[\s!.]*$",
+    re.I,
 )
+
+
+def _is_greeting(prompt: str) -> bool:
+    return bool(GREETING_RE.match((prompt or "").strip()))
+
+
+def _looks_myanmar(text: str) -> bool:
+    return bool(re.search(r"[\u1000-\u109F]", text or ""))
 
 
 def chat_reply(
@@ -10,26 +19,34 @@ def chat_reply(
     history: list[dict] | None = None,
     context: dict | None = None,
 ) -> str:
-    history = history or []
-    context = context or {}
-    recent = " | ".join(h.get("text", "")[:80] for h in history[-3:])
-    weather = (context.get("weatherText") or "").strip()
-    profile = (context.get("farmerProfile") or "").strip()
+    """Farmer-facing reply only — never echo system/profile/weather blocks."""
+    text = (prompt or "").strip() or "hello"
+    myanmar = _looks_myanmar(text) or _looks_myanmar(" ".join(h.get("text", "") for h in (history or [])[-2:]))
 
-    weather_line = (
-        f"ရာသီဥတုအချက်အလက်: {weather[:420]}"
-        if weather
-        else "ရာသီဥတုအချက်အလက် မရရှိပါ — ယေဘုယျ မြန်မာရာသီ အကြံဉာဏ် ပေးပါ။"
-    )
-    profile_line = f"လယ်သမား: {profile[:200]}" if profile else ""
+    if _is_greeting(text):
+        if myanmar or not re.search(r"[A-Za-z]", text):
+            return (
+                "မင်္ဂလာပါ။ ဘကြီးပျိုး ဖြစ်ပါတယ်။ "
+                "သီးနှံရောဂါ၊ ပိုးမွှား၊ ရာသီဥတု၊ ရေသွင်းရေထုတ် အကြောင်း မေးနိုင်ပါတယ်။ "
+                "ဘာကူညီရမလဲ။"
+            )
+        return (
+            "Hello — this is BaGyi Pyoe. "
+            "Ask me about crop disease, pests, weather, or what to do in the field today."
+        )
+
+    if myanmar:
+        return (
+            "ကွင်းထဲမှာ ရွက်အနာ၊ အဝါရောင်၊ ပိုးစားရာကို စစ်ပါ။ "
+            "ဓာတ်ပုံရိုက်ပြီး Detection တွင် တင်ပါ။ "
+            "စိုထိုင်းဆ/မိုးများရင် မှိုရောဂါ သတိထားပါ။ "
+            "ရေသွင်းရေထုတ်ကို ရာသီနှင့် ကိုက်အောင် ချိန်ပါ။ "
+            "မသေချာရင် ဒေသခံ စိုက်ပျိုးရေး ကျွမ်းကျင်သူနှင့် တိုင်ပင်ပါ။"
+        )
 
     return (
-        f"{SYSTEM_HINT}\n\n"
-        f"မေးခွန်း: {prompt[:300]}\n"
-        f"{profile_line}\n"
-        f"{weather_line}\n"
-        f"အကြံပြုချက်: ကွင်းအတွင်း ရောဂါ လက္ခဏာကို ဓာတ်ပုံရိုက်ပြီး Detection စာမျက်နှာတွင် စစ်ဆေးပါ။ "
-        f"စိုထိုင်းဆနှင့် မိုးရွာနိုင်ခြေ မြင့်ပါက မှိုရောဂါ ဖြစ်နိုင်ခြေ တက်နိုင်သည်။ "
-        f"ရေသွင်းရေထုတ်နှင့် ကွင်းစောင့်ကြည့်မှုကို ရာသီဥတုနှင့် ကိုက်ညီအောင် ချိန်ညှိပါ။ "
-        f"(context: {recent[:120]})"
+        "Check the field for spots, yellowing, or pest chewing. "
+        "Take a clear leaf photo on the Detect page if you want a name for it. "
+        "If it has been humid or rainy, watch for fungal disease. "
+        "Match irrigation to the weather, and ask a local agronomist before spraying."
     )

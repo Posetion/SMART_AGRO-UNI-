@@ -207,7 +207,7 @@ async function resolveChatContext(userId: string, loc: ChatLocation = {}) {
       recommendations: forecast.recommendations,
     });
   } catch {
-    weatherText = `Location: ${township} (${lat.toFixed(4)}, ${lng.toFixed(4)}; ${source}). Live weather unavailable right now — give general Myanmar-season advice and suggest the Weather page. Do not invent Yangon weather.`;
+    weatherText = `Location: ${township} (${lat.toFixed(4)}, ${lng.toFixed(4)}; ${source}). Live weather unavailable. Give general Myanmar-season advice.`;
   }
 
   return { farmerProfile, weatherText, township };
