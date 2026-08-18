@@ -66,17 +66,81 @@ function getCached<T>(key: string): T | null {
   return hit.data as T;
 }
 
-function setCache(key: string, data: unknown) {
+function setCache(key: string, data: unknown, ttlSeconds = env.WEATHER_CACHE_TTL_SECONDS) {
   cache.set(key, {
-    expiresAt: Date.now() + env.WEATHER_CACHE_TTL_SECONDS * 1000,
+    expiresAt: Date.now() + ttlSeconds * 1000,
     data,
   });
 }
 
-async function fetchOpenMeteo(lat: number, lng: number) {
+async function fetchWithTimeout(url: URL | string, timeoutMs = env.WEATHER_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function yangonDateOffset(offsetDays: number) {
+  const [y, m, d] = yangonToday().split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + offsetDays)).toISOString().slice(0, 10);
+}
+
+/** Typical Myanmar climate when Open-Meteo is blocked (no VPN). */
+function seasonalFallback(lat: number, lng: number): OpenMeteoPayload {
+  const month = Number(yangonToday().slice(5, 7));
+  const south = lat < 18;
+  const monsoon = month >= 5 && month <= 10;
+  const hot = month >= 3 && month <= 4;
+  const climate = monsoon
+    ? { high: south ? 31 : 32, low: south ? 24 : 23, humidity: 82, rain: south ? 14 : 8, chance: south ? 70 : 55, code: 61, wind: 12, uv: 6 }
+    : hot
+      ? { high: 38, low: 26, humidity: 55, rain: 1, chance: 15, code: 1, wind: 10, uv: 10 }
+      : { high: 30, low: 16, humidity: 50, rain: 0, chance: 10, code: 1, wind: 8, uv: 8 };
+
+  const times = Array.from({ length: 14 }, (_, i) => yangonDateOffset(i - 7));
+  const today = times[7] || yangonToday();
+
+  return {
+    latitude: lat,
+    longitude: lng,
+    timezone: 'Asia/Yangon',
+    current: {
+      time: `${today}T12:00`,
+      temperature_2m: climate.high - 2,
+      relative_humidity_2m: climate.humidity,
+      precipitation: climate.rain > 4 ? 0.4 : 0,
+      weather_code: climate.code,
+      wind_speed_10m: climate.wind,
+      wind_direction_10m: 180,
+      wind_gusts_10m: climate.wind + 4,
+      apparent_temperature: climate.high,
+      dew_point_2m: Math.round(climate.low + (climate.humidity / 20)),
+      uv_index: climate.uv,
+    },
+    daily: {
+      time: times,
+      weather_code: times.map((_, i) => (i % 4 === 0 && monsoon ? 63 : climate.code)),
+      temperature_2m_max: times.map((_, i) => climate.high + (i % 3) - 1),
+      temperature_2m_min: times.map((_, i) => climate.low + (i % 2)),
+      precipitation_sum: times.map((_, i) => Math.max(0, climate.rain + (i % 3) - 1)),
+      precipitation_probability_max: times.map(() => climate.chance),
+      wind_speed_10m_max: times.map(() => climate.wind + 3),
+      sunrise: times.map((d) => `${d}T05:45`),
+      sunset: times.map((d) => `${d}T18:30`),
+      uv_index_max: times.map(() => climate.uv),
+    },
+  };
+}
+
+type WeatherFetch = { data: OpenMeteoPayload; cached: boolean; offline: boolean };
+
+async function fetchOpenMeteo(lat: number, lng: number): Promise<WeatherFetch> {
   const key = `wx:${lat.toFixed(3)},${lng.toFixed(3)}`;
-  const cached = getCached<OpenMeteoPayload>(key);
-  if (cached) return { data: cached, cached: true };
+  const cached = getCached<WeatherFetch>(key);
+  if (cached?.data) return { ...cached, cached: true };
 
   const url = new URL(`${env.WEATHER_API_URL}/forecast`);
   url.searchParams.set('latitude', String(lat));
@@ -114,13 +178,20 @@ async function fetchOpenMeteo(lat: number, lng: number) {
   url.searchParams.set('forecast_days', '7');
   url.searchParams.set('past_days', '7');
 
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new AppError('Weather provider unavailable', 502);
+  try {
+    const res = await fetchWithTimeout(url);
+    if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
+    const data = (await res.json()) as OpenMeteoPayload;
+    const live: WeatherFetch = { data, cached: false, offline: false };
+    setCache(key, live);
+    return live;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[weather] Open-Meteo unreachable (${msg}); using seasonal Myanmar estimate`);
+    const offline: WeatherFetch = { data: seasonalFallback(lat, lng), cached: false, offline: true };
+    setCache(key, offline, 60);
+    return offline;
   }
-  const data = (await res.json()) as OpenMeteoPayload;
-  setCache(key, data);
-  return { data, cached: false };
 }
 
 function windLabel(speed?: number) {
@@ -352,7 +423,7 @@ function dailyForecast(data: OpenMeteoPayload) {
 }
 
 export async function getForecast(lat: number, lng: number) {
-  const { data, cached } = await fetchOpenMeteo(lat, lng);
+  const { data, cached, offline } = await fetchOpenMeteo(lat, lng);
   return {
     forecast: data,
     summary: enrichSummary(data),
@@ -361,22 +432,23 @@ export async function getForecast(lat: number, lng: number) {
     recommendations: buildRecommendations(data),
     alerts: buildAlerts(data),
     cached,
+    offline,
   };
 }
 
 export async function getCurrent(lat: number, lng: number) {
-  const { data, cached } = await fetchOpenMeteo(lat, lng);
-  return { current: data.current ?? null, summary: enrichSummary(data), cached };
+  const { data, cached, offline } = await fetchOpenMeteo(lat, lng);
+  return { current: data.current ?? null, summary: enrichSummary(data), cached, offline };
 }
 
 export async function getAlerts(lat: number, lng: number) {
-  const { data, cached } = await fetchOpenMeteo(lat, lng);
-  return { alerts: buildAlerts(data), cached };
+  const { data, cached, offline } = await fetchOpenMeteo(lat, lng);
+  return { alerts: buildAlerts(data), cached, offline };
 }
 
 export async function getRecommendations(lat: number, lng: number) {
-  const { data, cached } = await fetchOpenMeteo(lat, lng);
-  return { recommendations: buildRecommendations(data), cached };
+  const { data, cached, offline } = await fetchOpenMeteo(lat, lng);
+  return { recommendations: buildRecommendations(data), cached, offline };
 }
 
 type PlaceResult = {
@@ -416,32 +488,34 @@ async function geocodeMyanmar(search: string, count = 40): Promise<PlaceResult[]
   url.searchParams.set('format', 'json');
   url.searchParams.set('countryCode', 'MM');
 
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new AppError('Location search unavailable', 502);
+  try {
+    const res = await fetchWithTimeout(url);
+    if (!res.ok) return [];
+
+    const json = (await res.json()) as { results?: GeocodeHit[] };
+    const places = (json.results || [])
+      .filter((r) => r.latitude != null && r.longitude != null && r.name)
+      .map((r) => {
+        const lat = Number(r.latitude);
+        const lng = Number(r.longitude);
+        const region = r.admin1 || r.admin2 || 'Myanmar';
+        return {
+          id: r.id,
+          name: r.name as string,
+          nameEn: r.name as string,
+          region,
+          lat,
+          lng,
+          coordinates: { type: 'Point' as const, coordinates: [lng, lat] as [number, number] },
+          source: 'geocode' as const,
+        };
+      });
+
+    setCache(cacheKey, places);
+    return places;
+  } catch {
+    return [];
   }
-
-  const json = (await res.json()) as { results?: GeocodeHit[] };
-  const places = (json.results || [])
-    .filter((r) => r.latitude != null && r.longitude != null && r.name)
-    .map((r) => {
-      const lat = Number(r.latitude);
-      const lng = Number(r.longitude);
-      const region = r.admin1 || r.admin2 || 'Myanmar';
-      return {
-        id: r.id,
-        name: r.name as string,
-        nameEn: r.name as string,
-        region,
-        lat,
-        lng,
-        coordinates: { type: 'Point' as const, coordinates: [lng, lat] as [number, number] },
-        source: 'geocode' as const,
-      };
-    });
-
-  setCache(cacheKey, places);
-  return places;
 }
 
 /** Resolve a human place name for GPS coordinates (Open-Meteo reverse). */
@@ -463,7 +537,7 @@ export async function reverseGeocode(
   url.searchParams.set('count', '1');
 
   try {
-    const res = await fetch(url);
+    const res = await fetchWithTimeout(url);
     if (!res.ok) return null;
     const json = (await res.json()) as { results?: GeocodeHit[] };
     const hit = json.results?.[0];
@@ -565,7 +639,7 @@ async function weatherBundleForPlace(place: {
   lat: number;
   lng: number;
 }) {
-  const { data, cached } = await fetchOpenMeteo(place.lat, place.lng);
+  const { data, cached, offline } = await fetchOpenMeteo(place.lat, place.lng);
   const region = place.region || place.nameEn || place.name;
   return {
     township: {
@@ -584,6 +658,7 @@ async function weatherBundleForPlace(place: {
     recommendations: buildRecommendations(data),
     alerts: buildAlerts(data, region),
     cached,
+    offline,
   };
 }
 

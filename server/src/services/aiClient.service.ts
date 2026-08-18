@@ -231,9 +231,10 @@ function hasCursor(): boolean {
   return Boolean(env.CURSOR_API_KEY?.trim());
 }
 
-/** Use only the configured provider — no Gemini↔Cursor fallback. */
-function providerOrder(): Array<'gemini' | 'cursor'> {
-  return [env.AI_PROVIDER];
+/** Local FastAPI first (no VPN). Cloud provider next if the network can reach it. */
+function providerOrder(): Array<'gemini' | 'cursor' | 'local'> {
+  if (env.AI_PROVIDER === 'local') return ['local'];
+  return ['local', env.AI_PROVIDER];
 }
 
 function isGeminiQuotaError(err: unknown): boolean {
@@ -352,7 +353,7 @@ async function chatWithGemini(
 
   const requestOnce = async (turns: GeminiChatContent[]) => {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), Math.max(env.AI_SERVICE_TIMEOUT_MS, 90000));
+    const timer = setTimeout(() => controller.abort(), env.CURSOR_DETECT_TIMEOUT_MS);
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -782,8 +783,8 @@ async function detectWithGemini(
   const model = env.GEMINI_MODEL;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
   const controller = new AbortController();
-  // Fail over sooner when Google is unreachable (common on restricted networks)
-  const timeoutMs = Math.max(env.AI_SERVICE_TIMEOUT_MS, 25000);
+  // Keep short so blocked Google APIs fail fast without VPN
+  const timeoutMs = env.CURSOR_DETECT_TIMEOUT_MS;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   const generationConfig: Record<string, unknown> = {
@@ -1004,7 +1005,7 @@ async function detectWithLocalAi(imageBuffer: Buffer, mimeType: string): Promise
 }
 
 export async function detectDisease(imageBuffer: Buffer, mimeType: string): Promise<DetectResult> {
-  const order: Array<'gemini' | 'cursor' | 'local'> = [...providerOrder(), 'local'];
+  const order = providerOrder();
   console.info(`[detect] provider=${env.AI_PROVIDER} order=${order.join('→')}`);
   let lastError: unknown;
 
@@ -1027,13 +1028,17 @@ export async function detectDisease(imageBuffer: Buffer, mimeType: string): Prom
         console.warn(`[detect] ${provider} failed, trying next:`, err instanceof Error ? err.message : err);
         continue;
       }
+      if (!isLast) {
+        console.warn(`[detect] ${provider} failed, trying next:`, err instanceof Error ? err.message : err);
+        continue;
+      }
       if (err instanceof AppError) throw err;
       throw new AppError('Disease detection failed. Please try again.', 503);
     }
   }
 
   if (lastError instanceof AppError) throw lastError;
-  throw new AppError('Disease detection requires CURSOR_API_KEY', 503);
+  throw new AppError('Disease detection requires the local AI service on port 8000', 503);
 }
 
 export async function predictRisk(input: {
@@ -1070,6 +1075,24 @@ export async function chatWithAi(
     const provider = order[i];
     const isLast = i === order.length - 1;
     try {
+      if (provider === 'local') {
+        const data = await callAi<{ data?: ChatResult; reply?: string }>('/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            history,
+            context: {
+              farmerProfile: context?.farmerProfile,
+              weatherText: context?.weatherText,
+            },
+          }),
+        });
+        const raw = data.data?.reply ?? data.reply ?? mockChat(prompt).reply;
+        const reply = formatFarmReply(raw);
+        if (!reply || looksLikeLeakedPrompt(reply)) return mockChat(prompt);
+        return { reply };
+      }
       if (provider === 'gemini' && hasGemini()) {
         return await withGeminiKeys((key) => chatWithGemini(prompt, history, context, key));
       }
@@ -1082,42 +1105,11 @@ export async function chatWithAi(
         console.warn(`[chat] ${provider} failed, trying next:`, msg);
         continue;
       }
-      if (env.NODE_ENV === 'production') {
-        if (err instanceof AppError) throw err;
-        throw new AppError('AI chat unavailable', 503);
-      }
-      console.warn(`[chat] ${provider} failed, using local mock:`, msg);
+      console.warn(`[chat] ${provider} failed, using local greeting:`, msg);
     }
   }
 
-  try {
-    const data = await callAi<{ data?: ChatResult; reply?: string }>('/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt,
-        history,
-        context: {
-          farmerProfile: context?.farmerProfile,
-          weatherText: context?.weatherText,
-        },
-      }),
-    });
-    const raw = data.data?.reply ?? data.reply ?? mockChat(prompt).reply;
-    const reply = formatFarmReply(raw);
-    if (!reply || looksLikeLeakedPrompt(reply)) return mockChat(prompt);
-    return { reply };
-  } catch {
-    if (env.NODE_ENV === 'production') {
-      throw new AppError('AI service unavailable', 503);
-    }
-    const weatherHint = context?.weatherText
-      ? ` လက်ရှိရာသီဥတုအချက်အလက်ကို ထည့်သွင်းစဉ်းစားပါ။`
-      : '';
-    return {
-      reply: `${mockChat(prompt).reply}${weatherHint}`,
-    };
-  }
+  return mockChat(prompt);
 }
 
 export function treatmentFor(disease: string, crop?: string): string {

@@ -84,6 +84,7 @@ type WeatherBundle = {
   recommendations: { rice: Tip[]; onion: Tip[] };
   alerts: Alert[];
   cached?: boolean;
+  offline?: boolean;
 };
 
 type MapTownship = Township & {
@@ -132,6 +133,7 @@ const copy = {
     list: 'List',
     close: 'Close',
     cached: 'cached',
+    offline: 'seasonal estimate (live weather blocked)',
     mmToday: 'mm today',
     uvTip: 'Limit midday exposure when UV is high.',
     timezone: 'Timezone: Asia/Yangon',
@@ -183,6 +185,7 @@ const copy = {
     list: 'စာရင်း',
     close: 'ပိတ်ရန်',
     cached: 'သိမ်းထား',
+    offline: 'ရာသီခန့်မှန်း (တိုက်ရိုက် ရာသီဥတု မရ)',
     mmToday: 'မီလီမီတာ ယနေ့',
     uvTip: 'UV မြင့်ချိန်တွင် မွန်းတည့်အချိန် ထိတွေ့မှုကို လျှော့ပါ။',
     timezone: 'စံတော်ချိန်: အာရှ/ရန်ကုန်',
@@ -625,7 +628,7 @@ export function WeatherPage() {
               </strong>
               <span>
                 {t.location}: {formatRegionLabel(bundle?.township.region || t.myanmar, lang)}
-                {loading ? ` · ${t.loading}` : bundle?.cached ? ` · ${t.cached}` : ''}
+                {loading ? ` · ${t.loading}` : bundle?.offline ? ` · ${t.offline}` : bundle?.cached ? ` · ${t.cached}` : ''}
               </span>
             </div>
           </div>

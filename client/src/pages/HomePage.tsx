@@ -33,6 +33,7 @@ type WeatherBundle = {
     };
   };
   alerts?: Array<{ type: string; date: string; message: string }>;
+  offline?: boolean;
 };
 
 type Article = {
@@ -288,7 +289,7 @@ export function HomePage() {
             closeLabel={t.closeList}
             emptyLabel={t.noTownship}
           />
-          <p className="home-loc-hint">{t.vpnLocationHint}</p>
+          <p className="home-loc-hint">{weather?.offline ? t.weatherOfflineHint : t.vpnLocationHint}</p>
         </section>
 
         <section className="home-section home-stats-section">

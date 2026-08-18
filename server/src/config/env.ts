@@ -30,14 +30,17 @@ const envSchema = z.object({
   /** Optional comma-separated extra Gemini keys (after KEY … KEY_8). */
   GEMINI_API_KEYS: z.string().optional().default(''),
   GEMINI_MODEL: z.string().default('gemini-3.6-flash'),
-  /** Primary AI for leaf detect + farmer chat. `cursor` = Cursor only (no Gemini). */
-  AI_PROVIDER: z.enum(['gemini', 'cursor']).default('cursor'),
-  /** Cursor SDK key — required when AI_PROVIDER=cursor. */
+  /** Primary AI. `local` = FastAPI on this PC (works without VPN). `cursor` / `gemini` are tried after local. */
+  AI_PROVIDER: z.enum(['gemini', 'cursor', 'local']).default('local'),
+  /** Cursor SDK key — used after local AI when the network can reach Cursor. */
   CURSOR_API_KEY: z.string().optional().default(''),
   CURSOR_MODEL: z.string().default('composer-2.5'),
-  CURSOR_DETECT_TIMEOUT_MS: z.coerce.number().default(120000),
+  /** Keep short so blocked Cursor/Gemini APIs fail fast without VPN. */
+  CURSOR_DETECT_TIMEOUT_MS: z.coerce.number().default(12000),
   WEATHER_API_URL: z.string().default('https://api.open-meteo.com/v1'),
   WEATHER_CACHE_TTL_SECONDS: z.coerce.number().default(900),
+  /** Fail fast when Open-Meteo is blocked (common without VPN in Myanmar). */
+  WEATHER_TIMEOUT_MS: z.coerce.number().default(8000),
   FILE_STORAGE_TYPE: z.enum(['gridfs', 's3']).default('gridfs'),
   RATE_LIMIT_MAX_PER_MINUTE: z.coerce.number().default(100),
   OTP_TTL_SECONDS: z.coerce.number().default(180),

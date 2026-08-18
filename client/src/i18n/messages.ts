@@ -1611,6 +1611,7 @@ export const homeCopy = (lang: Lang) =>
       closeList: 'Close',
       noTownship: 'No place found. Try another spelling.',
       vpnLocationHint: 'VPN can hide GPS. Pick your real township for local weather.',
+      weatherOfflineHint: 'Live weather is blocked on this network. Showing a seasonal Myanmar estimate — the rest of the app still works without VPN.',
       signInForStats: 'Sign in',
       diagnostics: 'Scans',
       thisMonth: 'This month',
@@ -1677,6 +1678,7 @@ export const homeCopy = (lang: Lang) =>
       closeList: 'ပိတ်ရန်',
       noTownship: 'မတွေ့ပါ။ စာလုံးပေါင်း ပြန်ကြည့်ပါ။',
       vpnLocationHint: 'VPN ကြောင့် GPS မှားနိုင်သည်။ သင့်မြို့နယ်ကို ကိုယ်တိုင် ရွေးပါ။',
+      weatherOfflineHint: 'ဤကွန်ရက်တွင် တိုက်ရိုက် ရာသီဥတု ပိတ်ထားသည်။ မြန်မာ ရာသီခန့်မှန်း ပြထားသည် — အက်ပ်ကို VPN မလိုဘဲ ဆက်သုံးနိုင်သည်။',
       signInForStats: 'ဝင်ရန်',
       diagnostics: 'စကန်',
       thisMonth: 'ယခုလ',
@@ -2213,11 +2215,11 @@ export const faqCopy = (lang: Lang): FaqCopy => {
         },
         {
           q: 'Can I use Smart Agro without internet?',
-          a: 'You need an internet connection for AI detection, live weather, community, and chat. Downloaded lab reports and notes you already saved on your device can still be opened offline.',
+          a: 'On this computer, detection and BaGyi Pyoe chat use the local AI service (port 8000) and MongoDB on localhost — they do not need a VPN. Community and email still need internet. If live weather is blocked, the app shows a seasonal Myanmar estimate so Home still loads.',
         },
         {
           q: 'Why does detection fail with a network / connection error?',
-          a: 'Online detection uses Google Gemini over HTTPS. Some Myanmar ISPs, firewalls, or DNS settings block that connection (the same class of issue as GitHub port 443). Turn on a VPN, try another network, or set DNS to 1.1.1.1 / 8.8.8.8, then retry. If the local AI service is running on this computer (port 8000), Smart Agro will fall back to it automatically.',
+          a: 'Leaf detection is set to the local AI on this computer (port 8000). You do not need a VPN. Start the FastAPI AI service and the Node server, then retry. VPN is only needed if you switch to Google Gemini or Cursor cloud AI. If weather looks approximate, Open-Meteo is blocked on your ISP — the app still works.',
         },
         {
           q: 'How do I share a diagnosis with the community?',
@@ -2336,11 +2338,11 @@ export const faqCopy = (lang: Lang): FaqCopy => {
         },
         {
           q: 'အင်တာနက် မရှိဘဲ Smart Agro သုံးနိုင်သလား?',
-          a: 'AI ရောဂါရှာ၊ တိုက်ရိုက် ရာသီဥတု၊ အသိုင်းအဝိုင်းနှင့် ချတ်အတွက် အင်တာနက် လိုသည်။ ဒေါင်းလုဒ်လုပ်ပြီးသား အစီရင်ခံစာနှင့် စက်ထဲ သိမ်းထားသော မှတ်စုများကို အော့ဖ်လိုင်း ဖွင့်နိုင်သည်။',
+          a: 'ဤကွန်ပျူတာတွင် ရောဂါရှာနှင့် ဘကြီးပျိုး ချတ်သည် local AI (port 8000) နှင့် localhost MongoDB ကို သုံးသည် — VPN မလိုပါ။ အသိုင်းအဝိုင်းနှင့် အီးမေးလ်အတွက် အင်တာနက် လိုသည်။ တိုက်ရိုက် ရာသီဥတု ပိတ်ထားလျှင် မြန်မာ ရာသီခန့်မှန်း ပြပြီး ပင်မစာမျက်နှာ ဆက်ဖွင့်နိုင်သည်။',
         },
         {
           q: 'ရောဂါရှာတွင် ကွန်ရက် / ချိတ်ဆက်မှု အမှား ဘာကြောင့် ဖြစ်သလဲ?',
-          a: 'အွန်လိုင်း ရောဂါရှာသည် Google Gemini ကို HTTPS ဖြင့် သုံးသည်။ မြန်မာ ISP၊ ဖိုင်းယားဝေါလ် သို့မဟုတ် DNS က ထိုချိတ်ဆက်မှုကို ပိတ်တတ်သည် (GitHub port 443 နှင့် အတူတူ အမျိုးအစား)။ VPN ဖွင့်ပါ၊ အခြားကွန်ရက် စမ်းပါ၊ သို့မဟုတ် DNS ကို 1.1.1.1 / 8.8.8.8 ထားပြီး ထပ်မံ စမ်းပါ။ ဤကွန်ပျူတာတွင် local AI (port 8000) ဖွင့်ထားလျှင် Smart Agro က အလိုအလျောက် ပြန်သုံးမည်။',
+          a: 'ရွက်ရောဂါရှာသည် ဤကွန်ပျူတာရှိ local AI (port 8000) ကို သုံးသည်။ VPN မလိုပါ။ FastAPI AI နှင့် Node ဆာဗာ ဖွင့်ပြီး ထပ်မံ စမ်းပါ။ Google Gemini သို့မဟုတ် Cursor cloud AI ပြောင်းမှသာ VPN လိုသည်။ ရာသီဥတု ခန့်မှန်းသာ ပြလျှင် ISP က Open-Meteo ကို ပိတ်ထားခြင်းဖြစ်သည် — အက်ပ် ဆက်အလုပ်လုပ်သည်။',
         },
         {
           q: 'ရောဂါစစ်ချက်ကို အသိုင်းအဝိုင်းသို့ ဘယ်လို မျှဝေမလဲ?',
