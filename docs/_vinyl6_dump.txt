@@ -1,0 +1,17 @@
+﻿PageWidth=1728 PageHeight=3456 inches=(24 x 48)
+  1 type=17 L=90.9 T=376.6 W=602.5 H=140.3 B=516.8 text=Objectives | 
+  2 type=17 L=58.1 T=108.5 W=1,592.7 H=117.2 B=225.7 text=University of Computer Studies (Meiktila) | 
+  3 type=17 L=42.2 T=525.1 W=1,639.1 H=583.9 B=1,109.0 text=  To identify crop diseases with AI, and get methods how to treat and prevent them  |  To obtain expert review and insight of field cases |  To show crop disease occurrences by region using heatmap |  To enable farmers to share agricultural problems, experiences, and solutions with each other |  To ask for weather and farming advice in Myanmar language from the AI advisor ‘BaGyi Pyoe’ | 
+  4 type=17 L=181.4 T=209.9 W=1,452.4 H=134.8 B=344.7 text=SMART AGRO Community | 
+  5 type=17 L=42.0 T=2,598.7 W=1,643.4 H=471.0 B=3,069.7 text= AI-based farming assistance platform for Myanmar farmers |  Expert Review for specialist evaluations |  Data visualization for regional crop disease occurrences |  Farmer-to-Farmer Community for sharing agricultural experiences |  Knowledge Center on crop pathogens |  Myanmar-language AI Chatbot for farmers to ask questions | 
+  6 type=17 L=90.9 T=1,116.4 W=585.6 H=125.3 B=1,241.7 text=Functions | 
+  7 type=17 L=42.2 T=1,253.7 W=728.0 H=686.3 B=1,940.0 text=For Farmers |  Identify crop diseases and pests   |    with AI. | View infection rates on the heatmap. |  Share  agricultural problems and solutions with other farmers. |  Ask ‘BaGyi Pyoe’ for weather    |    and farm advices. | 
+  8 type=17 L=837.1 T=1,653.1 W=840.2 H=403.2 B=2,056.3 text=For Experts |  Review and analyse farmers’ field  |    cases. |  Check regional outbreaks on the       |     heatmap. | 
+  9 type=13 L=824.6 T=1,132.4 W=854.8 H=508.7 B=1,641.1 text=
+ 10 type=13 L=40.2 T=1,955.3 W=763.8 H=505.6 B=2,461.0 text=
+ 11 type=13 L=837.2 T=2,094.6 W=854.8 H=457.1 B=2,551.7 text=
+ 12 type=13 L=42.2 T=94.6 W=237.6 H=247.4 B=342.0 text=
+ 13 type=17 L=87.6 T=2,469.6 W=627.6 H=124.8 B=2,594.4 text=Benefits | 
+ 14 type=17 L=1,034.1 T=437.5 W=661.9 H=62.8 B=500.3 text=Team Name- NextGen Innovators | 
+ 15 type=17 L=40.2 T=3,082.3 W=1,649.3 H=337.7 B=3,420.0 text= | 
+MAX_BOTTOM=3419.99984741211  PAGE_H=3456  FREE_BELOW=36.0001525878906
