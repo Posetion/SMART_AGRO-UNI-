@@ -22,14 +22,23 @@ export function createApp() {
     })
   );
   const allowedOrigins = env.CLIENT_ORIGIN.split(',').map((s) => s.trim()).filter(Boolean);
+
+  function originAllowed(origin?: string) {
+    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) return true;
+    try {
+      const host = new URL(origin).hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return true;
+      if (host.endsWith('.trycloudflare.com') || host.endsWith('.surge.sh')) return true;
+    } catch {
+      return false;
+    }
+    return false;
+  }
+
   app.use(
     cors({
       origin(origin, cb) {
-        if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-          cb(null, true);
-          return;
-        }
-        cb(null, false);
+        cb(null, originAllowed(origin));
       },
       credentials: true,
     })

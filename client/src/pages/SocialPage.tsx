@@ -771,13 +771,17 @@ export function SocialPage() {
             <IconChat />
           </SoftIcon>
           <h1>{t.guestTitle}</h1>
-          <p>{t.guestLead}</p>
+          <p>
+            {lang === 'my'
+              ? 'လယ်ကွင်းမှတ်စုများ မျှဝေရန် အီးမေးလ်နှင့် စကားဝှက်ဖြင့် ဝင်ရောက်ပါ။'
+              : 'Sign in with your email and password to share field notes, link diagnoses, and reply to fellow farmers.'}
+          </p>
           <div className="sf-guest-actions">
             <Link className="button" to="/login">
-              {t.signIn}
+              {lang === 'my' ? 'ဝင်ရန်' : 'Login'}
             </Link>
             <Link className="button secondary" to="/register">
-              {t.register}
+              {lang === 'my' ? 'စာရင်းသွင်းရန်' : 'Register'}
             </Link>
           </div>
         </div>

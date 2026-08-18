@@ -281,10 +281,14 @@ writeRedirect(tunnel.url);
 const published = await deployRedirect();
 console.log('\n========================================');
 console.log('  Smart Agro is public');
+console.log(`  Live now:    ${tunnel.url}`);
 console.log(`  Use this QR: docs/Smart-Agro-Demo-QR.png`);
-console.log(`  Link:        ${PUBLIC_URL}`);
+console.log(`  QR link:     ${PUBLIC_URL}`);
 if (!published) {
-  console.log('  Permanent link not updated. Run: npx --yes surge login');
+  console.log('  Surge did not update the QR link.');
+  console.log(`  Phones: open ${tunnel.url}`);
+  console.log('  Or run: npx --yes surge login');
+  console.log('  then log in with the Surge account that owns smart-agro-ucs.surge.sh');
 }
 console.log('  Leave this window open. Ctrl+C when the demo is over.');
 console.log('========================================\n');

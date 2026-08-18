@@ -13,6 +13,22 @@
       rel="stylesheet"
     />
     <title>Smart Agro Community</title>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          regs.forEach((reg) => {
+            void reg.unregister();
+          });
+        });
+      }
+      if (window.caches) {
+        caches.keys().then((keys) => {
+          keys.forEach((key) => {
+            void caches.delete(key);
+          });
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
