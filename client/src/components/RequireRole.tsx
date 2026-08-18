@@ -31,8 +31,7 @@ export function RequireRole({ roles, children }: Props) {
 
           <h1>Sign in to continue</h1>
           <p>
-            Use your admin or expert email with a one-time password to manage the farm community
-            platform.
+            Use your admin or expert email and password to manage the farm community platform.
           </p>
 
           <ul className="gate-points">

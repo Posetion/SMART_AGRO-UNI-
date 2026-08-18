@@ -239,9 +239,9 @@ function hasCursor(): boolean {
   return Boolean(env.CURSOR_API_KEY?.trim());
 }
 
-/** Primary first, the other as fallback. Flip AI_PROVIDER in .env on project day. */
+/** Use only the configured provider — no Gemini↔Cursor fallback. */
 function providerOrder(): Array<'gemini' | 'cursor'> {
-  return env.AI_PROVIDER === 'cursor' ? ['cursor', 'gemini'] : ['gemini', 'cursor'];
+  return [env.AI_PROVIDER];
 }
 
 function isGeminiQuotaError(err: unknown): boolean {
@@ -1027,7 +1027,7 @@ export async function detectDisease(imageBuffer: Buffer, mimeType: string): Prom
   }
 
   if (lastError instanceof AppError) throw lastError;
-  throw new AppError('Disease detection requires GEMINI_API_KEY or CURSOR_API_KEY', 503);
+  throw new AppError('Disease detection requires CURSOR_API_KEY', 503);
 }
 
 export async function predictRisk(input: {

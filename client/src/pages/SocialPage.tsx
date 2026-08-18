@@ -772,9 +772,14 @@ export function SocialPage() {
           </SoftIcon>
           <h1>{t.guestTitle}</h1>
           <p>{t.guestLead}</p>
-          <Link className="button" to="/login">
-            {t.loginOtp}
-          </Link>
+          <div className="sf-guest-actions">
+            <Link className="button" to="/login">
+              {t.signIn}
+            </Link>
+            <Link className="button secondary" to="/register">
+              {t.register}
+            </Link>
+          </div>
         </div>
       </div>
     );

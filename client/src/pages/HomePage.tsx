@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { TownshipLocationPicker, placeCoords, type TownshipOption } from '../components/TownshipLocationPicker';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { homeCopy } from '../i18n/messages';
 import { api } from '../services/api';
+import { formatRegionLabel, formatTownshipLabel } from '../utils/localizeFarm';
+import { readPreferredTownship, writePreferredTownship } from '../utils/preferredTownship';
 import {
   IconBook,
   IconChat,
@@ -15,7 +18,7 @@ import {
 } from '../components/icons';
 
 type WeatherBundle = {
-  township?: { name?: string; nameEn?: string; region?: string };
+  township?: { name?: string; nameEn?: string; nameMy?: string; region?: string };
   weather?: {
     current?: {
       temperature_2m?: number;
@@ -114,12 +117,17 @@ export function HomePage() {
   const { user, accessToken } = useAuth();
   const { lang } = useLanguage();
   const t = homeCopy(lang);
+  const savedPlace = readPreferredTownship();
+  const [township, setTownship] = useState(savedPlace?.nameEn || 'Yangon');
+  const [townshipMy, setTownshipMy] = useState(savedPlace?.nameMy || (savedPlace?.nameEn ? '' : 'ရန်ကုန်'));
+  const [region, setRegion] = useState(savedPlace?.region || 'Yangon');
   const [weather, setWeather] = useState<WeatherBundle | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [heatmap, setHeatmap] = useState<HeatmapData | null>(null);
   const [diagnosticsCount, setDiagnosticsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [weatherLoading, setWeatherLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,14 +135,12 @@ export function HomePage() {
     async function load() {
       setLoading(true);
       try {
-        const [wx, arts, heat] = await Promise.all([
-          api<WeatherBundle>('/weather/township/Yangon').catch(() => null),
+        const [arts, heat] = await Promise.all([
           api<Article[]>('/knowledge/articles').catch(() => []),
           api<HeatmapData>('/heatmap/data').catch(() => null),
         ]);
 
         if (cancelled) return;
-        setWeather(wx);
         setArticles(Array.isArray(arts) ? arts.slice(0, 3) : []);
         setHeatmap(heat);
 
@@ -168,6 +174,47 @@ export function HomePage() {
     };
   }, [accessToken]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setWeatherLoading(true);
+    void api<WeatherBundle>(`/weather/township/${encodeURIComponent(township)}`)
+      .then((wx) => {
+        if (cancelled) return;
+        setWeather(wx);
+        const place = wx?.township;
+        if (place?.nameEn || place?.name) {
+          if (place.nameMy) setTownshipMy(place.nameMy);
+          if (place.region) setRegion(place.region);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setWeather(null);
+      })
+      .finally(() => {
+        if (!cancelled) setWeatherLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [township]);
+
+  function onTownshipSelect(tw: TownshipOption) {
+    const nameEn = tw.nameEn || tw.name;
+    const nameMy = tw.nameMy || '';
+    const nextRegion = tw.region || 'Myanmar';
+    const coords = placeCoords(tw);
+    setTownship(nameEn);
+    setTownshipMy(nameMy);
+    setRegion(nextRegion);
+    writePreferredTownship({
+      nameEn,
+      nameMy,
+      region: nextRegion,
+      lat: coords?.lat,
+      lng: coords?.lng,
+    });
+  }
+
   const features = useMemo(
     () =>
       FEATURE_ROUTES.map(({ to, keys, Icon, tone }) => ({
@@ -184,19 +231,13 @@ export function HomePage() {
     const place = weather?.township as
       | { name?: string; nameEn?: string; nameMy?: string; region?: string }
       | undefined;
-    if (place?.nameEn || place?.name) {
-      const town =
-        lang === 'my' && place.nameMy ? place.nameMy : place.nameEn || place.name;
-      const region =
-        lang === 'my' && place.region === 'Yangon'
-          ? 'ရန်ကုန်'
-          : lang === 'my' && place.region === 'Myanmar'
-            ? 'မြန်မာ'
-            : place.region;
-      return `${town}${region ? `, ${region}` : ''}`;
-    }
-    return lang === 'my' ? 'ရန်ကုန်, မြန်မာ' : 'Yangon, Myanmar';
-  }, [weather, lang]);
+    const townName = place?.nameEn || place?.name || township;
+    const townMy = place?.nameMy || townshipMy;
+    const regionName = place?.region || region;
+    const town = formatTownshipLabel(townName, townMy, lang);
+    const regionLabel = formatRegionLabel(regionName, lang);
+    return regionLabel ? `${town}, ${regionLabel}` : town;
+  }, [weather, township, townshipMy, region, lang]);
 
   const currentTemp = weather?.weather?.current?.temperature_2m;
   const currentLabel = weatherLabel(
@@ -221,17 +262,33 @@ export function HomePage() {
     <div className="home page-home">
       <div className="home-desk-hero">
         <section className="home-location-bar">
-          <div className="home-location-left">
-            <IconPin />
-            <div>
-              <strong>{locationLabel}</strong>
-              <span>{loading ? t.updating : t.liveFieldConditions}</span>
+          <div className="home-location-top">
+            <div className="home-location-left">
+              <IconPin />
+              <div>
+                <strong>{locationLabel}</strong>
+                <span>{weatherLoading || loading ? t.updating : t.liveFieldConditions}</span>
+              </div>
+            </div>
+            <div className="home-location-right">
+              <span className="temp">{currentTemp != null ? `${Math.round(currentTemp)}°C` : '—'}</span>
+              <span className="cond">{currentLabel}</span>
             </div>
           </div>
-          <div className="home-location-right">
-            <span className="temp">{currentTemp != null ? `${Math.round(currentTemp)}°C` : '—'}</span>
-            <span className="cond">{currentLabel}</span>
-          </div>
+          <TownshipLocationPicker
+            className="home-loc-picker"
+            currentName={township}
+            currentNameMy={townshipMy}
+            currentRegion={region}
+            lang={lang}
+            onSelect={onTownshipSelect}
+            townshipLabel={t.chooseTownship}
+            searchPlaceholder={t.searchTownships}
+            listLabel={t.listTownships}
+            closeLabel={t.closeList}
+            emptyLabel={t.noTownship}
+          />
+          <p className="home-loc-hint">{t.vpnLocationHint}</p>
         </section>
 
         <section className="home-section home-stats-section">

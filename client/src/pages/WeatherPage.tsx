@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLanguage, type Lang } from '../context/LanguageContext';
 import { api } from '../services/api';
 import { formatRegionLabel, formatTownshipLabel } from '../utils/localizeFarm';
+import { readPreferredTownship, writePreferredTownship } from '../utils/preferredTownship';
 type Tone = 'mint' | 'sky' | 'coral' | 'amber' | 'peach' | 'teal';
 
 type Township = {
@@ -303,7 +304,7 @@ function saveRecent(name: string) {
 export function WeatherPage() {
   const { lang, setLang } = useLanguage();
   const t = copy[lang];
-  const [township, setTownship] = useState('Yangon');
+  const [township, setTownship] = useState(() => readPreferredTownship()?.nameEn || 'Yangon');
   const [query, setQuery] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [allTownships, setAllTownships] = useState<Township[]>([]);
@@ -371,6 +372,13 @@ export function WeatherPage() {
       setTownship(data.township.nameEn || data.township.name);
       setSelectedDay(0);
       setRecent(saveRecent(data.township.nameEn || data.township.name));
+      writePreferredTownship({
+        nameEn: data.township.nameEn || data.township.name,
+        nameMy: data.township.nameMy,
+        region: data.township.region,
+        lat: data.township.lat,
+        lng: data.township.lng,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
@@ -388,6 +396,13 @@ export function WeatherPage() {
       setTownship(data.township.nameEn || data.township.name);
       setSelectedDay(0);
       setRecent(saveRecent(data.township.nameEn || data.township.name));
+      writePreferredTownship({
+        nameEn: data.township.nameEn || data.township.name,
+        nameMy: data.township.nameMy,
+        region: data.township.region,
+        lat: data.township.lat,
+        lng: data.township.lng,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
@@ -445,20 +460,9 @@ export function WeatherPage() {
   useEffect(() => {
     void (async () => {
       const list = await loadAllTownships().catch(() => [] as Township[]);
-      // Prefer live GPS on first load (snaps to nearest township), fall back to Yangon
-      if (navigator.geolocation) {
-        try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 120_000,
-            });
-          });
-          await loadWeatherByPlace(pos.coords.latitude, pos.coords.longitude, 'My location', 'Myanmar');
-        } catch {
-          await loadWeatherByName('Yangon');
-        }
+      const saved = readPreferredTownship();
+      if (saved?.nameEn) {
+        await loadWeatherByName(saved.nameEn);
       } else {
         await loadWeatherByName('Yangon');
       }

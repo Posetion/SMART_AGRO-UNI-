@@ -15,6 +15,7 @@ import {
   formatRegionLabel,
   formatTownshipLabel,
 } from '../utils/localizeFarm';
+import { readPreferredTownship, writePreferredTownship } from '../utils/preferredTownship';
 
 type Tone = 'mint' | 'sky' | 'coral' | 'amber' | 'peach' | 'teal';
 
@@ -219,13 +220,16 @@ export function DetectPage() {
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [dontAskAgain, setDontAskAgain] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const [township, setTownship] = useState('Yangon');
-  const [townshipMy, setTownshipMy] = useState('ရန်ကုန်');
-  const [region, setRegion] = useState('Yangon');
-  const [lat, setLat] = useState(16.8661);
-  const [lng, setLng] = useState(96.1951);
+  const savedPlace = readPreferredTownship();
+  const [township, setTownship] = useState(savedPlace?.nameEn || 'Yangon');
+  const [townshipMy, setTownshipMy] = useState(savedPlace?.nameMy || (savedPlace?.nameEn ? '' : 'ရန်ကုန်'));
+  const [region, setRegion] = useState(savedPlace?.region || 'Yangon');
+  const [lat, setLat] = useState(savedPlace?.lat ?? 16.8661);
+  const [lng, setLng] = useState(savedPlace?.lng ?? 96.1951);
   const [locating, setLocating] = useState(false);
-  const [locationSource, setLocationSource] = useState<'default' | 'gps' | 'picker'>('default');
+  const [locationSource, setLocationSource] = useState<'default' | 'gps' | 'picker'>(
+    savedPlace?.nameEn ? 'picker' : 'default'
+  );
 
   const locationDisplay = useMemo(() => {
     const town = formatTownshipLabel(township, townshipMy, lang);
@@ -442,23 +446,28 @@ export function DetectPage() {
     }
   }
 
-  useEffect(() => {
-    void useDeviceLocation(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-locate once on mount
-  }, []);
-
   function onTownshipSelect(tw: TownshipOption) {
-    setTownship(tw.nameEn || tw.name);
-    setTownshipMy(tw.nameMy || '');
-    setRegion(tw.region || '');
+    const nameEn = tw.nameEn || tw.name;
+    const nameMy = tw.nameMy || '';
+    const nextRegion = tw.region || '';
+    setTownship(nameEn);
+    setTownshipMy(nameMy);
+    setRegion(nextRegion);
     setLocationSource('picker');
+    let nextLat = lat;
+    let nextLng = lng;
     if (tw.lat != null && tw.lng != null) {
+      nextLat = tw.lat;
+      nextLng = tw.lng;
       setLat(tw.lat);
       setLng(tw.lng);
     } else if (tw.coordinates?.coordinates) {
-      setLng(tw.coordinates.coordinates[0]);
-      setLat(tw.coordinates.coordinates[1]);
+      nextLng = tw.coordinates.coordinates[0];
+      nextLat = tw.coordinates.coordinates[1];
+      setLng(nextLng);
+      setLat(nextLat);
     }
+    writePreferredTownship({ nameEn, nameMy, region: nextRegion, lat: nextLat, lng: nextLng });
   }
 
   async function analyze() {

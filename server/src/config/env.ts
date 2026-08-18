@@ -30,9 +30,9 @@ const envSchema = z.object({
   /** Optional comma-separated extra Gemini keys (after KEY … KEY_8). */
   GEMINI_API_KEYS: z.string().optional().default(''),
   GEMINI_MODEL: z.string().default('gemini-3.6-flash'),
-  /** Primary AI for leaf detect + farmer chat. Flip to `cursor` on project day. */
-  AI_PROVIDER: z.enum(['gemini', 'cursor']).default('gemini'),
-  /** Cursor SDK key — used when AI_PROVIDER=cursor, or as Gemini fallback. */
+  /** Primary AI for leaf detect + farmer chat. `cursor` = Cursor only (no Gemini). */
+  AI_PROVIDER: z.enum(['gemini', 'cursor']).default('cursor'),
+  /** Cursor SDK key — required when AI_PROVIDER=cursor. */
   CURSOR_API_KEY: z.string().optional().default(''),
   CURSOR_MODEL: z.string().default('composer-2.5'),
   CURSOR_DETECT_TIMEOUT_MS: z.coerce.number().default(120000),

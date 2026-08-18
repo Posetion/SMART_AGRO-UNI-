@@ -749,6 +749,7 @@ export function KnowledgePage() {
               </div>
             </header>
 
+            <div className="kc-modal-scroll">
             {detailLoading && <p className="muted kc-modal-loading">Loading…</p>}
 
             {selected && !detailLoading && selected.category === 'Book' && (
@@ -815,6 +816,7 @@ export function KnowledgePage() {
                 </div>
               </div>
             )}
+            </div>
           </div>
         </div>
       )}
