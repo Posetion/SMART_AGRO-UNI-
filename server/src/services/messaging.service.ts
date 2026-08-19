@@ -314,10 +314,17 @@ export async function regenerateInvite(conversationId: string, actorId: string) 
 export async function previewInvite(code: string) {
   const inviteCode = code.trim();
   if (!inviteCode) throw new AppError('Invite not found', 404);
-  const convo = await Conversation.findOne({ type: 'group', inviteCode })
+  const convo = (await Conversation.findOne({ type: 'group', inviteCode })
     .populate('createdBy', USER_PUBLIC)
     .select('name description visibility inviteCode participants createdBy')
-    .lean();
+    .lean()) as {
+    name?: string;
+    description?: string;
+    visibility?: string;
+    inviteCode?: string;
+    participants?: unknown[];
+    createdBy?: unknown;
+  } | null;
   if (!convo) throw new AppError('Invite not found', 404);
   return {
     name: convo.name,
@@ -649,7 +656,7 @@ export async function forwardMessage(
   const senderName = sender?.fullName?.trim() || sender?.email?.split('@')[0] || 'Farmer';
 
   const unique = [...new Set(conversationIds.map(String))].slice(0, 20);
-  const sent = [];
+  const sent: unknown[] = [];
   for (const destId of unique) {
     const copy = await sendMessage(
       destId,

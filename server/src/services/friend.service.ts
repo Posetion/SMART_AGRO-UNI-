@@ -260,12 +260,16 @@ export async function friendshipStatus(selfId: string, otherId: string) {
   const blockedMe = await UserBlock.findOne({ blockerId: otherId, blockedId: selfId }).lean();
   if (blockedMe) return { status: 'blocked_by' as const };
 
-  const row = await Friendship.findOne({
+  const row = (await Friendship.findOne({
     $or: [
       { fromUserId: selfId, toUserId: otherId },
       { fromUserId: otherId, toUserId: selfId },
     ],
-  }).lean();
+  }).lean()) as {
+    _id: unknown;
+    status?: string;
+    fromUserId?: unknown;
+  } | null;
   if (!row) return { status: 'none' as const };
   if (row.status === 'accepted') return { status: 'friends' as const, id: row._id };
   if (row.status === 'pending') {
