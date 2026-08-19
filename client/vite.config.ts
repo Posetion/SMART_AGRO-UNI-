@@ -8,7 +8,7 @@ export default defineConfig({
     VitePWA({
       disable: process.env.SMART_AGRO_SHARE === '1',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'logo-leaf.png'],
       manifest: {
         name: 'Smart Agro Community',
         short_name: 'SmartAgro',
@@ -19,9 +19,9 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/favicon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
+            src: '/logo-leaf.png',
+            sizes: '235x235',
+            type: 'image/png',
             purpose: 'any maskable',
           },
         ],
