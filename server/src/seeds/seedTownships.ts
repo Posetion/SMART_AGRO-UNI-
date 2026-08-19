@@ -2,7 +2,7 @@ import { Township } from '../models/Township.js';
 import { TownshipBoundary } from '../models/TownshipBoundary.js';
 
 /** Major Myanmar cities / township centers for quick pick + map tiles. */
-const TOWNSHIPS = [
+export const TOWNSHIPS = [
   { name: 'Yangon', nameEn: 'Yangon', nameMy: 'ရန်ကုန်', region: 'Yangon', lng: 96.1951, lat: 16.8661 },
   { name: 'Mandalay', nameEn: 'Mandalay', nameMy: 'မန္တလေး', region: 'Mandalay', lng: 96.0891, lat: 21.9588 },
   { name: 'Naypyidaw', nameEn: 'Naypyidaw', nameMy: 'နေပြည်တော်', region: 'Naypyidaw', lng: 96.0785, lat: 19.7633 },

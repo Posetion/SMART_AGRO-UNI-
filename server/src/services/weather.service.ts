@@ -1,5 +1,6 @@
 import { env } from '../config/env.js';
 import { Township } from '../models/Township.js';
+import { TOWNSHIPS } from '../seeds/seedTownships.js';
 import { AppError } from '../utils/AppError.js';
 
 type CacheEntry = { expiresAt: number; data: unknown };
@@ -595,14 +596,14 @@ export async function listTownships(search?: string) {
 
   const localFilter = q
     ? {
-        isActive: true,
-        $or: [
-          { name: new RegExp(q, 'i') },
-          { nameEn: new RegExp(q, 'i') },
-          { nameMy: new RegExp(q, 'i') },
-          { region: new RegExp(q, 'i') },
-        ],
-      }
+      isActive: true,
+      $or: [
+        { name: new RegExp(q, 'i') },
+        { nameEn: new RegExp(q, 'i') },
+        { nameMy: new RegExp(q, 'i') },
+        { region: new RegExp(q, 'i') },
+      ],
+    }
     : { isActive: true };
 
   const rows = await Township.find(localFilter).sort({ nameEn: 1 }).limit(200).lean();
@@ -618,17 +619,34 @@ export async function listTownships(search?: string) {
     )
     .filter((p): p is PlaceResult => Boolean(p));
 
+  const catalog = TOWNSHIPS.filter((t) =>
+    q
+      ? [t.name, t.nameEn, t.nameMy, t.region].some((value) => value.toLowerCase().includes(q.toLowerCase()))
+      : true
+  ).map((t): PlaceResult => ({
+    name: t.name,
+    nameEn: t.nameEn,
+    nameMy: t.nameMy,
+    region: t.region,
+    lat: t.lat,
+    lng: t.lng,
+    coordinates: { type: 'Point', coordinates: [t.lng, t.lat] },
+    source: 'local',
+  }));
+
+  const merged = mergePlaces(local, catalog);
+
   // Country-wide search via Open-Meteo geocoding (Myanmar only)
   if (q && q.length >= 2) {
     try {
       const remote = await geocodeMyanmar(q, 40);
-      return mergePlaces(local, remote);
+      return mergePlaces(merged, remote);
     } catch {
-      return local;
+      return merged;
     }
   }
 
-  return local;
+  return merged;
 }
 
 async function weatherBundleForPlace(place: {
