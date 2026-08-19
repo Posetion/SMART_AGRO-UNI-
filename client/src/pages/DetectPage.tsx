@@ -677,19 +677,19 @@ export function DetectPage() {
             : guide?.controlsEn?.length
               ? guide.controlsEn
               : treatmentSteps(
-                  report.treatmentProtocol?.trim() ||
-                    treatmentProtocolFromGuide(report.disease, 'my', report.cropType) ||
-                    ''
-                )
+                report.treatmentProtocol?.trim() ||
+                treatmentProtocolFromGuide(report.disease, 'my', report.cropType) ||
+                ''
+              )
           : guide?.controlsEn?.length
             ? guide.controlsEn
             : guide?.controlsMy?.length
               ? guide.controlsMy
               : treatmentSteps(
-                  report.treatmentProtocol?.trim() ||
-                    treatmentProtocolFromGuide(report.disease, 'en', report.cropType) ||
-                    ''
-                );
+                report.treatmentProtocol?.trim() ||
+                treatmentProtocolFromGuide(report.disease, 'en', report.cropType) ||
+                ''
+              );
       const probs = [...(report.probabilities || [])]
         .sort((a, b) => b.probability - a.probability)
         .slice(0, 6)
@@ -698,14 +698,14 @@ export function DetectPage() {
           pct: Math.round((p.probability <= 1 ? p.probability * 100 : p.probability) * 10) / 10,
         }));
       const confidencePct =
-        report.prediction?.confidence != null
-          ? Math.round(
+        probs[0]?.pct != null
+          ? probs[0].pct
+          : report.prediction?.confidence != null
+            ? Math.round(
               (report.prediction.confidence <= 1
                 ? report.prediction.confidence * 100
                 : report.prediction.confidence) * 10
             ) / 10
-          : probs[0]?.pct != null
-            ? Math.round(probs[0].pct)
             : null;
       await downloadLabReportDocx(
         {
@@ -1204,10 +1204,10 @@ export function DetectPage() {
                 const previewChemicals = chemicals.slice(0, 2);
                 const hasExpertAdvice = Boolean(
                   result.isVerified &&
-                    (result.diseaseCorrected ||
-                      result.expertBooks?.trim() ||
-                      result.expertDrugs?.trim() ||
-                      result.expertSuggestion?.trim())
+                  (result.diseaseCorrected ||
+                    result.expertBooks?.trim() ||
+                    result.expertDrugs?.trim() ||
+                    result.expertSuggestion?.trim())
                 );
 
                 return (
