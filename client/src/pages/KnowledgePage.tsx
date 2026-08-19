@@ -56,6 +56,17 @@ function bookCoverSrc(item: Pick<KnowledgeItem, 'coverUrl'>) {
   return item.coverUrl?.trim() || DEFAULT_BOOK_COVER;
 }
 
+function fileHref(fileUrl?: string) {
+  const value = fileUrl?.trim();
+  if (!value) return '';
+  if (!value.startsWith('/api/') || !/^https?:\/\//i.test(import.meta.env.VITE_API_URL || '')) return value;
+  return new URL(value, import.meta.env.VITE_API_URL).toString();
+}
+
+function isExternalFile(fileUrl?: string) {
+  return /^https?:\/\//i.test(fileUrl?.trim() || '');
+}
+
 type Topic = {
   key: TopicKey;
   label: string;
@@ -589,9 +600,10 @@ export function KnowledgePage() {
                     {item.fileUrl ? (
                       <a
                         className="button secondary compact"
-                        href={item.fileUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                        href={fileHref(item.fileUrl)}
+                        download
+                        target={isExternalFile(item.fileUrl) ? '_blank' : undefined}
+                        rel={isExternalFile(item.fileUrl) ? 'noreferrer' : undefined}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {t.download}
@@ -676,7 +688,7 @@ export function KnowledgePage() {
                 </p>
                 <div className="kc-row-actions">
                   {item.fileUrl && (
-                    <a className="button compact" href={item.fileUrl} target="_blank" rel="noreferrer">
+                    <a className="button compact" href={fileHref(item.fileUrl)} download target={isExternalFile(item.fileUrl) ? '_blank' : undefined} rel={isExternalFile(item.fileUrl) ? 'noreferrer' : undefined}>
                       {t.downloadPdf}
                     </a>
                   )}
@@ -750,72 +762,72 @@ export function KnowledgePage() {
             </header>
 
             <div className="kc-modal-scroll">
-            {detailLoading && <p className="muted kc-modal-loading">Loading…</p>}
+              {detailLoading && <p className="muted kc-modal-loading">Loading…</p>}
 
-            {selected && !detailLoading && selected.category === 'Book' && (
-              <BookDetail
-                item={selected}
-                all={items}
-                topics={topics}
-                labels={t}
-                saved={saved.has(selected._id)}
-                onOpen={(i) => void openDetail(i)}
-                onSave={() => toggleSave(selected._id)}
-              />
-            )}
+              {selected && !detailLoading && selected.category === 'Book' && (
+                <BookDetail
+                  item={selected}
+                  all={items}
+                  topics={topics}
+                  labels={t}
+                  saved={saved.has(selected._id)}
+                  onOpen={(i) => void openDetail(i)}
+                  onSave={() => toggleSave(selected._id)}
+                />
+              )}
 
-            {selected && !detailLoading && selected.category === 'Article' && (
-              <ArticleDetail
-                item={selected}
-                all={items}
-                saved={saved.has(selected._id)}
-                labels={t}
-                onSave={() => toggleSave(selected._id)}
-                onOpen={(i) => void openDetail(i)}
-              />
-            )}
+              {selected && !detailLoading && selected.category === 'Article' && (
+                <ArticleDetail
+                  item={selected}
+                  all={items}
+                  saved={saved.has(selected._id)}
+                  labels={t}
+                  onSave={() => toggleSave(selected._id)}
+                  onOpen={(i) => void openDetail(i)}
+                />
+              )}
 
-            {selected && !detailLoading && selected.category === 'Journal' && (
-              <div className="kc-modal-body">
-                <h2 className="kc-detail-title">{selected.title}</h2>
-                <div className="kc-meta wrap">
-                  <span>{selected.author || 'Research team'}</span>
-                  <span>{formatMonth(selected.updatedAt || selected.createdAt)}</span>
+              {selected && !detailLoading && selected.category === 'Journal' && (
+                <div className="kc-modal-body">
+                  <h2 className="kc-detail-title">{selected.title}</h2>
+                  <div className="kc-meta wrap">
+                    <span>{selected.author || 'Research team'}</span>
+                    <span>{formatMonth(selected.updatedAt || selected.createdAt)}</span>
+                  </div>
+                  {selected.description && <p className="kc-lead">{selected.description}</p>}
+                  <div className="kc-cite-box">
+                    <strong>Citation (APA)</strong>
+                    <p>{citation(selected)}</p>
+                    <button type="button" className="button secondary compact" onClick={() => void copyCitation(selected)}>
+                      {citeCopied ? t.copied : t.copyCitation}
+                    </button>
+                  </div>
+                  <div className="kc-content">
+                    {(selected.content || '')
+                      .split(/\n{2,}/)
+                      .map((block, i) => (
+                        <p key={i}>{block}</p>
+                      ))}
+                  </div>
+                  <div className="kc-row-actions">
+                    {selected.fileUrl && (
+                      <a className="button" href={fileHref(selected.fileUrl)} download target={isExternalFile(selected.fileUrl) ? '_blank' : undefined} rel={isExternalFile(selected.fileUrl) ? 'noreferrer' : undefined}>
+                        <IconDownload /> {t.downloadPdf}
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      className={`button secondary ${saved.has(selected._id) ? 'is-saved' : ''}`}
+                      onClick={() => toggleSave(selected._id)}
+                    >
+                      {saved.has(selected._id) ? t.saved : t.save}
+                    </button>
+                    <button type="button" className="button secondary" onClick={() => void shareItem(selected)}>
+                      {t.share}
+                    </button>
+                  </div>
                 </div>
-                {selected.description && <p className="kc-lead">{selected.description}</p>}
-                <div className="kc-cite-box">
-                  <strong>Citation (APA)</strong>
-                  <p>{citation(selected)}</p>
-                  <button type="button" className="button secondary compact" onClick={() => void copyCitation(selected)}>
-                    {citeCopied ? t.copied : t.copyCitation}
-                  </button>
-                </div>
-                <div className="kc-content">
-                  {(selected.content || '')
-                    .split(/\n{2,}/)
-                    .map((block, i) => (
-                      <p key={i}>{block}</p>
-                    ))}
-                </div>
-                <div className="kc-row-actions">
-                  {selected.fileUrl && (
-                    <a className="button" href={selected.fileUrl} target="_blank" rel="noreferrer">
-                      <IconDownload /> {t.downloadPdf}
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    className={`button secondary ${saved.has(selected._id) ? 'is-saved' : ''}`}
-                    onClick={() => toggleSave(selected._id)}
-                  >
-                    {saved.has(selected._id) ? t.saved : t.save}
-                  </button>
-                  <button type="button" className="button secondary" onClick={() => void shareItem(selected)}>
-                    {t.share}
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
             </div>
           </div>
         </div>
@@ -922,7 +934,7 @@ function BookDetail({
 
           <div className="kc-book-cta">
             {item.fileUrl ? (
-              <a className="kc-book-btn primary" href={item.fileUrl} target="_blank" rel="noreferrer">
+              <a className="kc-book-btn primary" href={fileHref(item.fileUrl)} download target={isExternalFile(item.fileUrl) ? '_blank' : undefined} rel={isExternalFile(item.fileUrl) ? 'noreferrer' : undefined}>
                 <IconDownload />
                 <span>PDF</span>
               </a>
@@ -1366,7 +1378,7 @@ function ResourceRow({
               : labels.readNow}
         </button>
         {item.category === 'Book' && item.fileUrl && (
-          <a className="button secondary compact" href={item.fileUrl} target="_blank" rel="noreferrer">
+          <a className="button secondary compact" href={fileHref(item.fileUrl)} download target={isExternalFile(item.fileUrl) ? '_blank' : undefined} rel={isExternalFile(item.fileUrl) ? 'noreferrer' : undefined}>
             <IconDownload /> {labels.download}
           </a>
         )}
