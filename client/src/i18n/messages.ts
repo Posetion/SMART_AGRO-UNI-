@@ -85,7 +85,7 @@ export const landingCopy = (lang: Lang) =>
   pick(
     lang,
     {
-      tagline: 'Smart Tools for Myanmar Farmers',
+      tagline: 'Smart Tool for Myanmar Farmers',
       subtitle: 'Detect disease · Check diagnosis · Check weather',
       getStarted: 'Get Started',
       member: 'Log in',
@@ -2122,249 +2122,249 @@ type FaqCopy = {
 
 export const faqCopy = (lang: Lang): FaqCopy => {
   const en: FaqCopy = {
-      heroTitle: 'How can we help you?',
-      heroLead:
-        'Welcome to the Smart Agro Help Center. Search common questions about disease detection, weather, community, and your farm account.',
-      search: 'Search',
-      support: 'Support',
-      faqs: 'FAQs',
-      faqsLead:
-        "Have questions? We've got answers. Browse frequently asked questions to find quick solutions for rice farming with Smart Agro.",
-      empty: 'No questions match your search. Try another keyword.',
-      backSettings: 'Back to Settings',
-      items: [
-        {
-          q: 'Who can use Smart Agro?',
-          a: 'Smart Agro is built for Myanmar rice farmers, plus experts and admins who support them. Guests can explore some pages; a free account unlocks detection history, community, and saved guides.',
-        },
-        {
-          q: 'How do I detect a leaf disease?',
-          a: 'Open Disease Detection, set your township, then upload or take a clear photo of the affected leaf. Tap Analyze to get the crop, disease, severity, confidence, and a treatment protocol you can expand or download.',
-        },
-        {
-          q: 'Which crops and pests does AI detection support?',
-          a: 'Smart Agro detects diseases and pests across many Myanmar field crops — rice, pulses, oilseeds, maize, rubber, sugarcane, cotton, vegetables, potato, tea, coffee, and oil palm. Use a clear photo of the leaf, stem, fruit, or pest damage.',
-        },
-        {
-          q: 'Can detection identify field pests?',
-          a: 'Yes. Upload a photo showing pest damage or the insect on the plant. You will get the pest name, severity estimate, and an IPM-style treatment guide with recommended control chemicals when available.',
-        },
-        {
-          q: 'Can an expert review my AI result?',
-          a: 'Yes. After a detection, you can request expert review. Experts and admins can verify or follow up, and you will see the status on your diagnosis and in notices.',
-        },
-        {
-          q: 'How do I check weather for my township?',
-          a: 'Open Weather, search or pick your township on the map, or use your GPS location. You will get current conditions, a 7-day forecast, alerts, and crop-related tips for that place.',
-        },
-        {
-          q: 'How does the community feed work?',
-          a: 'In Community you can share field notes, photos, and detection results, comment on other farmers’ posts, and learn from local experience across Myanmar. You can delete your own posts. To flag someone else’s post, use Report with a reason — admins review it and may delete it. If a post is removed, the author gets a notice with the reason.',
-        },
-        {
-          q: 'How do I update my profile and farm location?',
-          a: 'Go to Profile → Settings. Update your name, bio, crops, photos, and township. Your farm location helps personalize weather and community context.',
-        },
-        {
-          q: 'How do I switch the app to Myanmar language?',
-          a: 'Use the language toggle in the top navigation, or open Profile → Settings → Preferences and choose Myanmar. Numbers and labels update across the app.',
-        },
-        {
-          q: 'Is Smart Agro free to use?',
-          a: 'Yes. Core tools—disease detection, township weather, knowledge guides, community, and chat—are free for farmers. No payment is required to create an account.',
-        },
-        {
-          q: 'What should I do if detection fails or looks wrong?',
-          a: 'Try a clearer, closer leaf photo in good light. Avoid heavy shadows and non-leaf images. You can run a new detection, read the treatment guide, or ask for expert review if you are unsure.',
-        },
-        {
-          q: 'How do I create an account?',
-          a: 'Open Login, switch to Register, then enter your name, email, and a password (at least 8 characters). After registering you can use detection history, community posting, messages, and saved items.',
-        },
-        {
-          q: 'What is the difference between guest and a registered account?',
-          a: 'Guests can try many tools quickly. A registered account keeps your diagnoses, profile, friends, messages, and saved knowledge so you can return to them later on any device after logging in.',
-        },
-        {
-          q: 'How do I download a lab / treatment report?',
-          a: 'After a successful detection, open Treatment Protocol and tap Download Lab Report. The file includes symptoms, how to treat now, control measures, recommended chemicals, severity, and location.',
-        },
-        {
-          q: 'Where can I find farming knowledge articles?',
-          a: 'Open Knowledge to browse guides on rice care, diseases, and pests, and field practices. You can save useful articles from your Profile → Saved tab.',
-        },
-        {
-          q: 'What is the disease heatmap?',
-          a: 'The Heatmap shows community detection activity across Myanmar townships and regions for the day. It helps you see where outbreaks are being reported—not only your own scans.',
-        },
-        {
-          q: 'How does BaGyi Pyoe (farm chat) help?',
-          a: 'Open Chat and ask BaGyi Pyoe about crops, diseases, weather, or treatments. Answers use farming guidance and can factor in your local weather when location is available.',
-        },
-        {
-          q: 'How do I message other farmers or experts?',
-          a: 'Open Messages to chat one-to-one or in groups. You can add friends from profiles or notices, and join groups with an invite link when the group is public.',
-        },
-        {
-          q: 'How do I change or reset my password?',
-          a: 'Go to Profile → Settings → Change password. Enter your current password, then your new password twice. Admins can also reset a password for you if you lose access.',
-        },
-        {
-          q: 'Why does Smart Agro ask for my location?',
-          a: 'Location (or your chosen township) personalizes weather, detection context, and local tips. You can pick a township manually anytime if you prefer not to share GPS.',
-        },
-        {
-          q: 'Can I use Smart Agro without internet?',
-          a: 'On this computer, detection and BaGyi Pyoe chat use the local AI service (port 8000) and MongoDB on localhost — they do not need a VPN. Community and email still need internet. If live weather is blocked, the app shows a seasonal Myanmar estimate so Home still loads.',
-        },
-        {
-          q: 'Why does detection fail with a network / connection error?',
-          a: 'Leaf detection is set to the local AI on this computer (port 8000). You do not need a VPN. Start the FastAPI AI service and the Node server, then retry. VPN is only needed if you switch to Google Gemini or Cursor cloud AI. If weather looks approximate, Open-Meteo is blocked on your ISP — the app still works.',
-        },
-        {
-          q: 'How do I share a diagnosis with the community?',
-          a: 'On a detection result, tap Share to Community. A draft post is prepared with the disease and severity so other farmers can learn from your field case.',
-        },
-        {
-          q: 'What do Mild, Moderate, Severe, and Critical mean?',
-          a: 'These severity levels summarize how serious the detected disease looks based on the AI score. Higher levels usually need faster action—check the treatment protocol and consider expert review.',
-        },
-        {
-          q: 'How do notifications and the mailbox work?',
-          a: 'The mailbox bell shows notices such as expert review updates, friend requests, and important account messages. Open it from the top bar and mark items as read when you are done.',
-        },
-        {
-          q: 'Is my farm data private?',
-          a: 'Your profile details follow what you choose to share in community posts. Account login uses your email and password. Admins manage safety and reviews; do not post sensitive personal information in public feeds.',
-        },
-        {
-          q: 'Which photo formats work for leaf detection?',
-          a: 'Use JPEG, PNG, or WebP up to 5MB. On iPhone, avoid HEIC—set the camera to Most Compatible—or convert the photo before uploading.',
-        },
-      ],
+    heroTitle: 'How can we help you?',
+    heroLead:
+      'Welcome to the Smart Agro Help Center. Search common questions about disease detection, weather, community, and your farm account.',
+    search: 'Search',
+    support: 'Support',
+    faqs: 'FAQs',
+    faqsLead:
+      "Have questions? We've got answers. Browse frequently asked questions to find quick solutions for rice farming with Smart Agro.",
+    empty: 'No questions match your search. Try another keyword.',
+    backSettings: 'Back to Settings',
+    items: [
+      {
+        q: 'Who can use Smart Agro?',
+        a: 'Smart Agro is built for Myanmar rice farmers, plus experts and admins who support them. Guests can explore some pages; a free account unlocks detection history, community, and saved guides.',
+      },
+      {
+        q: 'How do I detect a leaf disease?',
+        a: 'Open Disease Detection, set your township, then upload or take a clear photo of the affected leaf. Tap Analyze to get the crop, disease, severity, confidence, and a treatment protocol you can expand or download.',
+      },
+      {
+        q: 'Which crops and pests does AI detection support?',
+        a: 'Smart Agro detects diseases and pests across many Myanmar field crops — rice, pulses, oilseeds, maize, rubber, sugarcane, cotton, vegetables, potato, tea, coffee, and oil palm. Use a clear photo of the leaf, stem, fruit, or pest damage.',
+      },
+      {
+        q: 'Can detection identify field pests?',
+        a: 'Yes. Upload a photo showing pest damage or the insect on the plant. You will get the pest name, severity estimate, and an IPM-style treatment guide with recommended control chemicals when available.',
+      },
+      {
+        q: 'Can an expert review my AI result?',
+        a: 'Yes. After a detection, you can request expert review. Experts and admins can verify or follow up, and you will see the status on your diagnosis and in notices.',
+      },
+      {
+        q: 'How do I check weather for my township?',
+        a: 'Open Weather, search or pick your township on the map, or use your GPS location. You will get current conditions, a 7-day forecast, alerts, and crop-related tips for that place.',
+      },
+      {
+        q: 'How does the community feed work?',
+        a: 'In Community you can share field notes, photos, and detection results, comment on other farmers’ posts, and learn from local experience across Myanmar. You can delete your own posts. To flag someone else’s post, use Report with a reason — admins review it and may delete it. If a post is removed, the author gets a notice with the reason.',
+      },
+      {
+        q: 'How do I update my profile and farm location?',
+        a: 'Go to Profile → Settings. Update your name, bio, crops, photos, and township. Your farm location helps personalize weather and community context.',
+      },
+      {
+        q: 'How do I switch the app to Myanmar language?',
+        a: 'Use the language toggle in the top navigation, or open Profile → Settings → Preferences and choose Myanmar. Numbers and labels update across the app.',
+      },
+      {
+        q: 'Is Smart Agro free to use?',
+        a: 'Yes. Core tools—disease detection, township weather, knowledge guides, community, and chat—are free for farmers. No payment is required to create an account.',
+      },
+      {
+        q: 'What should I do if detection fails or looks wrong?',
+        a: 'Try a clearer, closer leaf photo in good light. Avoid heavy shadows and non-leaf images. You can run a new detection, read the treatment guide, or ask for expert review if you are unsure.',
+      },
+      {
+        q: 'How do I create an account?',
+        a: 'Open Login, switch to Register, then enter your name, email, and a password (at least 8 characters). After registering you can use detection history, community posting, messages, and saved items.',
+      },
+      {
+        q: 'What is the difference between guest and a registered account?',
+        a: 'Guests can try many tools quickly. A registered account keeps your diagnoses, profile, friends, messages, and saved knowledge so you can return to them later on any device after logging in.',
+      },
+      {
+        q: 'How do I download a lab / treatment report?',
+        a: 'After a successful detection, open Treatment Protocol and tap Download Lab Report. The file includes symptoms, how to treat now, control measures, recommended chemicals, severity, and location.',
+      },
+      {
+        q: 'Where can I find farming knowledge articles?',
+        a: 'Open Knowledge to browse guides on rice care, diseases, and pests, and field practices. You can save useful articles from your Profile → Saved tab.',
+      },
+      {
+        q: 'What is the disease heatmap?',
+        a: 'The Heatmap shows community detection activity across Myanmar townships and regions for the day. It helps you see where outbreaks are being reported—not only your own scans.',
+      },
+      {
+        q: 'How does BaGyi Pyoe (farm chat) help?',
+        a: 'Open Chat and ask BaGyi Pyoe about crops, diseases, weather, or treatments. Answers use farming guidance and can factor in your local weather when location is available.',
+      },
+      {
+        q: 'How do I message other farmers or experts?',
+        a: 'Open Messages to chat one-to-one or in groups. You can add friends from profiles or notices, and join groups with an invite link when the group is public.',
+      },
+      {
+        q: 'How do I change or reset my password?',
+        a: 'Go to Profile → Settings → Change password. Enter your current password, then your new password twice. Admins can also reset a password for you if you lose access.',
+      },
+      {
+        q: 'Why does Smart Agro ask for my location?',
+        a: 'Location (or your chosen township) personalizes weather, detection context, and local tips. You can pick a township manually anytime if you prefer not to share GPS.',
+      },
+      {
+        q: 'Can I use Smart Agro without internet?',
+        a: 'On this computer, detection and BaGyi Pyoe chat use the local AI service (port 8000) and MongoDB on localhost — they do not need a VPN. Community and email still need internet. If live weather is blocked, the app shows a seasonal Myanmar estimate so Home still loads.',
+      },
+      {
+        q: 'Why does detection fail with a network / connection error?',
+        a: 'Leaf detection is set to the local AI on this computer (port 8000). You do not need a VPN. Start the FastAPI AI service and the Node server, then retry. VPN is only needed if you switch to Google Gemini or Cursor cloud AI. If weather looks approximate, Open-Meteo is blocked on your ISP — the app still works.',
+      },
+      {
+        q: 'How do I share a diagnosis with the community?',
+        a: 'On a detection result, tap Share to Community. A draft post is prepared with the disease and severity so other farmers can learn from your field case.',
+      },
+      {
+        q: 'What do Mild, Moderate, Severe, and Critical mean?',
+        a: 'These severity levels summarize how serious the detected disease looks based on the AI score. Higher levels usually need faster action—check the treatment protocol and consider expert review.',
+      },
+      {
+        q: 'How do notifications and the mailbox work?',
+        a: 'The mailbox bell shows notices such as expert review updates, friend requests, and important account messages. Open it from the top bar and mark items as read when you are done.',
+      },
+      {
+        q: 'Is my farm data private?',
+        a: 'Your profile details follow what you choose to share in community posts. Account login uses your email and password. Admins manage safety and reviews; do not post sensitive personal information in public feeds.',
+      },
+      {
+        q: 'Which photo formats work for leaf detection?',
+        a: 'Use JPEG, PNG, or WebP up to 5MB. On iPhone, avoid HEIC—set the camera to Most Compatible—or convert the photo before uploading.',
+      },
+    ],
   };
 
   const my: FaqCopy = {
-      heroTitle: 'ဘယ်လို ကူညီရမလဲ?',
-      heroLead:
-        'Smart Agro အကူအညီ စင်တာမှ ကြိုဆိုပါသည်။ ရောဂါရှာ၊ ရာသီဥတု၊ အသိုင်းအဝိုင်းနှင့် လယ်ကွင်း အကောင့်အကြောင်း မေးလေ့ရှိသော မေးခွန်းများကို ရှာပါ။',
-      search: 'ရှာရန်',
-      support: 'အကူအညီ',
-      faqs: 'အမေးအဖြေ',
-      faqsLead:
-        'မေးခွန်းရှိပါသလား? အဖြေများ ရှိပါသည်။ စပါး စိုက်ပျိုးရေးအတွက် Smart Agro တွင် မေးလေ့ရှိသော မေးခွန်းများကို ဤနေရာတွင် ကြည့်ပါ။',
-      empty: 'ရှာဖွေမှုနှင့် ကိုက်ညီသော မေးခွန်း မရှိပါ။ အခြား စကားလုံးဖြင့် စမ်းပါ။',
-      backSettings: 'ဆက်တင်သို့ ပြန်ရန်',
-      items: [
-        {
-          q: 'Smart Agro ကို ဘယ်သူ သုံးနိုင်သလဲ?',
-          a: 'မြန်မာ စပါးလယ်သမားများ၊ သူတို့ကို ကူညီသော ကျွမ်းကျင်သူနှင့် အက်ဒ်မင်များအတွက် ဖြစ်သည်။ ဧည့်သည်အဖြစ် အချို့စာမျက်နှာများ ကြည့်နိုင်ပြီး အခမဲ့ အကောင့်ဖြင့် ရောဂါရှာမှတ်တမ်း၊ အသိုင်းအဝိုင်းနှင့် သိမ်းထားသော လမ်းညွှန်များ ရရှိသည်။',
-        },
-        {
-          q: 'အရွက်ရောဂါကို ဘယ်လို ရှာမလဲ?',
-          a: 'ရောဂါရှာ စာမျက်နှာကို ဖွင့်ပါ၊ မြို့နယ် သတ်မှတ်ပါ၊ ထိခိုက်သော အရွက်ဓာတ်ပုံ တင်ပါ သို့မဟုတ် ရိုက်ပါ။ စိစစ်ရန် နှိပ်ပြီး သီးနှံ၊ ရောဂါ၊ ပြင်းထန်မှု၊ ယုံကြည်မှုနှင့် ကုသနည်း လမ်းညွှန်ကို ရယူပါ။',
-        },
-        {
-          q: 'AI ရောဂါရှာက ဘယ်သီးနှံ/ပိုးမွှားများ ပံ့ပိုးသလဲ?',
-          a: 'Smart Agro သည် စပါး၊ ပဲမျိုးစုံ၊ ဆီထွက်သီးနှံ၊ ပြောင်း၊ ရော်ဘာ၊ ကြံ၊ ဝါ၊ ဟင်းသီးဟင်းရွက်၊ အာလူး၊ လက်ဖက်၊ ကော်ဖီ၊ ဆီအုန်း စသည့် သီးနှံများ၏ ရောဂါနှင့် ပိုးမွှားများကို ဖော်ထုတ်နိုင်သည်။ အရွက်၊ ပင်စည်၊ သီး သို့မဟုတ် ပိုးထိခိုက်ဓာတ်ပုံ ရှင်းလင်းစွာ တင်ပါ။',
-        },
-        {
-          q: 'စိုက်ခင်း ပိုးမွှားများကိုလည်း ရှာနိုင်သလား?',
-          a: 'ရပါသည်။ ပိုးထိခိုက်မှု သို့မဟုတ် ပိုးကောင်ကို မြင်ရသော ဓာတ်ပုံ တင်ပါ။ ပိုးအမည်၊ ပြင်းထန်မှုနှင့် IPM ကုသ/နှိမ်နင်းနည်း လမ်းညွှန် ရရှိမည်။',
-        },
-        {
-          q: 'ကျွမ်းကျင်သူက AI ရလဒ်ကို စစ်ဆေးပေးနိုင်သလား?',
-          a: 'ရပါသည်။ ရောဂါရှာပြီးနောက် ကျွမ်းကျင်သူ စစ်ဆေးမှု တောင်းဆိုနိုင်သည်။ ကျွမ်းကျင်သူ/အက်ဒ်မင်က အတည်ပြုနိုင်ပြီး အခြေအနေကို ရောဂါစစ်ချက်နှင့် အသိပေးချက်တွင် မြင်ရမည်။',
-        },
-        {
-          q: 'မြို့နယ် ရာသီဥတုကို ဘယ်လို ကြည့်မလဲ?',
-          a: 'ရာသီဥတု စာမျက်နှာတွင် မြို့နယ် ရှာပါ သို့မဟုတ် မြေပုံမှ ရွေးပါ၊ သို့မဟုတ် GPS သုံးပါ။ လက်ရှိအခြေအနေ၊ ၇ ရက် ခန့်မှန်းချက်၊ သတိပေးချက်နှင့် သီးနှံ အကြံပြုချက်များ ရရှိမည်။',
-        },
-        {
-          q: 'အသိုင်းအဝိုင်း ဖိဒ် ဘယ်လို အလုပ်လုပ်သလဲ?',
-          a: 'အသိုင်းအဝိုင်းတွင် လယ်ကွင်းမှတ်စု၊ ဓာတ်ပုံနှင့် ရောဂါရှာရလဒ်များ မျှဝေနိုင်ပြီး အခြားလယ်သမားများ၏ ပို့စ်တွင် မှတ်ချက်ပေးကာ အတွေ့အကြုံ လေ့လာနိုင်သည်။ မိမိပို့စ်ကို ဖျက်နိုင်သည်။ အခြားသူ့ပို့စ်ကို တိုင်ကြားရန် အကြောင်းရင်းနှင့် Report သုံးပါ — အက်ဒ်မင်က သုံးသပ်ပြီး ဖျက်နိုင်သည်။ ဖျက်ပါက ပို့စ်ပိုင်ရှင်ထံ အကြောင်းရင်းပါ အသိပေးချက် ရောက်မည်။',
-        },
-        {
-          q: 'ပရိုဖိုင်နှင့် လယ်တည်နေရာကို ဘယ်လို ပြင်မလဲ?',
-          a: 'ပရိုဖိုင် → ဆက်တင် သို့ သွားပါ။ အမည်၊ မိတ်ဆက်စာ၊ သီးနှံ၊ ဓာတ်ပုံနှင့် မြို့နယ်ကို ပြင်ပါ။ လယ်တည်နေရာသည် ရာသီဥတုနှင့် အသိုင်းအဝိုင်း အကြောင်းအရာကို ပိုကိုက်ညီစေသည်။',
-        },
-        {
-          q: 'အက်ပ်ကို မြန်မာဘာသာသို့ ဘယ်လို ပြောင်းမလဲ?',
-          a: 'အပေါ်နား ဘာသာစကား ခလုတ်ကို သုံးပါ၊ သို့မဟုတ် ပရိုဖိုင် → ဆက်တင် → ဦးစားပေးများတွင် မြန်မာကို ရွေးပါ။ အညွှန်းနှင့် ကိန်းဂဏန်းများ အက်ပ်တစ်ခုလုံး ပြောင်းမည်။',
-        },
-        {
-          q: 'Smart Agro သည် အခမဲ့လား?',
-          a: 'ဟုတ်ကဲ့။ ရောဂါရှာ၊ မြို့နယ် ရာသီဥတု၊ ဗဟုသုတ၊ အသိုင်းအဝိုင်းနှင့် ချတ်တို့သည် လယ်သမားများအတွက် အခမဲ့ဖြစ်သည်။ အကောင့်ဖွင့်ရန် ငွေပေးရန် မလိုပါ။',
-        },
-        {
-          q: 'ရောဂါရှာ မအောင်မြင် သို့မဟုတ် မှားနေပုံရရင် ဘာလုပ်မလဲ?',
-          a: 'အလင်းကောင်းသော ရှင်းလင်းသည့် အရွက်ဓာတ်ပုံဖြင့် ထပ်မံ စမ်းပါ။ အရိပ်များနှင့် အရွက်မဟုတ်သော ပုံများကို ရှောင်ပါ။ အသစ် စိစစ်နိုင်သည်၊ ကုသနည်း ဖတ်နိုင်သည်၊ သို့မဟုတ် မသေချာလျှင် ကျွမ်းကျင်သူ စစ်ဆေးမှု တောင်းဆိုနိုင်သည်။',
-        },
-        {
-          q: 'အကောင့်ကို ဘယ်လို ဖွင့်မလဲ?',
-          a: 'ဝင်ရန် စာမျက်နှာတွင် စာရင်းသွင်းရန် သို့ ပြောင်းပါ။ အမည်၊ အီးမေးလ်နှင့် စကားဝှက် (အနည်းဆုံး ၈ လုံး) ထည့်ပါ။ စာရင်းသွင်းပြီးရင် ရောဂါရှာမှတ်တမ်း၊ အသိုင်းအဝိုင်း၊ စာပို့ခြင်းနှင့် သိမ်းထားသော အကြောင်းအရာများ သုံးနိုင်သည်။',
-        },
-        {
-          q: 'ဧည့်သည်နှင့် စာရင်းသွင်းအကောင့် ဘာကွာသလဲ?',
-          a: 'ဧည့်သည်အဖြစ် ကိရိယာများကို မြန်မြန် စမ်းနိုင်သည်။ စာရင်းသွင်းအကောင့်က ရောဂါစစ်ချက်၊ ပရိုဖိုင်၊ သူငယ်ချင်း၊ စာများနှင့် သိမ်းထားသော ဗဟုသုတများကို သိမ်းပေးသောကြောင့် နောက်မှ ဝင်ပြီး ပြန်ကြည့်နိုင်သည်။',
-        },
-        {
-          q: 'ဓာတ်ခွဲခန်း / ကုသနည်း အစီရင်ခံစာကို ဘယ်လို ဒေါင်းလုဒ်လုပ်မလဲ?',
-          a: 'ရောဂါရှာ အောင်မြင်ပြီးနောက် ကုသနည်း လမ်းညွှန်တွင် ဓာတ်ခွဲခန်း အစီရင်ခံစာ ဒေါင်းလုဒ်ကို နှိပ်ပါ။ ရောဂါလက္ခဏာ၊ ကုသနည်း၊ ကာကွယ်နှိမ်နင်းနည်း၊ အကြံပြုဆေးများ၊ ပြင်းထန်မှုနှင့် တည်နေရာ ပါဝင်သည်။',
-        },
-        {
-          q: 'စိုက်ပျိုးရေး ဗဟုသုတ ဆောင်းပါးများကို ဘယ်မှာ ရှာမလဲ?',
-          a: 'ဗဟုသုတ စာမျက်နှာတွင် စပါး စောင့်ရှောက်မှု၊ ရောဂါ/ပိုးမွှားနှင့် လယ်ကွင်း အလေ့အကျင့် လမ်းညွှန်များကို ကြည့်ပါ။ အသုံးဝင်သော ဆောင်းပါးများကို ပရိုဖိုင် → သိမ်းထားသည်တွင် သိမ်းနိုင်သည်။',
-        },
-        {
-          q: 'ရောဂါ heatmap ဆိုသည်မှာ အဘယ်နည်း?',
-          a: 'Heatmap က မြန်မာ မြို့နယ်/တိုင်းများတွင် ထိုနေ့အတွက် အသိုင်းအဝိုင်း ရောဂါရှာ လှုပ်ရှားမှုကို ပြသည်။ သင့်စစ်ဆေးမှုသာမက အခြားနေရာများတွင် သတင်းပို့မှုကိုလည်း မြင်နိုင်သည်။',
-        },
-        {
-          q: 'ဘကြီးပျိုး (ချတ်) က ဘယ်လို ကူညီသလဲ?',
-          a: 'ချတ်ကို ဖွင့်ပြီး ဘကြီးပျိုးကို သီးနှံ၊ ရောဂါ၊ ရာသီဥတု သို့မဟုတ် ကုသနည်း မေးပါ။ အဖြေများသည် စိုက်ပျိုးရေး လမ်းညွှန်အပေါ် အခြေခံပြီး တည်နေရာ ရနိုင်လျှင် ဒေသခံ ရာသီဥတုကို ထည့်သွင်းနိုင်သည်။',
-        },
-        {
-          q: 'အခြား လယ်သမား သို့မဟုတ် ကျွမ်းကျင်သူကို ဘယ်လို စာပို့မလဲ?',
-          a: 'Messages တွင် တစ်ဦးချင်း သို့မဟုတ် အဖွဲ့ဖြင့် စကားပြောနိုင်သည်။ ပရိုဖိုင် သို့မဟုတ် အသိပေးချက်မှ သူငယ်ချင်း ထည့်နိုင်ပြီး အများသုံး အဖွဲ့များကို ဖိတ်ကြားလင့်ခ်ဖြင့် ဝင်နိုင်သည်။',
-        },
-        {
-          q: 'စကားဝှက်ကို ဘယ်လို ပြောင်း သို့မဟုတ် ပြန်သတ်မှတ်မလဲ?',
-          a: 'ပရိုဖိုင် → ဆက်တင် → စကားဝှက် ပြောင်းရန် သို့ သွားပါ။ လက်ရှိ စကားဝှက်နှင့် အသစ်ကို နှစ်ကြိမ် ရိုက်ထည့်ပါ။ ဝင်မရပါက အက်ဒ်မင်က စကားဝှက် ပြန်သတ်မှတ်ပေးနိုင်သည်။',
-        },
-        {
-          q: 'Smart Agro က တည်နေရာကို ဘာကြောင့် တောင်းသလဲ?',
-          a: 'တည်နေရာ (သို့မဟုတ် ရွေးထားသော မြို့နယ်) က ရာသီဥတု၊ ရောဂါရှာ အကြောင်းအရာနှင့် ဒေသခံ အကြံပြုချက်များကို ကိုက်ညီစေသည်။ GPS မမျှဝေချင်လျှင် မြို့နယ်ကို ကိုယ်တိုင် ရွေးနိုင်သည်။',
-        },
-        {
-          q: 'အင်တာနက် မရှိဘဲ Smart Agro သုံးနိုင်သလား?',
-          a: 'ဤကွန်ပျူတာတွင် ရောဂါရှာနှင့် ဘကြီးပျိုး ချတ်သည် local AI (port 8000) နှင့် localhost MongoDB ကို သုံးသည် — VPN မလိုပါ။ အသိုင်းအဝိုင်းနှင့် အီးမေးလ်အတွက် အင်တာနက် လိုသည်။ တိုက်ရိုက် ရာသီဥတု ပိတ်ထားလျှင် မြန်မာ ရာသီခန့်မှန်း ပြပြီး ပင်မစာမျက်နှာ ဆက်ဖွင့်နိုင်သည်။',
-        },
-        {
-          q: 'ရောဂါရှာတွင် ကွန်ရက် / ချိတ်ဆက်မှု အမှား ဘာကြောင့် ဖြစ်သလဲ?',
-          a: 'ရွက်ရောဂါရှာသည် ဤကွန်ပျူတာရှိ local AI (port 8000) ကို သုံးသည်။ VPN မလိုပါ။ FastAPI AI နှင့် Node ဆာဗာ ဖွင့်ပြီး ထပ်မံ စမ်းပါ။ Google Gemini သို့မဟုတ် Cursor cloud AI ပြောင်းမှသာ VPN လိုသည်။ ရာသီဥတု ခန့်မှန်းသာ ပြလျှင် ISP က Open-Meteo ကို ပိတ်ထားခြင်းဖြစ်သည် — အက်ပ် ဆက်အလုပ်လုပ်သည်။',
-        },
-        {
-          q: 'ရောဂါစစ်ချက်ကို အသိုင်းအဝိုင်းသို့ ဘယ်လို မျှဝေမလဲ?',
-          a: 'ရောဂါရှာ ရလဒ်တွင် အသိုင်းအဝိုင်းသို့ မျှဝေရန် ကို နှိပ်ပါ။ ရောဂါနှင့် ပြင်းထန်မှု ပါသော မူကြမ်းပို့စ် ပြင်ဆင်ပေးသောကြောင့် အခြားလယ်သမားများ လေ့လာနိုင်သည်။',
-        },
-        {
-          q: 'ပေါ့ပါး၊ အလယ်အလတ်၊ ပြင်းထန်၊ အရေးပေါ် ဆိုသည်မှာ ဘာလဲ?',
-          a: 'ဤအဆင့်များသည် AI ရမှတ်အရ ရောဂါ ပြင်းထန်မှုကို အနှစ်ချုပ်ပြသည်။ အဆင့်မြင့်လျှင် ပိုမြန်စွာ ဆောင်ရွက်သင့်သည်—ကုသနည်း လမ်းညွှန်ကို ဖတ်ပြီး လိုအပ်လျှင် ကျွမ်းကျင်သူ စစ်ဆေးမှု တောင်းဆိုပါ။',
-        },
-        {
-          q: 'အသိပေးချက်နှင့် စာတိုက်ပုံး ဘယ်လို အလုပ်လုပ်သလဲ?',
-          a: 'အပေါ်နား ခေါင်းလောင်းတွင် ကျွမ်းကျင်သူ စစ်ဆေးမှု၊ သူငယ်ချင်း တောင်းဆိုမှုနှင့် အရေးကြီး အကောင့်စာများ ပေါ်သည်။ ဖွင့်ကြည့်ပြီး ပြီးပါက ဖတ်ပြီးဟု မှတ်နိုင်သည်။',
-        },
-        {
-          q: 'ကျွန်ုပ်၏ လယ်ကွင်း ဒေတာ လုံခြုံပါသလား?',
-          a: 'ပရိုဖိုင်အချက်အလက်သည် အသိုင်းအဝိုင်းတွင် သင်မျှဝေသည့်အတိုင်း ဖြစ်သည်။ ဝင်ရန် အီးမေးလ်နှင့် စကားဝှက် သုံးသည်။ အက်ဒ်မင်များက လုံခြုံရေးနှင့် စစ်ဆေးမှု စီမံသည်—အများသုံး ဖိဒ်တွင် ထိခိုက်လွယ် ကိုယ်ရေးအချက် မတင်ပါနှင့်။',
-        },
-        {
-          q: 'အရွက်ရောဂါရှာအတွက် ဘယ်ဓာတ်ပုံအမျိုးအစား သုံးရမလဲ?',
-          a: 'JPEG၊ PNG သို့မဟုတ် WebP၊ အများဆုံး ၅MB သုံးပါ။ iPhone တွင် HEIC ကို ရှောင်ပြီး ကင်မရာကို Most Compatible သို့ ပြောင်းပါ သို့မဟုတ် တင်မီ ပြောင်းပါ။',
-        },
-      ],
+    heroTitle: 'ဘယ်လို ကူညီရမလဲ?',
+    heroLead:
+      'Smart Agro အကူအညီ စင်တာမှ ကြိုဆိုပါသည်။ ရောဂါရှာ၊ ရာသီဥတု၊ အသိုင်းအဝိုင်းနှင့် လယ်ကွင်း အကောင့်အကြောင်း မေးလေ့ရှိသော မေးခွန်းများကို ရှာပါ။',
+    search: 'ရှာရန်',
+    support: 'အကူအညီ',
+    faqs: 'အမေးအဖြေ',
+    faqsLead:
+      'မေးခွန်းရှိပါသလား? အဖြေများ ရှိပါသည်။ စပါး စိုက်ပျိုးရေးအတွက် Smart Agro တွင် မေးလေ့ရှိသော မေးခွန်းများကို ဤနေရာတွင် ကြည့်ပါ။',
+    empty: 'ရှာဖွေမှုနှင့် ကိုက်ညီသော မေးခွန်း မရှိပါ။ အခြား စကားလုံးဖြင့် စမ်းပါ။',
+    backSettings: 'ဆက်တင်သို့ ပြန်ရန်',
+    items: [
+      {
+        q: 'Smart Agro ကို ဘယ်သူ သုံးနိုင်သလဲ?',
+        a: 'မြန်မာ စပါးလယ်သမားများ၊ သူတို့ကို ကူညီသော ကျွမ်းကျင်သူနှင့် အက်ဒ်မင်များအတွက် ဖြစ်သည်။ ဧည့်သည်အဖြစ် အချို့စာမျက်နှာများ ကြည့်နိုင်ပြီး အခမဲ့ အကောင့်ဖြင့် ရောဂါရှာမှတ်တမ်း၊ အသိုင်းအဝိုင်းနှင့် သိမ်းထားသော လမ်းညွှန်များ ရရှိသည်။',
+      },
+      {
+        q: 'အရွက်ရောဂါကို ဘယ်လို ရှာမလဲ?',
+        a: 'ရောဂါရှာ စာမျက်နှာကို ဖွင့်ပါ၊ မြို့နယ် သတ်မှတ်ပါ၊ ထိခိုက်သော အရွက်ဓာတ်ပုံ တင်ပါ သို့မဟုတ် ရိုက်ပါ။ စိစစ်ရန် နှိပ်ပြီး သီးနှံ၊ ရောဂါ၊ ပြင်းထန်မှု၊ ယုံကြည်မှုနှင့် ကုသနည်း လမ်းညွှန်ကို ရယူပါ။',
+      },
+      {
+        q: 'AI ရောဂါရှာက ဘယ်သီးနှံ/ပိုးမွှားများ ပံ့ပိုးသလဲ?',
+        a: 'Smart Agro သည် စပါး၊ ပဲမျိုးစုံ၊ ဆီထွက်သီးနှံ၊ ပြောင်း၊ ရော်ဘာ၊ ကြံ၊ ဝါ၊ ဟင်းသီးဟင်းရွက်၊ အာလူး၊ လက်ဖက်၊ ကော်ဖီ၊ ဆီအုန်း စသည့် သီးနှံများ၏ ရောဂါနှင့် ပိုးမွှားများကို ဖော်ထုတ်နိုင်သည်။ အရွက်၊ ပင်စည်၊ သီး သို့မဟုတ် ပိုးထိခိုက်ဓာတ်ပုံ ရှင်းလင်းစွာ တင်ပါ။',
+      },
+      {
+        q: 'စိုက်ခင်း ပိုးမွှားများကိုလည်း ရှာနိုင်သလား?',
+        a: 'ရပါသည်။ ပိုးထိခိုက်မှု သို့မဟုတ် ပိုးကောင်ကို မြင်ရသော ဓာတ်ပုံ တင်ပါ။ ပိုးအမည်၊ ပြင်းထန်မှုနှင့် IPM ကုသ/နှိမ်နင်းနည်း လမ်းညွှန် ရရှိမည်။',
+      },
+      {
+        q: 'ကျွမ်းကျင်သူက AI ရလဒ်ကို စစ်ဆေးပေးနိုင်သလား?',
+        a: 'ရပါသည်။ ရောဂါရှာပြီးနောက် ကျွမ်းကျင်သူ စစ်ဆေးမှု တောင်းဆိုနိုင်သည်။ ကျွမ်းကျင်သူ/အက်ဒ်မင်က အတည်ပြုနိုင်ပြီး အခြေအနေကို ရောဂါစစ်ချက်နှင့် အသိပေးချက်တွင် မြင်ရမည်။',
+      },
+      {
+        q: 'မြို့နယ် ရာသီဥတုကို ဘယ်လို ကြည့်မလဲ?',
+        a: 'ရာသီဥတု စာမျက်နှာတွင် မြို့နယ် ရှာပါ သို့မဟုတ် မြေပုံမှ ရွေးပါ၊ သို့မဟုတ် GPS သုံးပါ။ လက်ရှိအခြေအနေ၊ ၇ ရက် ခန့်မှန်းချက်၊ သတိပေးချက်နှင့် သီးနှံ အကြံပြုချက်များ ရရှိမည်။',
+      },
+      {
+        q: 'အသိုင်းအဝိုင်း ဖိဒ် ဘယ်လို အလုပ်လုပ်သလဲ?',
+        a: 'အသိုင်းအဝိုင်းတွင် လယ်ကွင်းမှတ်စု၊ ဓာတ်ပုံနှင့် ရောဂါရှာရလဒ်များ မျှဝေနိုင်ပြီး အခြားလယ်သမားများ၏ ပို့စ်တွင် မှတ်ချက်ပေးကာ အတွေ့အကြုံ လေ့လာနိုင်သည်။ မိမိပို့စ်ကို ဖျက်နိုင်သည်။ အခြားသူ့ပို့စ်ကို တိုင်ကြားရန် အကြောင်းရင်းနှင့် Report သုံးပါ — အက်ဒ်မင်က သုံးသပ်ပြီး ဖျက်နိုင်သည်။ ဖျက်ပါက ပို့စ်ပိုင်ရှင်ထံ အကြောင်းရင်းပါ အသိပေးချက် ရောက်မည်။',
+      },
+      {
+        q: 'ပရိုဖိုင်နှင့် လယ်တည်နေရာကို ဘယ်လို ပြင်မလဲ?',
+        a: 'ပရိုဖိုင် → ဆက်တင် သို့ သွားပါ။ အမည်၊ မိတ်ဆက်စာ၊ သီးနှံ၊ ဓာတ်ပုံနှင့် မြို့နယ်ကို ပြင်ပါ။ လယ်တည်နေရာသည် ရာသီဥတုနှင့် အသိုင်းအဝိုင်း အကြောင်းအရာကို ပိုကိုက်ညီစေသည်။',
+      },
+      {
+        q: 'အက်ပ်ကို မြန်မာဘာသာသို့ ဘယ်လို ပြောင်းမလဲ?',
+        a: 'အပေါ်နား ဘာသာစကား ခလုတ်ကို သုံးပါ၊ သို့မဟုတ် ပရိုဖိုင် → ဆက်တင် → ဦးစားပေးများတွင် မြန်မာကို ရွေးပါ။ အညွှန်းနှင့် ကိန်းဂဏန်းများ အက်ပ်တစ်ခုလုံး ပြောင်းမည်။',
+      },
+      {
+        q: 'Smart Agro သည် အခမဲ့လား?',
+        a: 'ဟုတ်ကဲ့။ ရောဂါရှာ၊ မြို့နယ် ရာသီဥတု၊ ဗဟုသုတ၊ အသိုင်းအဝိုင်းနှင့် ချတ်တို့သည် လယ်သမားများအတွက် အခမဲ့ဖြစ်သည်။ အကောင့်ဖွင့်ရန် ငွေပေးရန် မလိုပါ။',
+      },
+      {
+        q: 'ရောဂါရှာ မအောင်မြင် သို့မဟုတ် မှားနေပုံရရင် ဘာလုပ်မလဲ?',
+        a: 'အလင်းကောင်းသော ရှင်းလင်းသည့် အရွက်ဓာတ်ပုံဖြင့် ထပ်မံ စမ်းပါ။ အရိပ်များနှင့် အရွက်မဟုတ်သော ပုံများကို ရှောင်ပါ။ အသစ် စိစစ်နိုင်သည်၊ ကုသနည်း ဖတ်နိုင်သည်၊ သို့မဟုတ် မသေချာလျှင် ကျွမ်းကျင်သူ စစ်ဆေးမှု တောင်းဆိုနိုင်သည်။',
+      },
+      {
+        q: 'အကောင့်ကို ဘယ်လို ဖွင့်မလဲ?',
+        a: 'ဝင်ရန် စာမျက်နှာတွင် စာရင်းသွင်းရန် သို့ ပြောင်းပါ။ အမည်၊ အီးမေးလ်နှင့် စကားဝှက် (အနည်းဆုံး ၈ လုံး) ထည့်ပါ။ စာရင်းသွင်းပြီးရင် ရောဂါရှာမှတ်တမ်း၊ အသိုင်းအဝိုင်း၊ စာပို့ခြင်းနှင့် သိမ်းထားသော အကြောင်းအရာများ သုံးနိုင်သည်။',
+      },
+      {
+        q: 'ဧည့်သည်နှင့် စာရင်းသွင်းအကောင့် ဘာကွာသလဲ?',
+        a: 'ဧည့်သည်အဖြစ် ကိရိယာများကို မြန်မြန် စမ်းနိုင်သည်။ စာရင်းသွင်းအကောင့်က ရောဂါစစ်ချက်၊ ပရိုဖိုင်၊ သူငယ်ချင်း၊ စာများနှင့် သိမ်းထားသော ဗဟုသုတများကို သိမ်းပေးသောကြောင့် နောက်မှ ဝင်ပြီး ပြန်ကြည့်နိုင်သည်။',
+      },
+      {
+        q: 'ဓာတ်ခွဲခန်း / ကုသနည်း အစီရင်ခံစာကို ဘယ်လို ဒေါင်းလုဒ်လုပ်မလဲ?',
+        a: 'ရောဂါရှာ အောင်မြင်ပြီးနောက် ကုသနည်း လမ်းညွှန်တွင် ဓာတ်ခွဲခန်း အစီရင်ခံစာ ဒေါင်းလုဒ်ကို နှိပ်ပါ။ ရောဂါလက္ခဏာ၊ ကုသနည်း၊ ကာကွယ်နှိမ်နင်းနည်း၊ အကြံပြုဆေးများ၊ ပြင်းထန်မှုနှင့် တည်နေရာ ပါဝင်သည်။',
+      },
+      {
+        q: 'စိုက်ပျိုးရေး ဗဟုသုတ ဆောင်းပါးများကို ဘယ်မှာ ရှာမလဲ?',
+        a: 'ဗဟုသုတ စာမျက်နှာတွင် စပါး စောင့်ရှောက်မှု၊ ရောဂါ/ပိုးမွှားနှင့် လယ်ကွင်း အလေ့အကျင့် လမ်းညွှန်များကို ကြည့်ပါ။ အသုံးဝင်သော ဆောင်းပါးများကို ပရိုဖိုင် → သိမ်းထားသည်တွင် သိမ်းနိုင်သည်။',
+      },
+      {
+        q: 'ရောဂါ heatmap ဆိုသည်မှာ အဘယ်နည်း?',
+        a: 'Heatmap က မြန်မာ မြို့နယ်/တိုင်းများတွင် ထိုနေ့အတွက် အသိုင်းအဝိုင်း ရောဂါရှာ လှုပ်ရှားမှုကို ပြသည်။ သင့်စစ်ဆေးမှုသာမက အခြားနေရာများတွင် သတင်းပို့မှုကိုလည်း မြင်နိုင်သည်။',
+      },
+      {
+        q: 'ဘကြီးပျိုး (ချတ်) က ဘယ်လို ကူညီသလဲ?',
+        a: 'ချတ်ကို ဖွင့်ပြီး ဘကြီးပျိုးကို သီးနှံ၊ ရောဂါ၊ ရာသီဥတု သို့မဟုတ် ကုသနည်း မေးပါ။ အဖြေများသည် စိုက်ပျိုးရေး လမ်းညွှန်အပေါ် အခြေခံပြီး တည်နေရာ ရနိုင်လျှင် ဒေသခံ ရာသီဥတုကို ထည့်သွင်းနိုင်သည်။',
+      },
+      {
+        q: 'အခြား လယ်သမား သို့မဟုတ် ကျွမ်းကျင်သူကို ဘယ်လို စာပို့မလဲ?',
+        a: 'Messages တွင် တစ်ဦးချင်း သို့မဟုတ် အဖွဲ့ဖြင့် စကားပြောနိုင်သည်။ ပရိုဖိုင် သို့မဟုတ် အသိပေးချက်မှ သူငယ်ချင်း ထည့်နိုင်ပြီး အများသုံး အဖွဲ့များကို ဖိတ်ကြားလင့်ခ်ဖြင့် ဝင်နိုင်သည်။',
+      },
+      {
+        q: 'စကားဝှက်ကို ဘယ်လို ပြောင်း သို့မဟုတ် ပြန်သတ်မှတ်မလဲ?',
+        a: 'ပရိုဖိုင် → ဆက်တင် → စကားဝှက် ပြောင်းရန် သို့ သွားပါ။ လက်ရှိ စကားဝှက်နှင့် အသစ်ကို နှစ်ကြိမ် ရိုက်ထည့်ပါ။ ဝင်မရပါက အက်ဒ်မင်က စကားဝှက် ပြန်သတ်မှတ်ပေးနိုင်သည်။',
+      },
+      {
+        q: 'Smart Agro က တည်နေရာကို ဘာကြောင့် တောင်းသလဲ?',
+        a: 'တည်နေရာ (သို့မဟုတ် ရွေးထားသော မြို့နယ်) က ရာသီဥတု၊ ရောဂါရှာ အကြောင်းအရာနှင့် ဒေသခံ အကြံပြုချက်များကို ကိုက်ညီစေသည်။ GPS မမျှဝေချင်လျှင် မြို့နယ်ကို ကိုယ်တိုင် ရွေးနိုင်သည်။',
+      },
+      {
+        q: 'အင်တာနက် မရှိဘဲ Smart Agro သုံးနိုင်သလား?',
+        a: 'ဤကွန်ပျူတာတွင် ရောဂါရှာနှင့် ဘကြီးပျိုး ချတ်သည် local AI (port 8000) နှင့် localhost MongoDB ကို သုံးသည် — VPN မလိုပါ။ အသိုင်းအဝိုင်းနှင့် အီးမေးလ်အတွက် အင်တာနက် လိုသည်။ တိုက်ရိုက် ရာသီဥတု ပိတ်ထားလျှင် မြန်မာ ရာသီခန့်မှန်း ပြပြီး ပင်မစာမျက်နှာ ဆက်ဖွင့်နိုင်သည်။',
+      },
+      {
+        q: 'ရောဂါရှာတွင် ကွန်ရက် / ချိတ်ဆက်မှု အမှား ဘာကြောင့် ဖြစ်သလဲ?',
+        a: 'ရွက်ရောဂါရှာသည် ဤကွန်ပျူတာရှိ local AI (port 8000) ကို သုံးသည်။ VPN မလိုပါ။ FastAPI AI နှင့် Node ဆာဗာ ဖွင့်ပြီး ထပ်မံ စမ်းပါ။ Google Gemini သို့မဟုတ် Cursor cloud AI ပြောင်းမှသာ VPN လိုသည်။ ရာသီဥတု ခန့်မှန်းသာ ပြလျှင် ISP က Open-Meteo ကို ပိတ်ထားခြင်းဖြစ်သည် — အက်ပ် ဆက်အလုပ်လုပ်သည်။',
+      },
+      {
+        q: 'ရောဂါစစ်ချက်ကို အသိုင်းအဝိုင်းသို့ ဘယ်လို မျှဝေမလဲ?',
+        a: 'ရောဂါရှာ ရလဒ်တွင် အသိုင်းအဝိုင်းသို့ မျှဝေရန် ကို နှိပ်ပါ။ ရောဂါနှင့် ပြင်းထန်မှု ပါသော မူကြမ်းပို့စ် ပြင်ဆင်ပေးသောကြောင့် အခြားလယ်သမားများ လေ့လာနိုင်သည်။',
+      },
+      {
+        q: 'ပေါ့ပါး၊ အလယ်အလတ်၊ ပြင်းထန်၊ အရေးပေါ် ဆိုသည်မှာ ဘာလဲ?',
+        a: 'ဤအဆင့်များသည် AI ရမှတ်အရ ရောဂါ ပြင်းထန်မှုကို အနှစ်ချုပ်ပြသည်။ အဆင့်မြင့်လျှင် ပိုမြန်စွာ ဆောင်ရွက်သင့်သည်—ကုသနည်း လမ်းညွှန်ကို ဖတ်ပြီး လိုအပ်လျှင် ကျွမ်းကျင်သူ စစ်ဆေးမှု တောင်းဆိုပါ။',
+      },
+      {
+        q: 'အသိပေးချက်နှင့် စာတိုက်ပုံး ဘယ်လို အလုပ်လုပ်သလဲ?',
+        a: 'အပေါ်နား ခေါင်းလောင်းတွင် ကျွမ်းကျင်သူ စစ်ဆေးမှု၊ သူငယ်ချင်း တောင်းဆိုမှုနှင့် အရေးကြီး အကောင့်စာများ ပေါ်သည်။ ဖွင့်ကြည့်ပြီး ပြီးပါက ဖတ်ပြီးဟု မှတ်နိုင်သည်။',
+      },
+      {
+        q: 'ကျွန်ုပ်၏ လယ်ကွင်း ဒေတာ လုံခြုံပါသလား?',
+        a: 'ပရိုဖိုင်အချက်အလက်သည် အသိုင်းအဝိုင်းတွင် သင်မျှဝေသည့်အတိုင်း ဖြစ်သည်။ ဝင်ရန် အီးမေးလ်နှင့် စကားဝှက် သုံးသည်။ အက်ဒ်မင်များက လုံခြုံရေးနှင့် စစ်ဆေးမှု စီမံသည်—အများသုံး ဖိဒ်တွင် ထိခိုက်လွယ် ကိုယ်ရေးအချက် မတင်ပါနှင့်။',
+      },
+      {
+        q: 'အရွက်ရောဂါရှာအတွက် ဘယ်ဓာတ်ပုံအမျိုးအစား သုံးရမလဲ?',
+        a: 'JPEG၊ PNG သို့မဟုတ် WebP၊ အများဆုံး ၅MB သုံးပါ။ iPhone တွင် HEIC ကို ရှောင်ပြီး ကင်မရာကို Most Compatible သို့ ပြောင်းပါ သို့မဟုတ် တင်မီ ပြောင်းပါ။',
+      },
+    ],
   };
 
   return lang === 'my' ? my : en;
