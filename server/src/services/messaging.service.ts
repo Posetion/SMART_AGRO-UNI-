@@ -318,13 +318,13 @@ export async function previewInvite(code: string) {
     .populate('createdBy', USER_PUBLIC)
     .select('name description visibility inviteCode participants createdBy')
     .lean()) as {
-    name?: string;
-    description?: string;
-    visibility?: string;
-    inviteCode?: string;
-    participants?: unknown[];
-    createdBy?: unknown;
-  } | null;
+      name?: string;
+      description?: string;
+      visibility?: string;
+      inviteCode?: string;
+      participants?: unknown[];
+      createdBy?: unknown;
+    } | null;
   if (!convo) throw new AppError('Invite not found', 404);
   return {
     name: convo.name,
