@@ -31,7 +31,7 @@ const envSchema = z.object({
   GEMINI_API_KEYS: z.string().optional().default(''),
   GEMINI_MODEL: z.string().default('gemini-3.6-flash'),
   /** Primary AI for detect + chat. `cursor` = Cursor Agent (detect + BaGyi Pyoe). */
-  AI_PROVIDER: z.enum(['gemini', 'cursor', 'local']).default('cursor'),
+  AI_PROVIDER: z.enum(['gemini', 'cursor', 'local']).default('gemini'),
   /** Cursor SDK key — required when AI_PROVIDER=cursor. */
   CURSOR_API_KEY: z.string().optional().default(''),
   CURSOR_MODEL: z.string().default('composer-2.5'),
